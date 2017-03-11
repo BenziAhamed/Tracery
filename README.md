@@ -1,6 +1,6 @@
 
  
- ![Tracery - powerful content generation][logo.png]
+ ![Tracery - powerful content generation](logo.png)
  
 # Tracery
 ## Introduction
