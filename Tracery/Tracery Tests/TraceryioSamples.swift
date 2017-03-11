@@ -16,7 +16,7 @@ class TraceryioSamples: XCTestCase {
         let t = Tracery {
             [ "animal" : animals]
         }
-        for i in 0..<animals.count {
+        for _ in 0..<animals.count {
             XCTAssertItemInArray(item: t.expand("#animal#"), array: animals)
         }
     }
@@ -39,7 +39,7 @@ class TraceryioSamples: XCTestCase {
         let regex = try? NSRegularExpression(pattern: pattern, options: .useUnixLineSeparators)
         let output = t.expand("#sentence#")
         let match = regex?.firstMatch(in: output, options: NSRegularExpression.MatchingOptions.anchored, range: .init(location: 0, length: output.characters.count))
-        print(output, match, match?.numberOfRanges)
+        
         XCTAssertNotNil(match?.numberOfRanges)
         XCTAssertEqual(match!.numberOfRanges, 5)
     }

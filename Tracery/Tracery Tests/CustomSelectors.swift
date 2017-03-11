@@ -10,9 +10,7 @@ import Foundation
 @testable import Tracery
 
 class AlwaysPickFirst : RuleCandidateSelector {
-    var invoked = false
     func pick(count: Int) -> Int {
-        invoked = true
         return 0
     }
 }
@@ -61,4 +59,8 @@ class SequentialSelector : RuleCandidateSelector {
     }
 }
 
-
+class Arc4RandomSelector : RuleCandidateSelector {
+    func pick(count: Int) -> Int {
+        return Int(arc4random_uniform(UInt32(count)))
+    }
+}

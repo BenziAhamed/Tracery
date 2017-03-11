@@ -78,7 +78,7 @@ class ExtensionMethod: XCTestCase {
         }
         
         let target = 10
-        for i in 0..<target {
+        for _ in 0..<target {
             XCTAssertEqual(t.expand("#msg.call()#"), "hello world")
         }
         
