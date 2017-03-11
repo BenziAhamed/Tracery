@@ -41,6 +41,4 @@
  
  That's all folks.
  
- > This README was auto-generated using [playme](https://github.com/BenziAhamed/playme)
- 
  */

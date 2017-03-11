@@ -2,6 +2,8 @@
  
  ![Tracery - powerful content generation](logo.png)
  
+ {{GEN:TOC}}
+ 
  # Tracery
  ## Introduction
 
@@ -12,6 +14,12 @@
  This implementation, while heavily inspired by the original, has more features added.
  
  The content generation in Tracery works based on an input set of rules. The rules determine how content should be generated.
+ 
+ ### Installation
+ 
+- Clone or download this repository
+- To work with the playground, open Playgrounds/Tracery.playground
+- The project builds `iOS` and `macOS` framework targets, which can be linked to your projects
  
  ### Basic usage
  

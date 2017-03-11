@@ -1,6 +1,11 @@
+
+ 
+ ![Tracery - powerful content generation](logo.png)
+ 
 # Contents
 - [Tracery](#tracery)
     - [Introduction](#introduction)
+        - [Installation](#installation)
         - [Basic usage](#basic-usage)
     - [Tags](#tags)
         - [Simple story](#simple-story)
@@ -16,9 +21,6 @@
             - [Weighted Distributions](#weighted-distributions)
 - [Tracery Grammar](#tracery-grammar)
 - [Conclusion](#conclusion)
-
- 
- ![Tracery - powerful content generation](logo.png)
  
 # Tracery
 ## Introduction
@@ -30,6 +32,12 @@
  This implementation, while heavily inspired by the original, has more features added.
  
  The content generation in Tracery works based on an input set of rules. The rules determine how content should be generated.
+ 
+### Installation
+ 
+- Clone or download this repository
+- To work with the playground, open Playgrounds/Tracery.playground
+- The project builds `iOS` and `macOS` framework targets, which can be linked to your projects
  
 ### Basic usage
  
@@ -710,7 +718,6 @@ runOptionRule(times: 100)
  
  That's all folks.
  
- > This README was auto-generated using [playme](https://github.com/BenziAhamed/playme)
- 
 
 
+> This README was auto-generated using [playme](https://github.com/BenziAhamed/playme)
