@@ -1,3 +1,21 @@
+# Contents
+- [Tracery](#tracery)
+    - [Introduction](#introduction)
+        - [Basic usage](#basic-usage)
+    - [Tags](#tags)
+        - [Simple story](#simple-story)
+        - [Random numbers](#random-numbers)
+    - [Modifiers](#modifiers)
+    - [Methods](#methods)
+    - [Calls](#calls)
+    - [Advanced Usage](#advanced-usage)
+        - [Custom Content Selectors](#custom-content-selectors)
+            - [Pick First Item Selector](#pick-first-item-selector)
+            - [Custom Random Item Selector](#custom-random-item-selector)
+        - [Custom Candidate Provider](#custom-candidate-provider)
+            - [Weighted Distributions](#weighted-distributions)
+- [Tracery Grammar](#tracery-grammar)
+- [Conclusion](#conclusion)
 
  
  ![Tracery - powerful content generation](logo.png)
