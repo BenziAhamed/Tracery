@@ -1,9 +1,12 @@
 /*:
+ 
+ ![Tracery - powerful content generation][logo.png]
+ 
  # Tracery
  ## Introduction
 
 
- Tracery is a content generation library originally created by @KateCompton, and you can find more information at [Tracery.io](http://www.tracery.io)
+ Tracery is a content generation library originally created by [@GalaxyKate](http://www.galaxykate.com/); you can find more information at [Tracery.io](http://www.tracery.io)
  
 
  This implementation of is heavily inspired by the original, although more features have been added.
