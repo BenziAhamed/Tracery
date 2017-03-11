@@ -12,24 +12,29 @@
  
  ### Basic usage
  
- 
+
 */
 
 import Tracery
+
+// create a new Tracery engine
 
 var t = Tracery {[
     "msg" : "hello world"
 ]}
 
+
+
+t.expand("well #msg#")
+
+// output: well hello world
+
 /*:
+
  We create an instance of the Tracery engine passing along a dictionary of rules. The keys to this dictionary are the rule names, and the value for each key represents the expansion of the rule.
  
- We can now use Tracery to expand instances of this rule as follows:
-*/
+ The we use Tracery to expand instances of specified rules
 
-t.expand("well #msg#") // evaluates to 'well hello world'
-
-/*:
  Notice we provide as input a template string, which contains `#msg#`, that is the rule we wish to expand inside `#` marks. Tracery evaluates the template, recognizes as rule, and replaces it with its expansion.
  
  We can have multiple rules:
@@ -56,9 +61,16 @@ t = Tracery {[
     ]}
 
 t.expand("#msg#")
+
+// jacob is 10 years old
+
 t.expand("#msg#")
 
-t.expand("#name# #name#") // will print out different names
+// jack is 10 years old
+
+t.expand("#name# #name#")
+
+// will print out two different names
 
 /*:
  In the snippet above, whenever Tracery sees the rule `#name#`, it will pick out one of the candidate values; in this example, name could be "jack" "john" or "jacob"
@@ -74,7 +86,9 @@ t = Tracery {[
     "sentence": "#boy# and #girl# went up the hill."
 ]}
 
-t.expand("#sentence#") // e.g. john and jenny went up the hill
+t.expand("#sentence#")
+
+// output: john and jenny went up the hill
 
 /*:
  So we get the first part of the sentence, what if we wanted to add in a second line so that our final output becomes:
@@ -84,10 +98,10 @@ t.expand("#sentence#") // e.g. john and jenny went up the hill
 
 // the following will fail
 // to produce the correct output
-t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl# too")
+t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl#")
 
 // sample output:
-// jack and jenny went up the hill, john fell down, and so did jill too
+// jack and jenny went up the hill, john fell down, and so did jill
 
 /*:
  The problem is that any occurence of a `#rule#` will be replaced by one of its candidate values. So when we write `#boy#` twice, it may get replaced with entirely different names.
@@ -95,20 +109,31 @@ t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl# 
  In order to remember values, we can use tags.
  
  ## Tags
+ 
+ Tags allow to persist the result of a rule expansion to a temporary variable.
+ 
  */
 
 t = Tracery {[
     "boy" : ["jack", "john"],
     "girl" : ["jill", "jenny"],
-    "sentence": "[b:#boy#][g:#girl#] #b# and #g# went up the hill, #b# fell down, and so did #g# too"
+    "sentence": "[b:#boy#][g:#girl#] #b# and #g# went up the hill, #b# fell down, and so did #g#"
 ]}
 
 t.expand("#sentence#")
 
+// output: jack and jill went up the hill, jack fell down, and so did jill
+
 /*:
  Tags are created using the format `[tagName:tagValue]`. In the above snippet we first create two tags, `b` and `g` to hold values of `boy` and `girl` names respectively. Later on we can use `#b#` and `#g#` as if they were new rules and we Tracery will recall their stored values as required for substitution.
  
- Tags can also simply contain a value, or a group of values. Tags can also appear inside `#rules#`. Here is a more complex example.
+ Tags can also simply contain a value, or a group of values. Tags can also appear inside `#rules#`. Tags are variable, they can be set any number of times.
+ 
+ 
+ ### Simple story
+ 
+ Here is a more complex example that generates a _short_ story.
+ 
  */
 
 t = Tracery {[
@@ -127,13 +152,20 @@ t.expand("#origin#")
 
 /*:
  
+ ### Random numbers
+ 
  Here's another example to generate a random number:
  
  */
 
 t.expand("[d:0,1,2,3,4,5,6,7,8,9] random 5-digit number: #d##d##d##d##d#")
 
+// sample output:
+// random 5-digit number: 68233
+
 /*:
+ 
+ In
  
  > If a tag name matches a rule, the tag will take precedence and will always be evaluated.
  

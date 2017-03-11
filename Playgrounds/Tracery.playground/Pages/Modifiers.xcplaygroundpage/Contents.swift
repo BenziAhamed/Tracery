@@ -16,22 +16,22 @@ var t = Tracery {[
     "city": "new york"
 ]}
 
-t.add(modifier: "caps") {
-    return $0.uppercased()
-}
+// add a bunch of modifiers
+t.add(modifier: "caps") { return $0.uppercased() }
+t.add(modifier: "title") { return $0.capitalized }
+t.add(modifier: "reverse") { return String($0.characters.reversed()) }
 
-t.add(modifier: "title") {
-    return $0.capitalized
-}
+t.expand("#city.caps#")
 
-t.add(modifier: "reverse") {
-    return String($0.characters.reversed())
-}
+// output: NEW YORK
 
+t.expand("#city.title#")
 
-t.expand("#city.caps#") // NEW YORK
-t.expand("#city.title#") // New York
-t.expand("#city.reverse#") // kroy wen
+// output: New York
+
+t.expand("#city.reverse#")
+
+// output: kroy wen
 
 /*:
  The power of modifiers lies in the fact that they can be chained.
@@ -39,10 +39,13 @@ t.expand("#city.reverse#") // kroy wen
 
 t.expand("#city.reverse.caps#")
 
+// output: KROY WREN
+
 t.expand("There once was a man named #city.reverse.title#, who came from the city of #city.title#.")
+// output: There once was a man named Kroy Wen, who came from the city of New York.
+
 
 /*:
- There once was a man named Kroy Wen, who came from the city of New York. 
  
  > The original implementation at Tracery.io has some modifiers built-in, however this library does not do the same. Add required modifiers is left to the end users. (e.g. there are many solid implementations of pluralize methods out there, and it should be easy to plug in one to Tracery - this allows Tracery to be lean and focused as a library)
  
