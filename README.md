@@ -38,7 +38,7 @@ t.expand("well #msg#")
  
  The we use Tracery to expand instances of specified rules
 
- Notice we provide as input a template string, which contains `#msg#`, that is the rule we wish to expand inside `#` marks. Tracery evaluates the template, recognizes as rule, and replaces it with its expansion.
+ Notice we provide as input a template string, which contains `#msg#`, that is the rule we wish to expand inside `#` marks. Tracery evaluates the template, recognizes a rule, and replaces it with its expansion.
  
  We can have multiple rules:
 
