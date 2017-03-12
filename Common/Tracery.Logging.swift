@@ -17,7 +17,6 @@ extension Tracery {
         case warnings
         case info
         case verbose
-        static let `default` = LoggingLevel.errors
     }
     
     public static var logLevel = LoggingLevel.errors

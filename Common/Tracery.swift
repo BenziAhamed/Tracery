@@ -177,7 +177,6 @@ public class Tracery {
     
     private func incrementStackDepth() throws {
         stackDepth += 1
-        info("stack depth: \(stackDepth)")
         if stackDepth > Tracery.maxStackDepth {
             error("stack overflow")
             throw ParserError.error("stack overflow")
@@ -185,7 +184,6 @@ public class Tracery {
     }
     
     private func decrementStackDepth() {
-        info("stack depth: \(stackDepth-1)")
         stackDepth = max(stackDepth - 1, 0)
     }
     
