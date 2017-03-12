@@ -41,3 +41,12 @@ extension Sequence {
         }
     }
 }
+
+
+
+//func dump<T>(_ item: T) {
+//    if let debuggable = item as? CustomDebugStringConvertible {
+//        print(debuggable.debugDescription)
+//    }
+//    print(item)
+//}

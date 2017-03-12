@@ -8,7 +8,10 @@
 
 import Foundation
 
-class TagOverrideRuleIndentifer : RulesetAnalyser {
+
+// NOTE: this only works in cases of unilevel
+// tag storage
+class UnilevelStorageTagOverrideRuleIndentifer : RulesetAnalyser {
     var allRules = [String]()
     var mappings = [(rule:String, mapping:RuleMapping)]()
     

@@ -21,9 +21,7 @@ class CandidateSelector : XCTestCase {
         
         t.setCandidateSelector(rule: "msg", selector: selector)
         
-        XCTAssertFalse(selector.invoked)
         XCTAssertEqual(t.expand("#msg#"), "hello")
-        XCTAssertTrue(selector.invoked)
     }
     
     

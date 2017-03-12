@@ -29,7 +29,6 @@ struct TagValue : CustomStringConvertible {
     var description: String { return rawText }
 }
 
-
 enum ParserNode : CustomStringConvertible {
     
     case text(String)
@@ -39,16 +38,16 @@ enum ParserNode : CustomStringConvertible {
     public var description: String {
         switch self {
             
-        case let .rule(name: name, mods: mods):
+        case let .rule(name, mods):
             if mods.count > 0 {
                 let mods = mods.map { "." + $0.name }.reduce("") { $0.0 + $0.1 }
                 return "rule(\(name) \(mods))"
             }
             return "rule(\(name))"
             
-        case let .tag(name: name, values: values):
+        case let .tag(name, values):
             if values.count == 1 { return "tag(\(name)=\(values[0]))" }
-            return "tag(\(name) \(values))"
+            return "tag(\(name)=\(values))"
             
         case let .text(text):
             return "text(\(text))"

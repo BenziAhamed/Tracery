@@ -44,4 +44,39 @@ class TraceryioSamples: XCTestCase {
         XCTAssertEqual(match!.numberOfRanges, 5)
     }
     
+    
+    //
+    // Hierarchical tag storage is present in Tracery
+    // as a consequence of issue 31 raised against
+    // the original tracery lib
+    //
+    // https://github.com/galaxykate/tracery/issues/31
+    //
+    func testIssue31() {
+        let o = TraceryOptions()
+        o.taggingPolicy = .heirarchical
+        
+        let braceTypes = ["()","{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+            .map { braces -> String in
+                let open = braces[braces.startIndex]
+                let close = braces[braces.index(after: braces.startIndex)]
+                return "[open:\(open)][close:\(close)]"
+            }
+        
+        let t = Tracery(o) {[
+            "letter": ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],
+            "bracetypes": braceTypes,
+            "brace": [
+                "#open##symbol# #[symbol:#letter#][#bracetypes#]brace##symbol##close# #[symbol:#letter#][#bracetypes#]brace#",
+                "#open##symbol# #[symbol:#letter#][#bracetypes#]brace##symbol##close# ",
+                "", // exit recursion
+            ],
+            "origin": ["#[symbol:#letter#][#bracetypes#]brace#"]
+        ]}
+        
+        // Tracery.logLevel = .verbose
+        _ = t.expand("#origin#")
+        
+        XCTAssertTrue(true)
+    }
 }

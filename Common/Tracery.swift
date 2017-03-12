@@ -18,17 +18,21 @@ struct RuleCandidate {
     let nodes: [ParserNode]
 }
 
-struct TagMapping {
-    let candidates: [String]
-    let selector: RuleCandidateSelector
+
+public class TraceryOptions {
+    public var taggingPolicy = TaggingPolicy.unilevel
+    public var isRuleAnalysisEnabled = true
 }
 
+extension TraceryOptions {
+    static let defaultSet = TraceryOptions()
+}
 
 public class Tracery {
     
     private(set) var ruleSet: [String: RuleMapping]
-    private(set) var tags: [String: TagMapping]
     private(set) var mods: [String: (String,[String])->String]
+    private(set) var tagStorage: TagStorage
     
     public var ruleNames: [String] { return ruleSet.keys.map { $0 } }
     
@@ -36,10 +40,14 @@ public class Tracery {
         self.init {[:]}
     }
     
-    public init(rules: () -> [String: Any]) {
-        tags = [:]
+    let options: TraceryOptions
+    
+    public init(_ options: TraceryOptions = TraceryOptions.defaultSet, rules: () -> [String: Any]) {
+        self.options = options
         mods = [:]
         ruleSet = [:]
+        tagStorage = options.taggingPolicy.storage()
+        tagStorage.tracery = self
         
         let rules = rules()
         
@@ -92,7 +100,7 @@ public class Tracery {
         
         let candidates = values.flatMap { createRuleCandidate(rule: rule, text: $0) }
         if candidates.count == 0 {
-            warn("rule '\(rule)' does not have any defnitions, will be ignored")
+            warn("rule '\(rule)' does not have any definitions, will be ignored")
             return
         }
         
@@ -162,7 +170,7 @@ public class Tracery {
         do {
             if resetTags {
                 stackDepth = 0
-                tags.removeAll()
+                tagStorage.removeAll()
             }
             return try eval(input)
         }
@@ -177,6 +185,7 @@ public class Tracery {
     
     private func incrementStackDepth() throws {
         stackDepth += 1
+        trace("⚙️ depth: \(stackDepth)")
         if stackDepth > Tracery.maxStackDepth {
             error("stack overflow")
             throw ParserError.error("stack overflow")
@@ -185,6 +194,7 @@ public class Tracery {
     
     private func decrementStackDepth() {
         stackDepth = max(stackDepth - 1, 0)
+        trace("⚙️ depth: \(stackDepth)")
     }
     
     
@@ -216,7 +226,7 @@ public class Tracery {
     
     private func eval(_ node: ParserNode) throws -> String {
         
-        try incrementStackDepth(); defer { decrementStackDepth() }
+        trace("⚙️ eval \(node)")
         
         let result: String
         switch node {
@@ -226,6 +236,8 @@ public class Tracery {
             result = text
             
         case let .rule(name: name, mods: mods):
+            
+            
             // if the rule name is an empty string
             // see if we need to run any generators
             if name.isEmpty {
@@ -235,11 +247,27 @@ public class Tracery {
             
             // check if we have an entry in the symbol table
             // if present, apply the mods and return
-            if let symbol = getSymbolMapping(tag: name) {
+            if let symbol = getTagMapping(tag: name) {
                 result = try apply(mods: mods,to: symbol)
-                trace("📗 tag[\(name)] = \(result)")
+                traceTag("📗 get tag[\(name)] = \(result)")
                 break
             }
+            
+            // we need to increment stack depth
+            // only when evaluating a rule
+            // and after this point
+            // getting a tag should be at the same
+            // level as storing it
+            //
+            // we do not want a "[tag:value]#tag#"
+            // to increase the level to n+1 when setting the tag
+            // and then decreasing it after its done;
+            // this will prevent #tag# evaluation at level n
+            // to fail because a tag will not be present
+            // at level n
+            //
+            try incrementStackDepth(); defer { decrementStackDepth() }
+
             
             trace("📘 eval \(node)")
             if let mapping = getRuleMapping(rule: name) {
@@ -252,22 +280,33 @@ public class Tracery {
                 result = "#\(name)#"
             }
             
-        case let .tag(name: name, values: values):
+        case let .tag(name, values):
+            
+            // evaluate individual candidates
             let candidates = try values.map { try eval($0.nodes) }
-            tags[name] = TagMapping(
+            // create a tag mapping
+            let mapping = TagMapping(
                 candidates: candidates,
                 selector: candidates.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(candidates.count)
             )
+            if let existing = tagStorage.get(name: name) {
+                traceTag("📗 ⚠️ overwriting tag[\(name)] = \(existing.description)")
+            }
+            tagStorage.store(name: name, tag: mapping)
+            traceTag("📗 set tag[\(name)] = \(mapping.description)")
             result = ""
-            trace("📗 create tag '\(name)' with \(tags[name]!.candidates.joined(separator: ", "))")
             
         }
         
         return result
     }
     
-    private func getSymbolMapping(tag: String) -> String? {
-        guard let mapping = tags[tag] else { return nil }
+    
+    
+    private func getTagMapping(tag: String) -> String? {
+        guard let mapping = tagStorage.get(name: tag) else {
+            return nil
+        }
         let i = mapping.selector.pick(count: mapping.candidates.count)
         return mapping.candidates[i]
     }
@@ -299,6 +338,18 @@ public class Tracery {
             accum = invoke(accum, params)
         }
         return accum
+    }
+    
+}
+
+
+extension Tracery {
+    
+    func traceTag(_ message: @autoclosure ()->String) {
+        switch options.taggingPolicy {
+        case .unilevel: trace(message)
+        case .heirarchical: trace("\(message()) depth:\(stackDepth)")
+        }
     }
     
 }

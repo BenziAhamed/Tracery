@@ -13,10 +13,11 @@ protocol RulesetAnalyser {
     func end()
 }
 
-
 extension Tracery {
     
     func analyzeRuleBook() {
+        
+        guard options.isRuleAnalysisEnabled else { return }
         
         info("analying rules")
         
@@ -24,7 +25,9 @@ extension Tracery {
         
         analyzers.append(CyclicReferenceIdentifier())
         analyzers.append(RuleSelfReferenceIdentifer())
-        analyzers.append(TagOverrideRuleIndentifer())
+        if options.taggingPolicy == .unilevel {
+            analyzers.append(UnilevelStorageTagOverrideRuleIndentifer())
+        }
         analyzers.append(EmptyRulesetDetector())
         
         ruleSet.forEach { rule, mapping in

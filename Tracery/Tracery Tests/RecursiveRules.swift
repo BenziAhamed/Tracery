@@ -52,9 +52,8 @@ class RecursiveRules: XCTestCase {
         // rule -> 0 2(end) skipped 1
         // rule -> 2(end) skipped 0, 1
         
-        XCTAssertTrue(!run(length: Tracery.maxStackDepth-1).contains("stack overflow"))
-        
-        XCTAssertTrue(run(length: Tracery.maxStackDepth).contains("stack overflow"))
+        XCTAssertTrue(!run(length: Tracery.maxStackDepth).contains("stack overflow"))
+        XCTAssertTrue(run(length: Tracery.maxStackDepth + 1).contains("stack overflow"))
         
     }
     
