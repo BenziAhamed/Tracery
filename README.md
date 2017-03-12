@@ -19,6 +19,7 @@
             - [Custom Random Item Selector](#custom-random-item-selector)
         - [Custom Candidate Provider](#custom-candidate-provider)
             - [Weighted Distributions](#weighted-distributions)
+        - [Recursion](#recursion)
 - [Tracery Grammar](#tracery-grammar)
 - [Conclusion](#conclusion)
  
@@ -96,15 +97,15 @@ t = Tracery {[
 
 t.expand("#msg#")
 
-// jacob is 10 years old
+// jacob is 10 years old  <- name is randomly picked
 
 t.expand("#msg#")
 
-// jack is 10 years old
+// jack is 10 years old   <- name is randomly picked
 
 t.expand("#name# #name#")
 
-// will print out two different names
+// will print out two different random names
 ```
 
 
@@ -279,7 +280,7 @@ t.expand("There once was a man named #city.reverse.title#, who came from the cit
 
 
  
- > The original implementation at Tracery.io has some modifiers built-in, however this library does not do the same. Add required modifiers is left to the end users. (e.g. there are many solid implementations of pluralize methods out there, and it should be easy to plug in one to Tracery - this allows Tracery to be lean and focused as a library)
+ > The original implementation at Tracery.io a couple of has modifiers that allows prefixing a/an to words, pluralization, caps etc. The library follows another approach and provides customization endopints so that one can add as many modifiers as required.
  
  The next rule expansion option is the ability to add custom rule methods.
  
@@ -427,17 +428,21 @@ t.add(modifier: "track") { input in
     return input
 }
 
-func runOptionRule(times: Int) {
+func runOptionRule(times: Int, header: String) {
     tracker.removeAll()
     for _ in 0..<times {
         _ = t.expand("#option.track#")
     }
+    let sep = String(repeating: "-", count: header.characters.count)
+    print(sep)
+    print(header)
+    print(sep)
     tracker.forEach {
         print($0.key, $0.value)
     }
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "default")
     
 
 // output will be
@@ -476,7 +481,7 @@ class AlwaysPickFirst : RuleCandidateSelector {
 // attach this new selector to rule: option
 t.setCandidateSelector(rule: "option", selector: AlwaysPickFirst())
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "pick first")
 
 // output will be:
 // a 100
@@ -503,7 +508,7 @@ class Arc4RandomSelector : RuleCandidateSelector {
 t.setCandidateSelector(rule: "option", selector: Arc4RandomSelector())
 
 // do a new dry run
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "arc4 random")
 
 // sample output, will vary when you try
 // b 18
@@ -531,7 +536,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 5)
+runOptionRule(times: 5, header: "default")
 
 // output will be
 // b 1
@@ -563,7 +568,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "default - weighted")
 
 // sample output, will vary over runs
 // b 17 ~> 20% of 100
@@ -584,25 +589,14 @@ runOptionRule(times: 100)
 
 
 
-```swift
-// scan is similar to reduce, but accumulates the intermediate results
-extension Sequence {
-    @discardableResult
-    func scan<T>(_ initial: T, _ combine: (T, Iterator.Element) throws -> T) rethrows -> [T] {
-        var accu = initial
-        return try map { e in
-            accu = try combine(accu, e)
-            return accu
-        }
-    }
-}
 
+```swift
 // This class implements two protocols
 // RuleCandidateSelector - which as we have seen before is used to
 //                         to select content in a custom way
 // RuleCandidatesProvider - the protocol which needs to be
 //                          adhered to to provide customised content
-class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
+class ExampleWeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
     
     // required for RuleCandidatesProvider
     let candidates: [String]
@@ -644,7 +638,7 @@ class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
 }
 
 t = Tracery {[
-    "option": WeightedCandidateSet(["a": 5, "b": 1])
+    "option": ExampleWeightedCandidateSet(["a": 5, "b": 1])
 ]}
 
 t.add(modifier: "track") { input in
@@ -653,7 +647,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "custom weighted")
 
 // sample output, will vary by run
 // b 13
@@ -679,44 +673,124 @@ runOptionRule(times: 100)
 
 
  
+### Recursion
+ 
+ It is possible to define recursive rules. When doing so, you must provide at least one rule candidate that exits out of the recursion.
+ 
+
+
+```swift
+import Tracery
+
+// suppose we wish to generate a random binary string
+// if we write the rules as
+
+var t = Tracery {[
+    "binary": [ "0 #binary#", "1 #binary#" ]
+]}
+
+t.expand("#binary#")
+
+
+// will output:
+// ⛔️ stack overflow
+
+// Since there is no option to exit out of the rule expansion
+// We can add one explicitly
+
+t = Tracery {[
+    "binary": [ "0#binary#", "1#binary#", "" ]
+]}
+
+print(t.expand("attempt 2: #binary#"))
+
+// while this works, if we run this a couple of times
+// you will notice that the output is as follows:
+
+// all possible outputs:
+// attempt 2: 1
+// attempt 2: 0
+// attempt 2: 01
+// attempt 2: 10
+// attempt 2:       <- empty
+
+// all possible outputs are limited because the built-in
+// candidate selector is guaranteed to quickly select the ""
+// candidate to maintain a strict uniform distribution
+// we can fix this
+
+t = Tracery {[
+    "binary": WeightedCandidateSet([
+        "0#binary#": 10,
+        "1#binary#": 10,
+                 "":  1
+    ])
+]}
+
+print(t.expand("attempt 3: #binary#"))
+
+// sample outputs:
+// attempt 3: 011101000010100001010
+// attempt 3: 1010110
+// attempt 3: 10101100101   and so on
+
+// Now we have more control, as we are stating that we are 20 times more
+// likely to continue with a binary rule than the exit
+```
+
+
+
+ 
+ If you wish to have a random sequence of a speicific length, you may want to create a custom `RuleCandidateSelector`, or write up/generate a non-recursive set of rules.
+ 
+ > You can control how deep recursive rules can get expanded by changing the `Tracery.maxStackDepth` property.
+ 
+
+
+
+
+ 
 # Tracery Grammar
  
  This section attempts to describe the grammar specification for Tracery.
  
 
 ```
-    rule_candidate -> ( plain_text | rule | tag )*
+ rule_candidate -> ( plain_text | rule | tag )*
  
-   
-    tag -> [ tag_name : tag_value ]
  
-        tag_name -> plain_text
+ tag -> [ tag_name : tag_value ]
  
-        tag_value -> tag_value_candidate (,tag_value_candidate)*
+    tag_name -> plain_text
  
-            tag_value_candidate -> rule | plain_text
+    tag_value -> tag_value_candidate (,tag_value_candidate)*
  
-    
-    rule -> # tag | rule_name(.modifier|.call|.method)* #
+        tag_value_candidate -> rule | plain_text
  
-        rule_name -> plain_text
  
-        modifier -> plain_text
+ rule -> # (tag)* | rule_name(.modifier|.call|.method)* #
  
-        call -> plain_text
+    rule_name -> plain_text
  
-        method -> method_name ( param (,param)* )
+    modifier -> plain_text
  
-            method_name -> plain_text
-            
-            param -> plain_text | rule
+    call -> plain_text
+ 
+    method -> method_name ( param (,param)* )
+ 
+        method_name -> plain_text
+ 
+        param -> plain_text | rule
  
  
 ```
  
 # Conclusion
  
- That's all folks.
+ Tracery in Swift was developed by [Benzi](https://twitter.com/benziahamed).
+ 
+ Original library in Javascript is available at [Tracery.io](http://www.tracery.io/).
+ 
  
 
 

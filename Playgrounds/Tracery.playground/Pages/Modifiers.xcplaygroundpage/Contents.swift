@@ -47,7 +47,7 @@ t.expand("There once was a man named #city.reverse.title#, who came from the cit
 
 /*:
  
- > The original implementation at Tracery.io has some modifiers built-in, however this library does not do the same. Add required modifiers is left to the end users. (e.g. there are many solid implementations of pluralize methods out there, and it should be easy to plug in one to Tracery - this allows Tracery to be lean and focused as a library)
+ > The original implementation at Tracery.io a couple of has modifiers that allows prefixing a/an to words, pluralization, caps etc. The library follows another approach and provides customization endopints so that one can add as many modifiers as required.
  
  The next rule expansion option is the ability to add custom rule methods.
  

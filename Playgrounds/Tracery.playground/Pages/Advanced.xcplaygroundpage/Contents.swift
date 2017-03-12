@@ -29,17 +29,21 @@ t.add(modifier: "track") { input in
     return input
 }
 
-func runOptionRule(times: Int) {
+func runOptionRule(times: Int, header: String) {
     tracker.removeAll()
     for _ in 0..<times {
         _ = t.expand("#option.track#")
     }
+    let sep = String(repeating: "-", count: header.characters.count)
+    print(sep)
+    print(header)
+    print(sep)
     tracker.forEach {
         print($0.key, $0.value)
     }
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "default")
     
 
 // output will be
@@ -75,7 +79,7 @@ class AlwaysPickFirst : RuleCandidateSelector {
 // attach this new selector to rule: option
 t.setCandidateSelector(rule: "option", selector: AlwaysPickFirst())
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "pick first")
 
 // output will be:
 // a 100
@@ -99,7 +103,7 @@ class Arc4RandomSelector : RuleCandidateSelector {
 t.setCandidateSelector(rule: "option", selector: Arc4RandomSelector())
 
 // do a new dry run
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "arc4 random")
 
 // sample output, will vary when you try
 // b 18
@@ -124,7 +128,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 5)
+runOptionRule(times: 5, header: "default")
 
 // output will be
 // b 1
@@ -153,7 +157,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "default - weighted")
 
 // sample output, will vary over runs
 // b 17 ~> 20% of 100
@@ -172,24 +176,13 @@ runOptionRule(times: 100)
  */
 
 
-// scan is similar to reduce, but accumulates the intermediate results
-extension Sequence {
-    @discardableResult
-    func scan<T>(_ initial: T, _ combine: (T, Iterator.Element) throws -> T) rethrows -> [T] {
-        var accu = initial
-        return try map { e in
-            accu = try combine(accu, e)
-            return accu
-        }
-    }
-}
 
 // This class implements two protocols
 // RuleCandidateSelector - which as we have seen before is used to
 //                         to select content in a custom way
 // RuleCandidatesProvider - the protocol which needs to be
 //                          adhered to to provide customised content
-class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
+class ExampleWeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
     
     // required for RuleCandidatesProvider
     let candidates: [String]
@@ -231,7 +224,7 @@ class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
 }
 
 t = Tracery {[
-    "option": WeightedCandidateSet(["a": 5, "b": 1])
+    "option": ExampleWeightedCandidateSet(["a": 5, "b": 1])
 ]}
 
 t.add(modifier: "track") { input in
@@ -240,7 +233,7 @@ t.add(modifier: "track") { input in
     return input
 }
 
-runOptionRule(times: 100)
+runOptionRule(times: 100, header: "custom weighted")
 
 // sample output, will vary by run
 // b 13
@@ -261,4 +254,5 @@ runOptionRule(times: 100)
  
  */
 
-//: [Conclusion](@next)
+
+//: [Advanced contd.](@next)

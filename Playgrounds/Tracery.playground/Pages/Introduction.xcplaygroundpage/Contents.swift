@@ -71,15 +71,15 @@ t = Tracery {[
 
 t.expand("#msg#")
 
-// jacob is 10 years old
+// jacob is 10 years old  <- name is randomly picked
 
 t.expand("#msg#")
 
-// jack is 10 years old
+// jack is 10 years old   <- name is randomly picked
 
 t.expand("#name# #name#")
 
-// will print out two different names
+// will print out two different random names
 
 /*:
  In the snippet above, whenever Tracery sees the rule `#name#`, it will pick out one of the candidate values; in this example, name could be "jack" "john" or "jacob"

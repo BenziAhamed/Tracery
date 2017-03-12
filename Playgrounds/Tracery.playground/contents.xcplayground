@@ -6,6 +6,7 @@
         <page name='Methods'/>
         <page name='Calls'/>
         <page name='Advanced'/>
-        <page name='Epilogue'/>
+        <page name='Advanced2'/>
+        <page name='Conclusion'/>
     </pages>
 </playground>
