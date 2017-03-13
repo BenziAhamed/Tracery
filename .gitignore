@@ -16,6 +16,7 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 xcuserdata/
+Tracery.xcworkspace/xcuserdata/
 
 ## Other
 *.moved-aside
