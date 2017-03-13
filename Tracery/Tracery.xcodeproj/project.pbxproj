@@ -277,7 +277,6 @@
 				B9FCA8031E73D6FA0069F8B6 /* Sources */,
 				B9FCA8041E73D6FA0069F8B6 /* Frameworks */,
 				B9FCA8051E73D6FA0069F8B6 /* Resources */,
-				B9FCA8121E73D7600069F8B6 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -359,22 +358,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		B9FCA8121E73D7600069F8B6 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "find ${TARGET_BUILD_DIR} -type d -name \"*.framework\" -exec cp -Rf {} ${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ \\;";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B96DBFB71E72B630008623B8 /* Sources */ = {
