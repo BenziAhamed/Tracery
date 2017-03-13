@@ -218,7 +218,6 @@ extension Tracery {
     struct ExecutionContext {
         enum PopAction {
             case appendToResult
-            case replaceResult
             case addArg
             case nothing
         }
@@ -273,8 +272,6 @@ extension Tracery {
                 switch context.popAction {
                 case .appendToResult:
                     stack[stack.count-1].result.append(context.result)
-                case .replaceResult:
-                    stack[stack.count-1].result = context.result
                 case .addArg:
                     stack[stack.count-1].args.append(context.result)
                 case .nothing:
@@ -294,9 +291,8 @@ extension Tracery {
 //            trace("----------")
 //            trace("stack-depth: \(stackDepth)")
 //            trace("contexts:")
-//            stack.enumerated().forEach { i, context in
-//                trace("\(i)-\(context.nodes) result:\(context.result) onPop:\(context.popAction)")
-//            }
+            
+            // trace("\(depth) - \(stack[depth].nodes) pop: \(stack[depth].popAction)")
             
             
             // we have finished all processing
@@ -321,6 +317,15 @@ extension Tracery {
                 // commit result to context
                 stack[depth].result.append(text)
                 
+            case let .evaluateArg(nodes):
+                // special node that evaluates
+                // child nodes and adds result
+                // in parent context's args list
+                try pushContext(nodes, .addArg)
+                
+            case .clearArgs:
+                stack[depth].args.removeAll()
+                
             case let .tag(name, values):
                 
                 // push a context with
@@ -332,7 +337,7 @@ extension Tracery {
                 // create tag will access the args and create
                 // a tag mapping
                 
-                var nodes = values.map { ParserNode.tagValue($0) }
+                var nodes = values.map { ParserNode.evaluateArg(nodes: $0.nodes) }
                 nodes.append(.createTag(name: name))
                 
                 // creating a tag should not 
@@ -340,8 +345,6 @@ extension Tracery {
                 // must be created at the same rule context level
                 try pushContext(nodes, .nothing, affectsStackDepth: false)
                 
-            case let .tagValue(value):
-                try pushContext(value.nodes, .addArg)
                 
             case let .createTag(name):
                 // create a tag mapping
@@ -357,36 +360,27 @@ extension Tracery {
                 traceTag("📗 set tag[\(name)] <-- \(mapping.description)")
                 
                 
-            case let .mod(modifier):
-                if let mod = mods[modifier.name] {
-                    var nodes = modifier.parameters.map { ParserNode.param($0) }
-                    nodes.append(.exec(command: modifier.name))
-                    try pushContext(nodes, .replaceResult)
-                    stack[stack.count-1].result = stack[depth].result
-                }
-                else {
-                    warn("modifier '\(modifier.name)' not defined")
-                }
+            case let .runMod(name):
+                guard let mod = mods[name] else { break }
+                let context = stack[depth]
+                trace("🔰 run mod \(name)(\(context.result) params: \(context.args.joined(separator: ",")))")
+                stack[depth].result = mod(context.result, context.args)
                 
-            case let .param(parameter):
-                try pushContext(parameter.nodes, .addArg)
-                
-            case let .exec(command):
-                if let mod = mods[command] {
-                    let context = stack[depth]
-                    trace("🔰 run mod \(command)(\(context.result) params: \(context.args.joined(separator: ",")))")
-                    stack[depth].result = mod(context.result, context.args)
-                }
-                else {
-                    warn("modifier '\(command)' not defined")
-                }
-                
+            
             case let .rule(name, mods):
                 
                 func applyMods(nodes: [ParserNode]) throws {
                     var nodes = nodes
                     for mod in mods {
-                        nodes.append(.mod(mod))
+                        guard self.mods[mod.name] != nil else {
+                            warn("modifier '\(mod.name)' not defined")
+                            continue
+                        }
+                        for param in mod.parameters {
+                            nodes.append(.evaluateArg(nodes: param.nodes))
+                        }
+                        nodes.append(.runMod(name: mod.name))
+                        nodes.append(.clearArgs)
                     }
                     try pushContext(nodes, .appendToResult)
                 }
@@ -418,8 +412,6 @@ extension Tracery {
                     stack[depth].result.append("#\(name)#")
                 }
                 
-            default:
-                fatalError()
                 
             }
         }

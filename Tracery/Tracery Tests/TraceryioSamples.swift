@@ -67,12 +67,14 @@ class TraceryioSamples: XCTestCase {
             "bracetypes": braceTypes,
             "brace": [
                 "#open##symbol# #origin##symbol##close# ",
+                "#open##symbol##close# #origin# #open##symbol##close#",
                 "#open##symbol# #origin##symbol##close# #origin#",
                 "",
             ],
             "origin": ["#[symbol:#letter#][#bracetypes#]brace#"]
         ]}
         
+        // Tracery.logLevel = .verbose
         XCTAssertFalse(t.expand("#origin#").contains("stack overflow"))
     }
 }
