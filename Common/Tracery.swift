@@ -20,8 +20,10 @@ struct RuleCandidate {
 
 
 public class TraceryOptions {
-    public var taggingPolicy = TaggingPolicy.unilevel
+    public var tagStorageType = TaggingPolicy.unilevel
     public var isRuleAnalysisEnabled = true
+    
+    public init() { }
 }
 
 extension TraceryOptions {
@@ -46,7 +48,7 @@ public class Tracery {
         self.options = options
         mods = [:]
         ruleSet = [:]
-        tagStorage = options.taggingPolicy.storage()
+        tagStorage = options.tagStorageType.storage()
         tagStorage.tracery = self
         
         let rules = rules()
@@ -346,7 +348,7 @@ public class Tracery {
 extension Tracery {
     
     func traceTag(_ message: @autoclosure ()->String) {
-        switch options.taggingPolicy {
+        switch options.tagStorageType {
         case .unilevel: trace(message)
         case .heirarchical: trace("\(message()) depth:\(stackDepth)")
         }

@@ -13,7 +13,7 @@ class Tags: XCTestCase {
     
     func testDefaultStorageIsUnilevel() {
         let t = Tracery()
-        XCTAssertEqual(t.options.taggingPolicy, .unilevel)
+        XCTAssertEqual(t.options.tagStorageType, .unilevel)
     }
     
     func testUnilevelTagsCanBeSet() {
@@ -91,10 +91,7 @@ class Tags: XCTestCase {
     }
     
     func testTagCanBeCreatedFromOtherTagValues() {
-        let options = TraceryOptions()
-        options.taggingPolicy = .unilevel
-        
-        let t = Tracery(options) {[
+        let t = Tracery {[
             "name" : "jack",
             "createTag1" : "[tag1:#name#]#tag1#", // create tag1 and output value
             "createTag2" : "[tag2:#createTag1#]", // trigger tag1 creation
@@ -115,7 +112,7 @@ extension Tags {
     
     private func hierarchicalTracery(rules: ()->[String: Any]) -> Tracery {
         let options = TraceryOptions()
-        options.taggingPolicy = .heirarchical
+        options.tagStorageType = .heirarchical
         let t = Tracery(options, rules: rules)
         return t
     }
@@ -170,13 +167,15 @@ extension Tags {
             "inside_rule" : "#[tag:value]tag#",
             "override_in_same_rule1": "[tag:value-out ]#[tag:value-in ]tag##tag#",
             "override_in_same_rule2": "[tag:value-out ]#tag##[tag:value-in ]tag#",
+            "sub_tag_not_visible" : "[#sub_tag#]#tag2#",
+            "sub_tag" : "[tag2:sub tag]"
         ]}
 
         XCTAssertEqual(t.expand("#outside_rule#"), "value")
         XCTAssertEqual(t.expand("#inside_rule#"), "value")
         XCTAssertEqual(t.expand("#override_in_same_rule1#"), "value-in value-in ")
         XCTAssertEqual(t.expand("#override_in_same_rule2#"), "value-out value-in ")
-        
+        XCTAssertEqual(t.expand("#sub_tag_not_visible#"), "#tag2#")
     }
     
 }

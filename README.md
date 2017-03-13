@@ -23,6 +23,7 @@
             - [Rule Expansions](#rule-expansions)
         - [Logging](#logging)
         - [Chaining Evaluations](#chaining-evaluations)
+        - [Hierarchical Tag Storage](#hierarchical-tag-storage)
 - [Tracery Grammar](#tracery-grammar)
 - [Conclusion](#conclusion)
  
@@ -828,7 +829,58 @@ t.expand("#num.eval#")
  
  We now have a mechanism to expand a rule based on the expansion results of another rule.
  
+### Hierarchical Tag Storage
+ 
+ By default, tags have global scope. This means that a tag can be set anywhere and its value will be accessible by any rule at any level of rule expansion. We can restrict tag access using hierarchical storage.
+ 
+ Rules are expandede using a stack. Each rule evaluation occurs at a specific depth on the stack. If a rule at level `n` expands to two sub-rules, the two sub-rules will be evaluated at level `n+1`. A tag's level `n` will be the same as that of the rule at level `n` which created it.
+ 
+ When a rule at level `n` tries to expand a tag, `Tracery` will check if a tag exists at level `n`, or search levels n-1,...0 until its able to find a value.
+ 
+ 
+ In the example below, we use hierarchical storage to push and pop matching open and close braces, at various levels of rule expansion. The matching close brace is _remembered_ when the rule sub-expansion finishes.
+ 
 
+
+```swift
+let options = TraceryOptions()
+options.tagStorageType = .heirarchical
+
+let braceTypes = ["()","{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+    .map { braces -> String in
+        let open = braces[braces.startIndex]
+        let close = braces[braces.index(after: braces.startIndex)]
+        return "[open:\(open)][close:\(close)]"
+}
+
+let h = Tracery(options) {[
+    "letter": ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],
+    "bracetypes": braceTypes,
+    "brace": [
+        // open with current symbol, 
+        // create new symbol, open brace pair and evaluate a sub-rule call to brace
+        // finally close off with orginal symbol and matching close brace pair
+        "#open##symbol# #origin##symbol##close# ",
+        
+        "#open##symbol# #origin##symbol##close# #origin#",
+
+        // exits recursion
+        "",
+    ],
+    
+    // start with a symbol and bracetype
+    "origin": ["#[symbol:#letter#][#bracetypes#]brace#"]
+]}
+
+h.expand("#origin#")
+
+// sample outputs:
+// {L ⌜D D⌝ (P 𛰫O O𛰬 <F ⦃C C⦄ F> P) L}
+// ⁅M ᙅK Kᙂ ᙦE {O O} Eᙣ M⁆
+// ⌈C C⌉
+// <K K>
+
+```
 
 
 

@@ -25,7 +25,7 @@ extension Tracery {
         
         analyzers.append(CyclicReferenceIdentifier())
         analyzers.append(RuleSelfReferenceIdentifer())
-        if options.taggingPolicy == .unilevel {
+        if options.tagStorageType == .unilevel {
             analyzers.append(UnilevelStorageTagOverrideRuleIndentifer())
         }
         analyzers.append(EmptyRulesetDetector())

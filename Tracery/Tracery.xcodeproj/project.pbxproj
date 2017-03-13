@@ -20,6 +20,7 @@
 		B96DC0311E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */; };
 		B96DC0321E72F2B7008623B8 /* Tracery.Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */; };
 		B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0281E72F2B7008623B8 /* Tracery.swift */; };
+		B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975BB7D1E75C91C0076A1EA /* TagStorage.swift */; };
 		B9FCA7F51E73D2D20069F8B6 /* CyclicReferenceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01E1E72F2B7008623B8 /* CyclicReferenceIdentifier.swift */; };
 		B9FCA7F61E73D2D20069F8B6 /* EmptyRulesetDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01F1E72F2B7008623B8 /* EmptyRulesetDetector.swift */; };
 		B9FCA7F71E73D2D20069F8B6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0201E72F2B7008623B8 /* Lexer.swift */; };
@@ -75,6 +76,7 @@
 		B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagOverrideRuleIdentifier.swift; sourceTree = "<group>"; };
 		B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Logging.swift; sourceTree = "<group>"; };
 		B96DC0281E72F2B7008623B8 /* Tracery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.swift; sourceTree = "<group>"; };
+		B975BB7D1E75C91C0076A1EA /* TagStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagStorage.swift; sourceTree = "<group>"; };
 		B9FCA8001E73D4350069F8B6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B9FCA8071E73D6FA0069F8B6 /* Tracery Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tracery Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9FCA8091E73D6FA0069F8B6 /* Rules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */,
 				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B9FCA8001E73D4350069F8B6 /* Info.plist */,
+				B975BB7D1E75C91C0076A1EA /* TagStorage.swift */,
 			);
 			name = Common;
 			path = ../Common;
@@ -378,6 +381,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */,
 				B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */,
 				B96DC02C1E72F2B7008623B8 /* Parser.swift in Sources */,
 				B96DC02F1E72F2B7008623B8 /* RuleSelfReferenceIdentifer.swift in Sources */,
@@ -690,6 +694,7 @@
 				B9FCA8111E73D6FA0069F8B6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
