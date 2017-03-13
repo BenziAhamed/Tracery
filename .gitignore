@@ -28,8 +28,8 @@ xcuserdata/
 *.dSYM
 
 ## Playgrounds
-timeline.xctimeline
-playground.xcworkspace
+**/Playgrounds/*/timeline.xctimeline
+**/Playgrounds/*/playground.xcworkspace
 
 # Swift Package Manager
 #
