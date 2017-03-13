@@ -13,5 +13,8 @@
       <FileRef
          location = "group:Playgrounds/Tracery.playground">
       </FileRef>
+      <FileRef
+         location = "group:Playgrounds/Loops.playground">
+      </FileRef>
    </Group>
 </Workspace>
