@@ -34,7 +34,7 @@ public class Tracery {
     
     private(set) var ruleSet: [String: RuleMapping]
     private(set) var mods: [String: (String,[String])->String]
-    private(set) var tagStorage: TagStorage
+    fileprivate(set) var tagStorage: TagStorage
     
     public var ruleNames: [String] { return ruleSet.keys.map { $0 } }
     
@@ -166,15 +166,14 @@ public class Tracery {
         ruleSet[rule]?.selector = selector
     }
     
-    
-    
     public func expand(_ input: String, resetTags: Bool = true) -> String {
         do {
             if resetTags {
                 stackDepth = 0
                 tagStorage.removeAll()
             }
-            return try eval(input)
+            // return try eval(input)
+            return try evalNonRecursive(input)
         }
         catch {
             return "error: \(error)"
@@ -183,9 +182,9 @@ public class Tracery {
     
     public static var maxStackDepth = 256
     
-    private(set) var stackDepth: Int = 0
+    fileprivate(set) var stackDepth: Int = 0
     
-    private func incrementStackDepth() throws {
+    fileprivate func incrementStackDepth() throws {
         stackDepth += 1
         trace("⚙️ depth: \(stackDepth)")
         if stackDepth > Tracery.maxStackDepth {
@@ -194,152 +193,9 @@ public class Tracery {
         }
     }
     
-    private func decrementStackDepth() {
+    fileprivate func decrementStackDepth() {
         stackDepth = max(stackDepth - 1, 0)
         trace("⚙️ depth: \(stackDepth)")
-    }
-    
-    
-    // evaluates formatted text and returns a string
-    private func eval(_ text: String) throws -> String {
-        
-        trace("📘 eval text '\(text)'")
-        
-        let tokens = Lexer.tokens(input: text)
-        // print_trace("📘 tokens => " + tokens.map { $0.description }.joined(separator: " "))
-        
-        let nodes = try Parser.gen(tokens: tokens)
-        // print_trace("nodes", "=>", nodes)
-        
-        let result = try eval(nodes)
-        
-        trace("📘 \(text) ==> \(result)")
-        
-        return result
-    }
-    
-    private func eval(_ nodes: [ParserNode]) throws -> String {
-        var result = ""
-        for node in nodes {
-            result.append(try eval(node))
-        }
-        return result
-    }
-    
-    private func eval(_ node: ParserNode) throws -> String {
-        
-        trace("⚙️ eval \(node)")
-        
-        let result: String
-        switch node {
-            
-        case let .text(text):
-            trace("📘 text (\(text))")
-            result = text
-            
-        case let .rule(name: name, mods: mods):
-            
-            
-            // if the rule name is an empty string
-            // see if we need to run any generators
-            if name.isEmpty {
-                result = try apply(mods: mods, to: "")
-                break
-            }
-            
-            // check if we have an entry in the symbol table
-            // if present, apply the mods and return
-            if let symbol = getTagMapping(tag: name) {
-                result = try apply(mods: mods,to: symbol)
-                traceTag("📗 get tag[\(name)] = \(result)")
-                break
-            }
-            
-            // we need to increment stack depth
-            // only when evaluating a rule
-            // and after this point
-            // getting a tag should be at the same
-            // level as storing it
-            //
-            // we do not want a "[tag:value]#tag#"
-            // to increase the level to n+1 when setting the tag
-            // and then decreasing it after its done;
-            // this will prevent #tag# evaluation at level n
-            // to fail because a tag will not be present
-            // at level n
-            //
-            try incrementStackDepth(); defer { decrementStackDepth() }
-
-            
-            trace("📘 eval \(node)")
-            if let mapping = getRuleMapping(rule: name) {
-                trace("📙 rule #\(name)# = \(mapping.text)")
-                let choice = try eval(mapping.nodes)
-                result = try apply(mods: mods, to: choice)
-            }
-            else {
-                warn("rule #\(name)# cannot be expanded")
-                result = "#\(name)#"
-            }
-            
-        case let .tag(name, values):
-            
-            // evaluate individual candidates
-            let candidates = try values.map { try eval($0.nodes) }
-            // create a tag mapping
-            let mapping = TagMapping(
-                candidates: candidates,
-                selector: candidates.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(candidates.count)
-            )
-            if let existing = tagStorage.get(name: name) {
-                traceTag("📗 ⚠️ overwriting tag[\(name)] = \(existing.description)")
-            }
-            tagStorage.store(name: name, tag: mapping)
-            traceTag("📗 set tag[\(name)] = \(mapping.description)")
-            result = ""
-            
-        }
-        
-        return result
-    }
-    
-    
-    
-    private func getTagMapping(tag: String) -> String? {
-        guard let mapping = tagStorage.get(name: tag) else {
-            return nil
-        }
-        let i = mapping.selector.pick(count: mapping.candidates.count)
-        return mapping.candidates[i]
-    }
-    
-    private func getRuleMapping(rule: String) -> RuleCandidate? {
-        guard let mapping = ruleSet[rule] else { return nil }
-        let i = mapping.selector.pick(count: mapping.candidates.count)
-        guard i < mapping.candidates.count, i >= 0 else { return nil }
-        return mapping.candidates[i]
-    }
-    
-    private func apply(mods: [Modifier], to input: String) throws -> String {
-        if mods.count == 0 {
-            return input
-        }
-        var accum = input
-        for mod in mods {
-            guard let invoke = self.mods[mod.name] else {
-                warn("modifier '\(mod.name)' not defined")
-                continue
-            }
-            let params = try mod.parameters.map { param -> String in
-                if param.rawText.range(of: "#") != nil {
-                    return try eval(param.nodes)
-                }
-                return param.rawText
-            }
-            trace("🔰 run mod \(mod.name)(\(accum) params: \(params.joined(separator: ",")))")
-            accum = invoke(accum, params)
-        }
-        return accum
     }
     
 }
@@ -354,6 +210,172 @@ extension Tracery {
         }
     }
     
+}
+
+
+extension Tracery {
+    
+    struct ExecutionContext {
+        var result: String
+        var nodes: [ParserNode]
+        init(_ nodes: [ParserNode]) {
+            self.nodes = nodes.reversed()
+            self.result = ""
+        }
+        var isEmpty: Bool { return nodes.isEmpty }
+        mutating func pop() -> ParserNode {
+            return nodes.removeLast()
+        }
+        mutating func push(token: ParserNode) {
+            nodes.append(token)
+        }
+    }
+
+    func evalNonRecursive(_ text: String) throws -> String {
+        trace("📘 input \(text)")
+        let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
+        let output = try evalNonRecursive(nodes)
+        trace("📘 ouptut \(text)")
+        return output
+    }
+    
+    func evalNonRecursive(_ nodes: [ParserNode]) throws -> String {
+        
+        var stack = [ExecutionContext]()
+        
+        func pushContext(_ tokens: [ParserNode]) throws {
+            try incrementStackDepth()
+            stack.append(ExecutionContext(tokens))
+        }
+        
+        func popContext() {
+            decrementStackDepth()
+            let context = stack.removeLast()
+            if stack.count > 0 {
+                stack[stack.count-1].result.append(context.result)
+            }
+        }
+        
+        // push initial context which is the
+        // set of nodes that are parsed from the input
+        try pushContext(nodes)
+        
+        while true {
+            
+            let depth = stack.count - 1
+            
+            trace("----------")
+            trace("stack-depth: \(stackDepth)")
+            trace("contexts:")
+            stack.enumerated().forEach { i, context in
+                trace("\(i)-\(context.nodes) result:\(context.result)")
+            }
+            
+            
+            // we have finished all processing
+            if depth == 0 && stack[depth].isEmpty {
+                break
+            }
+            
+            // if we are at the end of evaluating a context
+            // pop it and continue
+            if stack[depth].isEmpty {
+                popContext()
+                continue
+            }
+            
+            let node = stack[depth].pop()
+            
+            
+            
+            switch node {
+                
+            case let .text(text):
+                trace("📘 text (\(text))")
+                stack[depth].result.append(text)
+                
+            case let .tag(name, values):
+                
+                // evaluate individual candidates
+                let candidates = try values.map { try evalNonRecursive($0.nodes) }
+                // create a tag mapping
+                let mapping = TagMapping(
+                    candidates: candidates,
+                    selector: candidates.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(candidates.count)
+                )
+                if let existing = tagStorage.get(name: name) {
+                    traceTag("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
+                }
+                tagStorage.store(name: name, tag: mapping)
+                traceTag("📗 set tag[\(name)] = \(mapping.description)")
+                
+                
+            case let .mod(modifier):
+                
+                if let mod = mods[modifier.name] {
+                    var args = [String]()
+                    for param in modifier.parameters {
+                        if param.rawText.range(of: "#") != nil {
+                            args.append(try evalNonRecursive(param.nodes))
+                        }
+                        else {
+                            args.append(param.rawText)
+                        }
+                    }
+                    
+                    trace("🔰 run mod \(modifier.name)(\(stack[depth].result) params: \(args.joined(separator: ",")))")
+                    // update context result
+                    stack[depth].result = mod(stack[depth].result, args)
+                }
+                else {
+                    warn("modifier '\(modifier.name)' not defined")
+                }
+                
+                
+            case let .rule(name, mods):
+                
+                func applyMods(nodes: [ParserNode]) throws {
+                    var nodes = nodes
+                    for mod in mods {
+                        nodes.append(.mod(mod))
+                    }
+                    try pushContext(nodes)
+                }
+                
+                if name.isEmpty {
+                    try applyMods(nodes: [.text("")])
+                    break
+                }
+                if let mapping = tagStorage.get(name: name) {
+                    let i = mapping.selector.pick(count: mapping.candidates.count)
+                    let value = mapping.candidates[i]
+                    traceTag("📗 get tag[\(name)] = \(value)")
+                    try applyMods(nodes: [.text(value)])
+                    break
+                }
+                if let expansion = ruleSet[name] {
+                    let index = expansion.selector.pick(count: expansion.candidates.count)
+                    if index >= 0 && index < expansion.candidates.count {
+                        trace("📙 eval \(node)")
+                        try applyMods(nodes: expansion.candidates[index].nodes)
+                    }
+                    else {
+                        warn("no candidate found for rule #\(name)#")
+                        stack[depth].result.append("#\(name)#")
+                    }
+                }
+                else {
+                    warn("rule #\(name)# cannot be expanded")
+                    stack[depth].result.append("#\(name)#")
+                }
+            }
+        }
+        
+        let result = stack[0].result
+        popContext()
+        
+        return result
+    }
 }
 
 
