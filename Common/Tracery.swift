@@ -216,11 +216,23 @@ extension Tracery {
 extension Tracery {
     
     struct ExecutionContext {
+        enum PopAction {
+            case appendToResult
+            case replaceResult
+            case addArg
+            case nothing
+        }
         var result: String
+        var args: [String]
         var nodes: [ParserNode]
-        init(_ nodes: [ParserNode]) {
+        let popAction: PopAction
+        let affectsStackDepth: Bool
+        init(_ nodes: [ParserNode], _ popAction: PopAction, _ affectsStackDepth: Bool) {
             self.nodes = nodes.reversed()
             self.result = ""
+            self.args = []
+            self.popAction = popAction
+            self.affectsStackDepth = affectsStackDepth
         }
         var isEmpty: Bool { return nodes.isEmpty }
         mutating func pop() -> ParserNode {
@@ -235,7 +247,7 @@ extension Tracery {
         trace("📘 input \(text)")
         let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
         let output = try evalNonRecursive(nodes)
-        trace("📘 ouptut \(text)")
+        trace("📘 ouptut \(text) ==> \(output)")
         return output
     }
     
@@ -243,33 +255,48 @@ extension Tracery {
         
         var stack = [ExecutionContext]()
         
-        func pushContext(_ tokens: [ParserNode]) throws {
-            try incrementStackDepth()
-            stack.append(ExecutionContext(tokens))
+        func pushContext(_ tokens: [ParserNode], _ popAction: ExecutionContext.PopAction, affectsStackDepth: Bool = true) throws {
+            if affectsStackDepth {
+                try incrementStackDepth()
+            }
+            stack.append(ExecutionContext(tokens, popAction, affectsStackDepth))
         }
         
         func popContext() {
-            decrementStackDepth()
+            
             let context = stack.removeLast()
+            if context.affectsStackDepth {
+                decrementStackDepth()
+            }
+            
             if stack.count > 0 {
-                stack[stack.count-1].result.append(context.result)
+                switch context.popAction {
+                case .appendToResult:
+                    stack[stack.count-1].result.append(context.result)
+                case .replaceResult:
+                    stack[stack.count-1].result = context.result
+                case .addArg:
+                    stack[stack.count-1].args.append(context.result)
+                case .nothing:
+                    break
+                }
             }
         }
         
         // push initial context which is the
         // set of nodes that are parsed from the input
-        try pushContext(nodes)
+        try pushContext(nodes, .appendToResult)
         
         while true {
             
             let depth = stack.count - 1
             
-            trace("----------")
-            trace("stack-depth: \(stackDepth)")
-            trace("contexts:")
-            stack.enumerated().forEach { i, context in
-                trace("\(i)-\(context.nodes) result:\(context.result)")
-            }
+//            trace("----------")
+//            trace("stack-depth: \(stackDepth)")
+//            trace("contexts:")
+//            stack.enumerated().forEach { i, context in
+//                trace("\(i)-\(context.nodes) result:\(context.result) onPop:\(context.popAction)")
+//            }
             
             
             // we have finished all processing
@@ -287,50 +314,72 @@ extension Tracery {
             let node = stack[depth].pop()
             
             
-            
             switch node {
                 
             case let .text(text):
                 trace("📘 text (\(text))")
+                // commit result to context
                 stack[depth].result.append(text)
                 
             case let .tag(name, values):
                 
-                // evaluate individual candidates
-                let candidates = try values.map { try evalNonRecursive($0.nodes) }
+                // push a context with
+                // [value1, value2, .... valuen, createTag ]
+                // in turn, value1 will push another context
+                // to expand it's nodes, but the pop
+                // action will be to accumulate results in args
+                // once all valuex nodes are processed
+                // create tag will access the args and create
+                // a tag mapping
+                
+                var nodes = values.map { ParserNode.tagValue($0) }
+                nodes.append(.createTag(name: name))
+                
+                // creating a tag should not 
+                // affect the stack depth, since hierarchical tags
+                // must be created at the same rule context level
+                try pushContext(nodes, .nothing, affectsStackDepth: false)
+                
+            case let .tagValue(value):
+                try pushContext(value.nodes, .addArg)
+                
+            case let .createTag(name):
                 // create a tag mapping
+                let context = stack[depth]
                 let mapping = TagMapping(
-                    candidates: candidates,
-                    selector: candidates.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(candidates.count)
+                    candidates: context.args,
+                    selector: context.args.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(context.args.count)
                 )
                 if let existing = tagStorage.get(name: name) {
                     traceTag("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
                 }
                 tagStorage.store(name: name, tag: mapping)
-                traceTag("📗 set tag[\(name)] = \(mapping.description)")
+                traceTag("📗 set tag[\(name)] <-- \(mapping.description)")
                 
                 
             case let .mod(modifier):
-                
                 if let mod = mods[modifier.name] {
-                    var args = [String]()
-                    for param in modifier.parameters {
-                        if param.rawText.range(of: "#") != nil {
-                            args.append(try evalNonRecursive(param.nodes))
-                        }
-                        else {
-                            args.append(param.rawText)
-                        }
-                    }
-                    
-                    trace("🔰 run mod \(modifier.name)(\(stack[depth].result) params: \(args.joined(separator: ",")))")
-                    // update context result
-                    stack[depth].result = mod(stack[depth].result, args)
+                    var nodes = modifier.parameters.map { ParserNode.param($0) }
+                    nodes.append(.exec(command: modifier.name))
+                    try pushContext(nodes, .replaceResult)
+                    stack[stack.count-1].result = stack[depth].result
                 }
                 else {
                     warn("modifier '\(modifier.name)' not defined")
                 }
                 
+            case let .param(parameter):
+                try pushContext(parameter.nodes, .addArg)
+                
+            case let .exec(command):
+                if let mod = mods[command] {
+                    let context = stack[depth]
+                    trace("🔰 run mod \(command)(\(context.result) params: \(context.args.joined(separator: ",")))")
+                    stack[depth].result = mod(context.result, context.args)
+                }
+                else {
+                    warn("modifier '\(command)' not defined")
+                }
                 
             case let .rule(name, mods):
                 
@@ -339,7 +388,7 @@ extension Tracery {
                     for mod in mods {
                         nodes.append(.mod(mod))
                     }
-                    try pushContext(nodes)
+                    try pushContext(nodes, .appendToResult)
                 }
                 
                 if name.isEmpty {
@@ -349,7 +398,7 @@ extension Tracery {
                 if let mapping = tagStorage.get(name: name) {
                     let i = mapping.selector.pick(count: mapping.candidates.count)
                     let value = mapping.candidates[i]
-                    traceTag("📗 get tag[\(name)] = \(value)")
+                    traceTag("📗 get tag[\(name)] --> \(value)")
                     try applyMods(nodes: [.text(value)])
                     break
                 }
@@ -368,6 +417,10 @@ extension Tracery {
                     warn("rule #\(name)# cannot be expanded")
                     stack[depth].result.append("#\(name)#")
                 }
+                
+            default:
+                fatalError()
+                
             }
         }
         

@@ -28,7 +28,6 @@ class ExtensionMethod: XCTestCase {
         t.add(method: "combine") { input, args in
             return args.joined(separator: "-")
         }
-        Tracery.logLevel = .verbose
         XCTAssertEqual(t.expand("#.combine(#msg#)#"), "hello")
         XCTAssertEqual(t.expand("#.combine(#msg# world)#"), "hello world")
         XCTAssertEqual(t.expand("#.combine(#msg# world,!)#"), "hello world-!")

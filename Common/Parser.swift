@@ -42,7 +42,13 @@ enum ParserNode : CustomStringConvertible {
     case text(String)
     case rule(name:String, mods:[Modifier])
     case tag(name:String, values:[TagValue])
+    
     case mod(Modifier)
+    case param(ModifierParameter)
+    case exec(command: String)
+    
+    case tagValue(TagValue)
+    case createTag(name: String)
     
     public var description: String {
         switch self {
@@ -63,6 +69,18 @@ enum ParserNode : CustomStringConvertible {
             
         case let .mod(mod):
             return "mod(\(mod))"
+            
+        case let .param(param):
+            return "param(\(param))"
+            
+        case let .exec(command):
+            return "exec(\(command))"
+            
+        case let .tagValue(value):
+            return "tagValue(\(value.rawText))"
+            
+        case let .createTag(name):
+            return "createTag(\(name))"
             
         }
     }

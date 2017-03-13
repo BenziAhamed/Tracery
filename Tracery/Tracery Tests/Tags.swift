@@ -16,6 +16,11 @@ class Tags: XCTestCase {
         XCTAssertEqual(t.options.tagStorageType, .unilevel)
     }
     
+    func testTagsWork() {
+        let t = Tracery()
+        XCTAssertEqual(t.expand("[tag:value]#tag#"), "value")
+    }
+    
     func testUnilevelTagsCanBeSet() {
         let t = Tracery {[
             "outside_rule" : "[tag:value]#tag#",
