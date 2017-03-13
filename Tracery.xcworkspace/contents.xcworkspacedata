@@ -8,6 +8,9 @@
       location = "container:"
       name = "Playgrounds">
       <FileRef
+         location = "group:Playgrounds/Face Generator.playground">
+      </FileRef>
+      <FileRef
          location = "group:Playgrounds/Tracery.playground">
       </FileRef>
    </Group>
