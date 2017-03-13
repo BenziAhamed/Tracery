@@ -96,15 +96,32 @@ class Tags: XCTestCase {
     }
     
     func testTagCanBeCreatedFromOtherTagValues() {
+        
         let t = Tracery {[
             "name" : "jack",
             "createTag1" : "[tag1:#name#]#tag1#", // create tag1 and output value
             "createTag2" : "[tag2:#createTag1#]", // trigger tag1 creation
             "msg": "[#createTag2#]#tag2#" // trigger tag2 creation and output tag2
-            ]}
+        ]}
         XCTAssertEqual(t.expand("#msg#"), "jack")
     }
     
+    
+    func testTagValuesCanBeRuleCandidates() {
+        
+        let t = Tracery {[
+            "msg1": "hello",
+            "msg2": "world",
+            "msg": "[tag1:#msg1# #msg2#][tag:#tag1.surprised#]#tag.caps#"
+        ]}
+        
+        t.add(modifier: "surprised") { return $0 + "!" }
+        t.add(modifier: "caps") { return $0.uppercased() }
+        
+        XCTAssertEqual(t.expand("#msg#"), "HELLO WORLD!")
+        
+    }
+
     
 
     
@@ -182,5 +199,6 @@ extension Tags {
         XCTAssertEqual(t.expand("#override_in_same_rule2#"), "value-out value-in ")
         XCTAssertEqual(t.expand("#sub_tag_not_visible#"), "#tag2#")
     }
+    
     
 }

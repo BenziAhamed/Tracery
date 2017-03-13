@@ -172,8 +172,7 @@ public class Tracery {
                 stackDepth = 0
                 tagStorage.removeAll()
             }
-            // return try eval(input)
-            return try evalNonRecursive(input)
+            return try eval(input)
         }
         catch {
             return "error: \(error)"
@@ -203,57 +202,76 @@ public class Tracery {
 
 extension Tracery {
     
-    func traceTag(_ message: @autoclosure ()->String) {
-        switch options.tagStorageType {
-        case .unilevel: trace(message)
-        case .heirarchical: trace("\(message()) depth:\(stackDepth)")
-        }
-    }
-    
-}
-
-
-extension Tracery {
-    
     struct ExecutionContext {
+        
+        // Identifies what should happen
+        // when this context is removed from
+        // the execution stack
         enum PopAction {
             case appendToResult
             case addArg
             case nothing
         }
+        
+        // The accumulated result of
+        // this context, if any
         var result: String
+        
+        // The args that were created
+        // during context evaluation
         var args: [String]
+        
+        // The nodes stack that represent
+        // what needs to be evaluated in this
+        // context
         var nodes: [ParserNode]
+        
+        // what happens after evaluation
+        // is complete
         let popAction: PopAction
+        
+        // does this context affect the 
+        // stack depth? - required for setting tags
+        // using hierarchical storage
         let affectsStackDepth: Bool
+        
         init(_ nodes: [ParserNode], _ popAction: PopAction, _ affectsStackDepth: Bool) {
+            // store in reversed order 
+            // to allow stack operation
             self.nodes = nodes.reversed()
             self.result = ""
             self.args = []
             self.popAction = popAction
             self.affectsStackDepth = affectsStackDepth
         }
+        
+        // are there more nodes to process
         var isEmpty: Bool { return nodes.isEmpty }
+        
         mutating func pop() -> ParserNode {
             return nodes.removeLast()
         }
+        
         mutating func push(token: ParserNode) {
             nodes.append(token)
         }
     }
 
-    func evalNonRecursive(_ text: String) throws -> String {
+    func eval(_ text: String) throws -> String {
         trace("📘 input \(text)")
         let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
-        let output = try evalNonRecursive(nodes)
+        let output = try eval(nodes)
         trace("📘 ouptut \(text) ==> \(output)")
         return output
     }
     
-    func evalNonRecursive(_ nodes: [ParserNode]) throws -> String {
+    func eval(_ nodes: [ParserNode]) throws -> String {
         
+        // the execution stack
         var stack = [ExecutionContext]()
         
+        // push a new execution context
+        // onto the stack
         func pushContext(_ tokens: [ParserNode], _ popAction: ExecutionContext.PopAction, affectsStackDepth: Bool = true) throws {
             if affectsStackDepth {
                 try incrementStackDepth()
@@ -261,23 +279,29 @@ extension Tracery {
             stack.append(ExecutionContext(tokens, popAction, affectsStackDepth))
         }
         
-        func popContext() {
+        // pop an evaluated context 
+        // from the stack
+        @discardableResult
+        func popContext() -> ExecutionContext {
             
             let context = stack.removeLast()
             if context.affectsStackDepth {
                 decrementStackDepth()
             }
             
-            if stack.count > 0 {
-                switch context.popAction {
-                case .appendToResult:
-                    stack[stack.count-1].result.append(context.result)
-                case .addArg:
-                    stack[stack.count-1].args.append(context.result)
-                case .nothing:
-                    break
-                }
+            // check if this is the last context
+            guard stack.count > 0 else { return context }
+            
+            switch context.popAction {
+            case .appendToResult:
+                stack[stack.count-1].result.append(context.result)
+            case .addArg:
+                stack[stack.count-1].args.append(context.result)
+            case .nothing:
+                break
             }
+            
+            return context
         }
         
         // push initial context which is the
@@ -295,7 +319,8 @@ extension Tracery {
             // trace("\(depth) - \(stack[depth].nodes) pop: \(stack[depth].popAction)")
             
             
-            // we have finished all processing
+            // have we have finished processing
+            // the stack?
             if depth == 0 && stack[depth].isEmpty {
                 break
             }
@@ -307,8 +332,8 @@ extension Tracery {
                 continue
             }
             
+            // execute the current node
             let node = stack[depth].pop()
-            
             
             switch node {
                 
@@ -347,17 +372,21 @@ extension Tracery {
                 
                 
             case let .createTag(name):
-                // create a tag mapping
+                
                 let context = stack[depth]
+                
+                // context.args will have the accumulated
+                // values if the current context
                 let mapping = TagMapping(
                     candidates: context.args,
                     selector: context.args.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(context.args.count)
                 )
+                
                 if let existing = tagStorage.get(name: name) {
-                    traceTag("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
+                    trace("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
                 }
                 tagStorage.store(name: name, tag: mapping)
-                traceTag("📗 set tag[\(name)] <-- \(mapping.description)")
+                trace("📗 set tag[\(name)] <-- \(mapping.description)")
                 
                 
             case let .runMod(name):
@@ -370,7 +399,9 @@ extension Tracery {
             case let .rule(name, mods):
                 
                 func applyMods(nodes: [ParserNode]) throws {
+                    
                     var nodes = nodes
+                    
                     for mod in mods {
                         guard self.mods[mod.name] != nil else {
                             warn("modifier '\(mod.name)' not defined")
@@ -382,6 +413,15 @@ extension Tracery {
                         nodes.append(.runMod(name: mod.name))
                         nodes.append(.clearArgs)
                     }
+                    
+                    // at this stage nodes will be
+                    // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod, clearArgs)* ]
+                    
+                    // rule_expansion_nodes evaluate as normal, and updates context.result
+                    // evalArgs will update the args list, and runMod will use the args list to run a mod,
+                    // replacing the context.result with its computed value
+                    // clearArgs empties args list for consequent processing by any chained modifier nodes
+                    
                     try pushContext(nodes, .appendToResult)
                 }
                 
@@ -392,7 +432,7 @@ extension Tracery {
                 if let mapping = tagStorage.get(name: name) {
                     let i = mapping.selector.pick(count: mapping.candidates.count)
                     let value = mapping.candidates[i]
-                    traceTag("📗 get tag[\(name)] --> \(value)")
+                    trace("📗 get tag[\(name)] --> \(value)")
                     try applyMods(nodes: [.text(value)])
                     break
                 }
@@ -416,10 +456,10 @@ extension Tracery {
             }
         }
         
-        let result = stack[0].result
-        popContext()
+        // finally pop the last
+        // context and
+        return popContext().result
         
-        return result
     }
 }
 
