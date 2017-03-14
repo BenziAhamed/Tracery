@@ -6,7 +6,7 @@ env:
   - LANG=en_US.UTF-8
 
 # https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
-install: travis_wait mvn install
+# install: travis_wait mvn install
 script:
   - set -o pipefail
   - xcodebuild -version
