@@ -36,5 +36,22 @@ class ExtensionModifier: XCTestCase {
         XCTAssertEqual(t.expand("#msg.still.caps.goes.here#"), "hello world".uppercased())
     }
     
+    
+    func testModifiersGetCalledInCorrectOrder() {
+        let t = Tracery {
+            [ "msg" : "new york" ]
+        }
+        t.add(modifier: "caps") { return $0.uppercased() }
+        t.add(modifier: "reversed") { return .init($0.characters.reversed()) }
+        t.add(modifier: "kebabed") { return $0.replacingOccurrences(of: " ", with: "-") }
+        t.add(modifier: "prefix") { return "!" + $0 }
+        
+        XCTAssertEqual(t.expand("#msg.caps.reversed.kebabed.prefix#"), "!KROY-WEN")
+        XCTAssertEqual(t.expand("#msg.caps.kebabed.reversed.prefix#"), "!KROY-WEN")
+        XCTAssertEqual(t.expand("#msg.reversed.prefix.reversed#"), "new york!")
+        XCTAssertEqual(t.expand("#msg.prefix.reversed.prefix#"), "!kroy wen!")
+        XCTAssertEqual(t.expand("#msg.prefix.reversed.prefix.reversed#"), "!new york!")
+    }
+    
 }
 

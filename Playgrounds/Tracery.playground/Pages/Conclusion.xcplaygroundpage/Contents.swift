@@ -17,7 +17,7 @@
  
     tag_value -> tag_value_candidate (,tag_value_candidate)*
  
-        tag_value_candidate -> rule | plain_text
+        tag_value_candidate -> rule_candidate
  
  
  rule -> # (tag)* | rule_name(.modifier|.call|.method)* #

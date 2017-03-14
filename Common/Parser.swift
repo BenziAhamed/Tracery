@@ -12,14 +12,22 @@ import Foundation
 // MARK:- Parsing
 
 
-struct Modifier {
+struct Modifier : CustomStringConvertible {
     var name: String
     var parameters: [ModifierParameter]
+    
+    var description: String {
+        return ".\(name)(\(parameters))"
+    }
 }
 
-struct ModifierParameter {
+struct ModifierParameter: CustomStringConvertible {
     var rawText: String
     var nodes: [ParserNode]
+    
+    var description: String {
+        return rawText
+    }
 }
 
 struct TagValue : CustomStringConvertible {
@@ -34,6 +42,12 @@ enum ParserNode : CustomStringConvertible {
     case text(String)
     case rule(name:String, mods:[Modifier])
     case tag(name:String, values:[TagValue])
+    
+    case runMod(name: String)
+    case createTag(name: String)
+    
+    indirect case evaluateArg(nodes: [ParserNode])
+    case clearArgs
     
     public var description: String {
         switch self {
@@ -52,6 +66,17 @@ enum ParserNode : CustomStringConvertible {
         case let .text(text):
             return "text(\(text))"
             
+        case let .runMod(name):
+            return "runMod(\(name))"
+            
+        case let .createTag(name):
+            return "createTag(\(name))"
+            
+        case let .evaluateArg(nodes):
+            return "evaluateArg(\(nodes))"
+            
+        case .clearArgs:
+            return "clearArgs"
         }
     }
 }

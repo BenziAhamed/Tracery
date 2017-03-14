@@ -21,6 +21,20 @@ class ExtensionMethod: XCTestCase {
         XCTAssertEqual(t.expand("#msg.you().know()#"), "hello world")
     }
     
+    func testMethodCanReceiveComplexParameters() {
+        let t = Tracery {[
+            "msg" : "hello"
+        ]}
+        t.add(method: "combine") { input, args in
+            return args.joined(separator: "-")
+        }
+        XCTAssertEqual(t.expand("#.combine(#msg#)#"), "hello")
+        XCTAssertEqual(t.expand("#.combine(#msg# world)#"), "hello world")
+        XCTAssertEqual(t.expand("#.combine(#msg# world,!)#"), "hello world-!")
+        XCTAssertEqual(t.expand("#.combine(why,#msg# world)#"), "why-hello world")
+        XCTAssertEqual(t.expand("#.combine(why,#msg# world,!)#"), "why-hello world-!")
+    }
+    
     func testMethod() {
         let t = Tracery {
             [ "msg" : "hello world" ]
