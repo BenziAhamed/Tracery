@@ -37,17 +37,34 @@ struct TagValue : CustomStringConvertible {
     var description: String { return rawText }
 }
 
+enum ParserConditionOperator : String {
+    case equalTo = "=="
+    case notEqualTo = "!="
+}
+
+struct ParserCondition: CustomStringConvertible {
+    let lhs: ParserNode
+    let rhs: ParserNode
+    let op: ParserConditionOperator
+    var description: String {
+        return "\(lhs) \(op) \(rhs)"
+    }
+}
+
 enum ParserNode : CustomStringConvertible {
     
     case text(String)
     case rule(name:String, mods:[Modifier])
     case tag(name:String, values:[TagValue])
     
+    indirect case ifBlock(condition:ParserCondition, thenBlock:[ParserNode], elseBlock:[ParserNode]?)
+    
     case runMod(name: String)
     case createTag(name: String)
     
     indirect case evaluateArg(nodes: [ParserNode])
     case clearArgs
+    indirect case branch(check:ParserConditionOperator, thenBlock:[ParserNode], elseBlock:[ParserNode]?)
     
     public var description: String {
         switch self {
@@ -77,6 +94,12 @@ enum ParserNode : CustomStringConvertible {
             
         case .clearArgs:
             return "clearArgs"
+            
+        case let .ifBlock(condition, then, elsePart):
+            return "if(\(condition) then:\(then) else:\(elsePart))"
+            
+        case let .branch(check, thenBlock, elseBlock):
+            return "branch(args\(check) then:\(thenBlock) else:\(elseBlock))"
         }
     }
 }
@@ -163,7 +186,7 @@ struct Parser {
             return ""
         }
         
-        func parseRule() throws -> ParserNode? {
+        func parseRule(allowingTagsInside: Bool = true) throws -> ParserNode? {
             
             // #id#
             // #[set_tag]#
@@ -174,8 +197,13 @@ struct Parser {
             
             let foundSomethingInsideHash = currentToken != .HASH
             
-            while currentToken == .LEFT_SQUARE_BRACKET {
-                try parseBrackets()
+            if currentToken == .LEFT_SQUARE_BRACKET {
+                if !allowingTagsInside {
+                    throw ParserError.error("setting tags not allowed in this context")
+                }
+                while currentToken == .LEFT_SQUARE_BRACKET {
+                    try parseBrackets()
+                }
             }
             
             if currentToken == .HASH {
@@ -291,6 +319,113 @@ struct Parser {
             return tag
         }
         
+        func parseOptional(token: Token) {
+            if let current = currentToken, current == token {
+                advance()
+            }
+        }
+        
+        func consumeOptionalWhitespace() {
+            guard let tok = currentToken else { return }
+            for c in tok.rawText.characters {
+                if c != " " { return }
+            }
+            advance()
+        }
+        
+        func parseIfBlock() throws -> ParserNode {
+            
+            try parse(.KEYWORD_IF, error: "expected if block to start with if")
+            try parse(.text(" "), error: "expected space after if")
+            guard let lhs = try parseRule(allowingTagsInside: false) else {
+                throw ParserError.error("expected rule condition")
+            }
+            
+            consumeOptionalWhitespace()
+            
+            let op: ParserConditionOperator
+            let rhs: ParserNode
+            
+            switch currentToken {
+            
+            case let x where x == Token.EQUAL_TO:
+                advance()
+                consumeOptionalWhitespace()
+                op = .equalTo
+                guard let checkedRHS = try parseRule(allowingTagsInside: false) else {
+                    throw ParserError.error("expected rule after operator \(x!.rawText) in if block")
+                }
+                rhs = checkedRHS
+                
+            case let x where x == Token.NOT_EQUAL_TO:
+                advance()
+                consumeOptionalWhitespace()
+                op = .notEqualTo
+                guard let checkedRHS = try parseRule(allowingTagsInside: false) else {
+                    throw ParserError.error("expected rule after operator \(x!.rawText) in if block")
+                }
+                rhs = checkedRHS
+
+            default:
+                rhs = .text("")
+                op = .notEqualTo
+            }
+            
+            try parse(.text(" "), error: "expected space after condition")
+            try parse(.KEYWORD_THEN, error: "expected 'then' after condition")
+            try parse(.text(" "), error: "expected space after 'then'")
+            
+            // allows consuming matched [ ] pairs
+            func consumeTokensUntilRightSquareBracket(orReaching stoppers: [Token] = []) throws -> [ParserNode] {
+                var text = ""
+                var bracketLevel = 0
+                while let token = currentToken, stoppers.count > 0 && !stoppers.contains(token) || stoppers.count == 0 {
+                    if token == .LEFT_SQUARE_BRACKET {
+                        bracketLevel += 1
+                    }
+                    if token == .RIGHT_SQUARE_BRACKET {
+                        if bracketLevel > 0 {
+                            bracketLevel -= 1
+                        }
+                        else {
+                            break
+                        }
+                    }
+                    text.append(token.rawText)
+                    advance()
+                }
+                // strip trailing space
+                if text.characters.last == " " {
+                   text = text.substring(to: text.index(before: text.endIndex))
+                }
+                let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
+                return nodes
+            }
+            
+            let thenBlock = try consumeTokensUntilRightSquareBracket(orReaching: [.KEYWORD_ELSE])
+            guard thenBlock.count > 0 else { throw ParserError.error("'then' must be followed by a rule") }
+
+            var elseBlock:[ParserNode]? = nil
+            if currentToken == .KEYWORD_ELSE {
+                try parse(.KEYWORD_ELSE, error: nil) // will be there
+                try parse(.text(" "), error: "expected space after else")
+                let checkedElseBlock = try consumeTokensUntilRightSquareBracket()
+                if checkedElseBlock.count > 0 {
+                    elseBlock = checkedElseBlock
+                }
+            }
+            
+            let block = ParserNode.ifBlock(
+                condition: ParserCondition.init(lhs: lhs, rhs: rhs, op: op),
+                thenBlock: thenBlock,
+                elseBlock: elseBlock
+            )
+            
+            trace("⚙️ parsed \(block)")
+            
+            return block
+        }
+        
         func parseBrackets() throws {
             
             try parse(.LEFT_SQUARE_BRACKET, error: nil)
@@ -304,9 +439,13 @@ struct Parser {
                         somethingInsideBrackets = true
                     }
                 }
-                else
-                if currentToken == .LEFT_SQUARE_BRACKET {
+                else if currentToken == .LEFT_SQUARE_BRACKET {
                     try parseBrackets()
+                }
+                else if currentToken == .KEYWORD_IF {
+                    let ifBlock = try parseIfBlock()
+                    nodes.append(ifBlock)
+                    somethingInsideBrackets = true
                 }
                 else {
                     let tag = try parseTag()
@@ -327,7 +466,8 @@ struct Parser {
             
             switch token {
                 
-            // [#name#][tag:name][tag:name1,name2,...]
+                // [#name#][tag:name][tag:name1,name2,...]
+                // [if ...]
             case Token.LEFT_SQUARE_BRACKET:
                 try parseBrackets()
                 
@@ -355,6 +495,10 @@ struct Parser {
                 trace("⚙️ parsed \(text)")
             }
         }
+        
+        
+        // trace("⚙️ lexed \(tokens)")
+        // trace("⚙️ parsed \(nodes)")
         
         return nodes
         

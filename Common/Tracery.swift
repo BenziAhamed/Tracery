@@ -255,6 +255,7 @@ extension Tracery {
         mutating func push(token: ParserNode) {
             nodes.append(token)
         }
+        
     }
 
     func eval(_ text: String) throws -> String {
@@ -312,11 +313,14 @@ extension Tracery {
             
             let depth = stack.count - 1
             
-//            trace("----------")
+
 //            trace("stack-depth: \(stackDepth)")
 //            trace("contexts:")
-            
-            // trace("\(depth) - \(stack[depth].nodes) pop: \(stack[depth].popAction)")
+
+            trace("----------")
+            stack.enumerated().forEach { i, context in
+                trace("\(i) = \(context.nodes) pop: \(context.popAction) result: \(context.result) args: \(context.args)")
+            }
             
             
             // have we have finished processing
@@ -351,6 +355,7 @@ extension Tracery {
             case .clearArgs:
                 stack[depth].args.removeAll()
                 
+
             case let .tag(name, values):
                 
                 // push a context with
@@ -387,6 +392,41 @@ extension Tracery {
                 }
                 tagStorage.store(name: name, tag: mapping)
                 trace("📗 set tag[\(name)] <-- \(mapping.description)")
+                
+                
+                
+            case let .ifBlock(condition, thenBlock, elseBlock):
+                trace("✂️ \(node)")
+                let nodes:[ParserNode] = [
+                    .evaluateArg(nodes: [condition.lhs]),
+                    .evaluateArg(nodes: [condition.rhs]),
+                    .branch(check: condition.op, thenBlock: thenBlock, elseBlock: elseBlock),
+                ]
+                try pushContext(nodes, .appendToResult, affectsStackDepth: false)
+                
+            case let .branch(check, thenBlock, elseBlock):
+                guard stack[depth].args.count == 2 else {
+                    error("branching must be called after evaluating exactly two args")
+                    break
+                }
+                let conditionMet: Bool
+                switch check {
+                case .equalTo:
+                    conditionMet = (stack[depth].args[0] == stack[depth].args[1])
+                case .notEqualTo:
+                    conditionMet = (stack[depth].args[0] != stack[depth].args[1])
+                }
+                if conditionMet {
+                    trace("✂️ ✅")
+                    try pushContext(thenBlock, .appendToResult, affectsStackDepth: false)
+                }
+                else {
+                    trace("✂️ 🅾️")
+                    if let elseBlock = elseBlock {
+                        try pushContext(elseBlock, .appendToResult, affectsStackDepth: false)
+                    }
+                }
+                
                 
                 
             case let .runMod(name):
