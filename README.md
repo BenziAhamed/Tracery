@@ -155,6 +155,10 @@ t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl#"
  
  In order to remember values, we can use tags.
  
+
+[top](#contents)
+****
+
 ## Tags
  
  Tags allow to persist the result of a rule expansion to a temporary variable.
@@ -233,6 +237,10 @@ t.expand("[d:0,1,2,3,4,5,6,7,8,9] random 5-digit number: #d##d##d##d##d#")
 
 
 
+
+[top](#contents)
+****
+
 ## Modifiers
  
  When expanding a rule, sometimes we may need to capitalize its output, or transform it in some way. The Tracery engine allows for defining rule extensions.
@@ -293,6 +301,10 @@ t.expand("There once was a man named #city.reverse.title#, who came from the cit
 
 
  
+
+[top](#contents)
+****
+
 ## Methods
  
  While modifiers would receive as input the current candidate value of a rule, methods can be used to define modifiers that can accept parameters.
@@ -362,6 +374,10 @@ t.expand("[name:benzi]#name.repeat(3)#")
 
 
 
+
+[top](#contents)
+****
+
 ## Calls
  
  There is one more type of rule extension, which is a `call`. Unlike modifiers and methods that work with arguments, parameters and are expected to return some string value, calls do not need to do these.
@@ -402,6 +418,10 @@ t.expand("#letter#")
 
 
 
+
+
+[top](#contents)
+****
 
 ## Advanced Usage
  
@@ -885,6 +905,10 @@ h.expand("#origin#")
 
 
  
+
+[top](#contents)
+****
+
 # Tracery Grammar
  
  This section attempts to describe the grammar specification for Tracery.
@@ -920,6 +944,10 @@ h.expand("#origin#")
  
 ```
  
+
+[top](#contents)
+****
+
 # Conclusion
  
  Tracery in Swift was developed by [Benzi](https://twitter.com/benziahamed).
