@@ -51,11 +51,12 @@ class TraceryioSamples: XCTestCase {
     //
     // https://github.com/galaxykate/tracery/issues/31
     //
-    func testIssue31() {
+    func testIssue31_HierarchicalTagsAllowBracesMatchingCrossingRuleLevels() {
         let o = TraceryOptions()
         o.tagStorageType = .heirarchical
         
-        let braceTypes = ["()","{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+        let braces = ["()","{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+        let braceTypes = braces
             .map { braces -> String in
                 let open = braces[braces.startIndex]
                 let close = braces[braces.index(after: braces.startIndex)]
@@ -75,6 +76,32 @@ class TraceryioSamples: XCTestCase {
         ]}
         
         // Tracery.logLevel = .verbose
-        XCTAssertFalse(t.expand("#origin#").contains("stack overflow"))
+        let output = t.expand("#origin#")
+        
+        XCTAssertFalse(output.contains("stack overflow"))
+        
+        // track open and close
+        // of each brace
+        var stackOfBraces = [Character]()
+        func trackBraces(_ c: Character) {
+            braces
+                .filter {
+                    $0.range(of: "\(c)") != nil
+                }
+                .forEach {
+                    let leftBrace = $0.characters[$0.characters.startIndex]
+                    if leftBrace == c {
+                        stackOfBraces.append(c)
+                    }
+                    else {
+                        let expected = stackOfBraces.popLast()
+                        XCTAssertNotNil(expected)
+                        XCTAssertEqual(expected!, leftBrace)
+                    }
+                }
+        }
+        output.characters.forEach { trackBraces($0) }
+        XCTAssertEqual(stackOfBraces.count, 0)
+        
     }
 }

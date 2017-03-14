@@ -151,7 +151,7 @@ extension Tracery {
                 trace("📗 set tag[\(name)] <-- \(mapping.description)")
                 
             case let .ifBlock(condition, thenBlock, elseBlock):
-                trace("✂️ \(node)")
+                trace("🕎 ⤵️ \(node)")
                 let nodes:[ParserNode] = [
                     .evaluateArg(nodes: [condition.lhs]),
                     .evaluateArg(nodes: [condition.rhs]),
@@ -161,7 +161,7 @@ extension Tracery {
                 
                 
             case let .whileBlock(condition, doBlock):
-                trace("✂️ \(node)")
+                trace("🕎 🔁 \(node)")
                 let nodes:[ParserNode] = [
                     .evaluateArg(nodes: [condition.lhs]),
                     .evaluateArg(nodes: [condition.rhs]),
@@ -188,12 +188,13 @@ extension Tracery {
                     conditionMet = (stack[depth].args[0] != stack[depth].args[1])
                 }
                 if conditionMet {
-                    trace("✂️ ✅")
+                    trace("🕎 ✅ branch to then")
                     try pushContext(thenBlock, affectsEvaluationLevel: false)
                 }
                 else {
-                    trace("✂️ 🅾️")
+                    trace("🕎 🅾️ condition failed")
                     if let elseBlock = elseBlock {
+                        trace("🕎 ✅ branch to else")
                         try pushContext(elseBlock, affectsEvaluationLevel: false)
                     }
                 }

@@ -11,21 +11,37 @@ import XCTest
 
 class Conditionals: XCTestCase {
     
-    func testIfBlock() {
+    func testBasicIfBlockWorks() {
         
-////        let line = "[if #1#==#1# then [tag:you] else [tag:me]]#tag#"
-////        print(Lexer.tokens(input: line))
-//        
 //        Tracery.logLevel = .verbose
-//        let t = Tracery.hierarchical {[
-//            "number" : [-1,0,1,2,3,4,5,6,7,8,9],
-//            ]}
-//        
-//        t.setCandidateSelector(rule: "number", selector: SequentialSelector())
-//        
-//        Tracery.maxStackDepth = 30
-//        print(t.expand("[while #number#!=9 do #number#,]"))
-//        
+        
+        let t = Tracery {[
+            "name": ["benzi"]
+        ]}
+        
+        XCTAssertEqual(t.expand("[if #name#==benzi     then ok]"), "")
+        
+        XCTAssertEqual(t.expand("[if #name# == benzi then ok]"), "ok")
+        XCTAssertEqual(t.expand("[if #name#== benzi then ok]"), "ok")
+        XCTAssertEqual(t.expand("[if #name#==benzi then ok]"), "ok")
+        XCTAssertEqual(t.expand("[if #name#==benzithen ok]"), "ok")
+        
+        XCTAssertEqual(t.expand("[if #name# == benzi then ok else not-ok]"), "ok")
+        XCTAssertEqual(t.expand("[if #name# != danny then ok else not-ok]"), "ok")
+
+    }
+    
+    func testIfBlockWorksWithTags() {
+        
+        Tracery.logLevel = .verbose
+        
+        let t = Tracery {[
+            "name": ["benzi"]
+            ]}
+        
+        XCTAssertEqual(t.expand("[tag:#name#][if #tag# == benzi then ok]"), "ok")
+        XCTAssertEqual(t.expand("[tag:#name#][if #tag# != benzi then not-ok else ok]"), "ok")
+        
     }
     
 }

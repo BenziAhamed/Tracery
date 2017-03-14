@@ -147,6 +147,10 @@ struct Lexer {
                 advance()
                 return .op("\(c)")
                 
+            case let c where c == " ":
+                advance()
+                return .text(" ")
+                
             default:
                 var text = ""
                 while let c = current, !c.isReserved  {

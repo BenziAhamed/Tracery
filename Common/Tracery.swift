@@ -185,7 +185,7 @@ public class Tracery {
     
     func incrementEvaluationLevel() throws {
         ruleEvaluationLevel += 1
-        trace("⚙️ depth: \(ruleEvaluationLevel)")
+        // trace("⚙️ depth: \(ruleEvaluationLevel)")
         if ruleEvaluationLevel > Tracery.maxStackDepth {
             error("stack overflow")
             throw ParserError.error("stack overflow")
@@ -194,7 +194,7 @@ public class Tracery {
     
     func decrementEvaluationLevel() {
         ruleEvaluationLevel = max(ruleEvaluationLevel - 1, 0)
-        trace("⚙️ depth: \(ruleEvaluationLevel)")
+        // trace("⚙️ depth: \(ruleEvaluationLevel)")
     }
     
 }

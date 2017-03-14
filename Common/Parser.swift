@@ -97,10 +97,17 @@ enum ParserNode : CustomStringConvertible {
             return "clearArgs"
             
         case let .ifBlock(condition, thenBlock, elseBlock):
-            return "if(\(condition) then:\(thenBlock) else:\(elseBlock))"
+            if let elseBlock = elseBlock {
+                return "if(\(condition) then:\(thenBlock) else:\(elseBlock))"
+            }
+            return "if(\(condition) then:\(thenBlock))"
+            
             
         case let .branch(check, thenBlock, elseBlock):
-            return "branch(args\(check.rawValue) then:\(thenBlock) else:\(elseBlock))"
+            if let elseBlock = elseBlock {
+                return "branch(args \(check) then:\(thenBlock) else:\(elseBlock))"
+            }
+            return "branch(args \(check) then:\(thenBlock))"
             
         case let .whileBlock(condition, doBlock):
             return "while(\(condition) then:\(doBlock))"

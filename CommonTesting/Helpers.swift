@@ -57,4 +57,12 @@ extension Tracery {
         return hierarchical {[:]}
     }
     
+    func expandVerbose(_ text: String) -> String {
+        Tracery.logLevel = .verbose
+        defer {
+            Tracery.logLevel = .errors
+        }
+        return self.expand(text)
+    }
+    
 }
