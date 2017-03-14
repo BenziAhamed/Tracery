@@ -13,11 +13,11 @@ class IfBlock: XCTestCase {
     
     func testIfBlock() {
         
-        let line = "[if #condition# == #option# then #lemon# else [tag:me]]"
+        let line = "[if #1#==#1# then [tag:you] else [tag:me]]#tag#"
         print(Lexer.tokens(input: line))
         
         Tracery.logLevel = .verbose
-        let t = Tracery()
+        let t = Tracery.hierarchical()
         print(t.expand(line))
         
     }

@@ -8,6 +8,7 @@
 
 import Foundation
 import XCTest
+@testable import Tracery
 
 func XCTAssertItemInArray<T: Comparable>(item: T, array: [T]) {
     XCTAssert(array.contains(item), "\(item) was not found in \(array)")
@@ -44,9 +45,16 @@ extension Sequence {
 
 
 
-//func dump<T>(_ item: T) {
-//    if let debuggable = item as? CustomDebugStringConvertible {
-//        print(debuggable.debugDescription)
-//    }
-//    print(item)
-//}
+extension Tracery {
+    
+    class func hierarchical(rules: ()->[String:Any]) -> Tracery {
+        let options = TraceryOptions()
+        options.tagStorageType = .heirarchical
+        return Tracery.init(options, rules: rules)
+    }
+    
+    class func hierarchical() -> Tracery {
+        return hierarchical {[:]}
+    }
+    
+}
