@@ -11,7 +11,7 @@ env:
     - MACOS_SDK=macosx
   matrix:
     - DESTINATION="arch=x86_64" SCHEME=$MACOS_SCHEME SDK="$MACOS_SDK" 
-    - DESTINATION="OS=9.0" SCHEME=$IOS_SCHEME SDK="$IOS_SDK" 
+    - DESTINATION="platform=iOS Simulator,name=iPhone SE" SCHEME=$IOS_SCHEME SDK="$IOS_SDK" 
 
 # https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
 # install: travis_wait mvn install
