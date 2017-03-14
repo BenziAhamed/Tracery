@@ -47,6 +47,10 @@ enum Token : CustomStringConvertible {
     static let KEYWORD_IF = Token.keyword("if")
     static let KEYWORD_THEN = Token.keyword("then")
     static let KEYWORD_ELSE = Token.keyword("else")
+    static let KEYWORD_WHILE = Token.keyword("while")
+    static let KEYWORD_DO = Token.keyword("do")
+    
+    static let SPACE = Token.text(" ")
 }
 
 extension Token : Equatable { }
@@ -174,7 +178,7 @@ struct Lexer {
                     // if we have consumed free text that ends with
                     // a keyword, split text into (previous, keyword)
                     // and return previous, rewind by count of keyword
-                    let keywords = ["if","then","else"]
+                    let keywords = ["if","then","else","while","do"]
                     for keyword in keywords {
                         if text == keyword {
                             return .keyword(text)

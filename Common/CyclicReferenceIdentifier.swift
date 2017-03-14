@@ -66,6 +66,17 @@ class CyclicReferenceIdentifier : RulesetAnalyser {
                 }
             }
             
+        case let .ifBlock(condition, thenBlock, elseBlock):
+            addRuleDependency(from: vertex, to: condition.lhs)
+            addRuleDependency(from: vertex, to: condition.rhs)
+            thenBlock.forEach { addRuleDependency(from: vertex, to: $0) }
+            elseBlock?.forEach { addRuleDependency(from: vertex, to: $0) }
+            
+        case let .whileBlock(condition, doBlock):
+            addRuleDependency(from: vertex, to: condition.lhs)
+            addRuleDependency(from: vertex, to: condition.rhs)
+            doBlock.forEach { addRuleDependency(from: vertex, to: $0) }
+            
         default:
             break
         }

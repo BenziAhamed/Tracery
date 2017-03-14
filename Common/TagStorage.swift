@@ -69,16 +69,16 @@ struct HierarchicalTagStorage : TagStorage {
     var storage = [Int : UnilevelTagStorage]()
     mutating func store(name: String, tag: TagMapping) {
         guard let t = tracery else { return }
-        if storage[t.stackDepth] == nil {
+        if storage[t.ruleEvaluationLevel] == nil {
             var levelStorage = UnilevelTagStorage()
             levelStorage.tracery = tracery
-            storage[t.stackDepth] = levelStorage
+            storage[t.ruleEvaluationLevel] = levelStorage
         }
-        storage[t.stackDepth]!.store(name: name, tag: tag)
+        storage[t.ruleEvaluationLevel]!.store(name: name, tag: tag)
     }
     func get(name: String) -> TagMapping? {
         guard let t = tracery else { return nil }
-        var level = t.stackDepth
+        var level = t.ruleEvaluationLevel
         while level >= 0 {
             if let tag = storage[level]?.get(name: name) {
                 return tag

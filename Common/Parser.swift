@@ -58,6 +58,7 @@ enum ParserNode : CustomStringConvertible {
     case tag(name:String, values:[TagValue])
     
     indirect case ifBlock(condition:ParserCondition, thenBlock:[ParserNode], elseBlock:[ParserNode]?)
+    indirect case whileBlock(condition:ParserCondition, doBlock:[ParserNode])
     
     case runMod(name: String)
     case createTag(name: String)
@@ -95,11 +96,15 @@ enum ParserNode : CustomStringConvertible {
         case .clearArgs:
             return "clearArgs"
             
-        case let .ifBlock(condition, then, elsePart):
-            return "if(\(condition) then:\(then) else:\(elsePart))"
+        case let .ifBlock(condition, thenBlock, elseBlock):
+            return "if(\(condition) then:\(thenBlock) else:\(elseBlock))"
             
         case let .branch(check, thenBlock, elseBlock):
-            return "branch(args\(check) then:\(thenBlock) else:\(elseBlock))"
+            return "branch(args\(check.rawValue) then:\(thenBlock) else:\(elseBlock))"
+            
+        case let .whileBlock(condition, doBlock):
+            return "while(\(condition) then:\(doBlock))"
+            
         }
     }
 }
@@ -333,77 +338,101 @@ struct Parser {
             advance()
         }
         
-        func parseIfBlock() throws -> ParserNode {
+        
+        // allows consuming matched [ ] pairs
+        func consumeTokensUntilRightSquareBracket(orReaching stoppers: [Token] = []) throws -> [ParserNode] {
+            var text = ""
+            var bracketLevel = 0
+            while let token = currentToken, stoppers.count > 0 && !stoppers.contains(token) || stoppers.count == 0 {
+                if token == .LEFT_SQUARE_BRACKET {
+                    bracketLevel += 1
+                }
+                if token == .RIGHT_SQUARE_BRACKET {
+                    if bracketLevel > 0 {
+                        bracketLevel -= 1
+                    }
+                    else {
+                        break
+                    }
+                }
+                text.append(token.rawText)
+                advance()
+            }
+            // strip trailing space
+            if text.characters.last == " " {
+                text = text.substring(to: text.index(before: text.endIndex))
+            }
+            let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
+            return nodes
+        }
+        
+        func parseConditionRuleComponent(error: @autoclosure ()->String) throws -> ParserNode {
+            // parse a rule component of a condition
+            // i.e. its lhs or rhs node
+            // it can be either a text or rule
+            guard let token = currentToken else { throw ParserError.error(error()) }
             
-            try parse(.KEYWORD_IF, error: "expected if block to start with if")
-            try parse(.text(" "), error: "expected space after if")
-            guard let lhs = try parseRule(allowingTagsInside: false) else {
-                throw ParserError.error("expected rule condition")
+            // if we have a text token consume it,
+            // if it ends with a space, strip it
+            if case var .text(text) = token {
+                advance()
+                if text.hasSuffix(" ") {
+                    text = text.substring(to: text.index(before: text.endIndex))
+                }
+                return .text(text)
             }
             
-            consumeOptionalWhitespace()
+            // if we have a rule, parse it
+            if token == .HASH {
+                let rule = try parseRule(allowingTagsInside: false)
+                if let rule = rule {
+                    consumeOptionalWhitespace()
+                    return rule
+                }
+            }
+            
+            throw ParserError.error(error())
+        }
+        
+        func parseCondition() throws -> ParserCondition {
+            
+            let lhs = try parseConditionRuleComponent(error: "expected rule or text in condition clause")
             
             let op: ParserConditionOperator
             let rhs: ParserNode
             
             switch currentToken {
-            
+                
             case let x where x == Token.EQUAL_TO:
                 advance()
                 consumeOptionalWhitespace()
                 op = .equalTo
-                guard let checkedRHS = try parseRule(allowingTagsInside: false) else {
-                    throw ParserError.error("expected rule after operator \(x!.rawText) in if block")
-                }
-                rhs = checkedRHS
+                rhs = try parseConditionRuleComponent(error: "expected rule or text after \(op.rawValue)")
                 
             case let x where x == Token.NOT_EQUAL_TO:
                 advance()
                 consumeOptionalWhitespace()
                 op = .notEqualTo
-                guard let checkedRHS = try parseRule(allowingTagsInside: false) else {
-                    throw ParserError.error("expected rule after operator \(x!.rawText) in if block")
-                }
-                rhs = checkedRHS
-
+                rhs = try parseConditionRuleComponent(error: "expected rule or text after \(op.rawValue)")
+                
             default:
                 rhs = .text("")
                 op = .notEqualTo
             }
             
-            try parse(.text(" "), error: "expected space after condition")
-            try parse(.KEYWORD_THEN, error: "expected 'then' after condition")
-            try parse(.text(" "), error: "expected space after 'then'")
+            return ParserCondition.init(lhs: lhs, rhs: rhs, op: op)
+        }
+        
+        func parseIfBlock() throws -> ParserNode {
             
-            // allows consuming matched [ ] pairs
-            func consumeTokensUntilRightSquareBracket(orReaching stoppers: [Token] = []) throws -> [ParserNode] {
-                var text = ""
-                var bracketLevel = 0
-                while let token = currentToken, stoppers.count > 0 && !stoppers.contains(token) || stoppers.count == 0 {
-                    if token == .LEFT_SQUARE_BRACKET {
-                        bracketLevel += 1
-                    }
-                    if token == .RIGHT_SQUARE_BRACKET {
-                        if bracketLevel > 0 {
-                            bracketLevel -= 1
-                        }
-                        else {
-                            break
-                        }
-                    }
-                    text.append(token.rawText)
-                    advance()
-                }
-                // strip trailing space
-                if text.characters.last == " " {
-                   text = text.substring(to: text.index(before: text.endIndex))
-                }
-                let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
-                return nodes
-            }
+            try parse(.KEYWORD_IF, error: "expected if block to start with if")
+            try parse(.SPACE, error: "expected space after if")
+            let condition = try parseCondition()
+            try parse(.KEYWORD_THEN, error: "expected 'then' after condition")
+            try parse(.SPACE, error: "expected space after 'then'")
             
             let thenBlock = try consumeTokensUntilRightSquareBracket(orReaching: [.KEYWORD_ELSE])
-            guard thenBlock.count > 0 else { throw ParserError.error("'then' must be followed by a rule") }
+            guard thenBlock.count > 0 else { throw ParserError.error("'then' must be followed by rule(s)") }
 
             var elseBlock:[ParserNode]? = nil
             if currentToken == .KEYWORD_ELSE {
@@ -416,14 +445,29 @@ struct Parser {
             }
             
             let block = ParserNode.ifBlock(
-                condition: ParserCondition.init(lhs: lhs, rhs: rhs, op: op),
+                condition: condition,
                 thenBlock: thenBlock,
                 elseBlock: elseBlock
             )
             
             trace("⚙️ parsed \(block)")
-            
             return block
+        }
+        
+        func parseWhileBlock() throws -> ParserNode {
+            //
+            // [while rule == condition do something]
+            //
+            try parse(.KEYWORD_WHILE, error: "expected `while`")
+            try parse(.SPACE, error: "expected space after while")
+            let condition = try parseCondition()
+            try parse(.KEYWORD_DO, error: "expected `do` in while after condition")
+            try parse(.SPACE, error: "expected space after do in while")
+            let doBlock = try consumeTokensUntilRightSquareBracket()
+            guard doBlock.count > 0 else { throw ParserError.error("'do' must be followed by rule(s)") }
+            let whileBlock = ParserNode.whileBlock(condition: condition, doBlock: doBlock)
+            trace("⚙️ parsed \(whileBlock)")
+            return whileBlock
         }
         
         func parseBrackets() throws {
@@ -432,11 +476,15 @@ struct Parser {
             
             var somethingInsideBrackets = false
             
+            func addToNodes(node: ParserNode) {
+                nodes.append(node)
+                somethingInsideBrackets = true
+            }
+            
             while currentToken != .RIGHT_SQUARE_BRACKET {
                 if currentToken == .HASH {
                     if let rule = try parseRule() {
-                        nodes.append(rule)
-                        somethingInsideBrackets = true
+                        addToNodes(node: rule)
                     }
                 }
                 else if currentToken == .LEFT_SQUARE_BRACKET {
@@ -444,13 +492,15 @@ struct Parser {
                 }
                 else if currentToken == .KEYWORD_IF {
                     let ifBlock = try parseIfBlock()
-                    nodes.append(ifBlock)
-                    somethingInsideBrackets = true
+                    addToNodes(node: ifBlock)
+                }
+                else if currentToken == .KEYWORD_WHILE {
+                    let whileBlock = try parseWhileBlock()
+                    addToNodes(node: whileBlock)
                 }
                 else {
                     let tag = try parseTag()
-                    nodes.append(tag)
-                    somethingInsideBrackets = true
+                    addToNodes(node: tag)
                 }
             }
             

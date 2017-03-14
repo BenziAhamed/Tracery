@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B90E7E751E77C6A000C5BD17 /* Tracery.Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */; };
+		B90E7E761E77C71F00C5BD17 /* Tracery.Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */; };
 		B9127FE51E77AEA40063D5A8 /* Tracery.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B96DBFED1E72B993008623B8 /* Tracery.framework */; };
 		B912802D1E77AFEE0063D5A8 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B912802C1E77AFEE0063D5A8 /* Info.plist */; };
 		B912802E1E77AFEE0063D5A8 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B912802C1E77AFEE0063D5A8 /* Info.plist */; };
@@ -19,7 +21,7 @@
 		B91280351E77B0520063D5A8 /* ExtensionMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280021E77AF980063D5A8 /* ExtensionMethod.swift */; };
 		B91280361E77B0520063D5A8 /* ExtensionModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280031E77AF980063D5A8 /* ExtensionModifier.swift */; };
 		B91280371E77B0520063D5A8 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280041E77AF980063D5A8 /* Helpers.swift */; };
-		B91280381E77B0520063D5A8 /* IfBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280051E77AF980063D5A8 /* IfBlock.swift */; };
+		B91280381E77B0520063D5A8 /* Conditionals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280051E77AF980063D5A8 /* Conditionals.swift */; };
 		B91280391E77B0520063D5A8 /* Keywords.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280061E77AF980063D5A8 /* Keywords.swift */; };
 		B912803A1E77B0520063D5A8 /* Performance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280071E77AF980063D5A8 /* Performance.swift */; };
 		B912803B1E77B0520063D5A8 /* RecursiveRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280081E77AF980063D5A8 /* RecursiveRules.swift */; };
@@ -35,7 +37,7 @@
 		B91280451E77B0530063D5A8 /* ExtensionMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280021E77AF980063D5A8 /* ExtensionMethod.swift */; };
 		B91280461E77B0530063D5A8 /* ExtensionModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280031E77AF980063D5A8 /* ExtensionModifier.swift */; };
 		B91280471E77B0530063D5A8 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280041E77AF980063D5A8 /* Helpers.swift */; };
-		B91280481E77B0530063D5A8 /* IfBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280051E77AF980063D5A8 /* IfBlock.swift */; };
+		B91280481E77B0530063D5A8 /* Conditionals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280051E77AF980063D5A8 /* Conditionals.swift */; };
 		B91280491E77B0530063D5A8 /* Keywords.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280061E77AF980063D5A8 /* Keywords.swift */; };
 		B912804A1E77B0530063D5A8 /* Performance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280071E77AF980063D5A8 /* Performance.swift */; };
 		B912804B1E77B0530063D5A8 /* RecursiveRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91280081E77AF980063D5A8 /* RecursiveRules.swift */; };
@@ -89,6 +91,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Eval.swift; sourceTree = "<group>"; };
 		B9127FE01E77AEA40063D5A8 /* Tracery Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tracery Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9127FE41E77AEA40063D5A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B9127FFC1E77AF980063D5A8 /* CandidateProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CandidateProvider.swift; sourceTree = "<group>"; };
@@ -100,7 +103,7 @@
 		B91280021E77AF980063D5A8 /* ExtensionMethod.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionMethod.swift; sourceTree = "<group>"; };
 		B91280031E77AF980063D5A8 /* ExtensionModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionModifier.swift; sourceTree = "<group>"; };
 		B91280041E77AF980063D5A8 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
-		B91280051E77AF980063D5A8 /* IfBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IfBlock.swift; sourceTree = "<group>"; };
+		B91280051E77AF980063D5A8 /* Conditionals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conditionals.swift; sourceTree = "<group>"; };
 		B91280061E77AF980063D5A8 /* Keywords.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keywords.swift; sourceTree = "<group>"; };
 		B91280071E77AF980063D5A8 /* Performance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Performance.swift; sourceTree = "<group>"; };
 		B91280081E77AF980063D5A8 /* RecursiveRules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecursiveRules.swift; sourceTree = "<group>"; };
@@ -182,7 +185,7 @@
 				B91280021E77AF980063D5A8 /* ExtensionMethod.swift */,
 				B91280031E77AF980063D5A8 /* ExtensionModifier.swift */,
 				B91280041E77AF980063D5A8 /* Helpers.swift */,
-				B91280051E77AF980063D5A8 /* IfBlock.swift */,
+				B91280051E77AF980063D5A8 /* Conditionals.swift */,
 				B91280061E77AF980063D5A8 /* Keywords.swift */,
 				B91280071E77AF980063D5A8 /* Performance.swift */,
 				B91280081E77AF980063D5A8 /* RecursiveRules.swift */,
@@ -252,6 +255,7 @@
 				B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */,
 				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B975BB7D1E75C91C0076A1EA /* TagStorage.swift */,
+				B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */,
 			);
 			name = Common;
 			path = ../Common;
@@ -451,7 +455,7 @@
 				B91280441E77B0530063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912803F1E77B0530063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280411E77B0530063D5A8 /* CustomProviders.swift in Sources */,
-				B91280481E77B0530063D5A8 /* IfBlock.swift in Sources */,
+				B91280481E77B0530063D5A8 /* Conditionals.swift in Sources */,
 				B912804C1E77B0530063D5A8 /* Rules.swift in Sources */,
 				B91280471E77B0530063D5A8 /* Helpers.swift in Sources */,
 				B912804A1E77B0530063D5A8 /* Performance.swift in Sources */,
@@ -478,6 +482,7 @@
 				B96DC0301E72F2B7008623B8 /* RulesetAnalyser.swift in Sources */,
 				B96DC02E1E72F2B7008623B8 /* RuleCandidatesProvider.swift in Sources */,
 				B96DC0321E72F2B7008623B8 /* Tracery.Logging.swift in Sources */,
+				B90E7E751E77C6A000C5BD17 /* Tracery.Eval.swift in Sources */,
 				B96DC02D1E72F2B7008623B8 /* RuleCandidateSelector.swift in Sources */,
 				B96DC02B1E72F2B7008623B8 /* Lexer.swift in Sources */,
 				B96DC0311E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift in Sources */,
@@ -497,6 +502,7 @@
 				B9FCA7F91E73D2D20069F8B6 /* RuleCandidateSelector.swift in Sources */,
 				B9FCA7FA1E73D2D20069F8B6 /* RuleCandidatesProvider.swift in Sources */,
 				B9FCA7FB1E73D2D20069F8B6 /* RuleSelfReferenceIdentifer.swift in Sources */,
+				B90E7E761E77C71F00C5BD17 /* Tracery.Eval.swift in Sources */,
 				B9FCA7FC1E73D2D20069F8B6 /* RulesetAnalyser.swift in Sources */,
 				B9FCA7FD1E73D2D20069F8B6 /* TagOverrideRuleIdentifier.swift in Sources */,
 				B9FCA7FE1E73D2D20069F8B6 /* Tracery.Logging.swift in Sources */,
@@ -512,7 +518,7 @@
 				B91280341E77B0520063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912802F1E77B0520063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280311E77B0520063D5A8 /* CustomProviders.swift in Sources */,
-				B91280381E77B0520063D5A8 /* IfBlock.swift in Sources */,
+				B91280381E77B0520063D5A8 /* Conditionals.swift in Sources */,
 				B912803C1E77B0520063D5A8 /* Rules.swift in Sources */,
 				B91280371E77B0520063D5A8 /* Helpers.swift in Sources */,
 				B912803A1E77B0520063D5A8 /* Performance.swift in Sources */,
@@ -800,6 +806,7 @@
 				B9127FEA1E77AEA40063D5A8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B96DBFB61E72B630008623B8 /* Build configuration list for PBXProject "Tracery" */ = {
 			isa = XCConfigurationList;
