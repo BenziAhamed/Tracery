@@ -8,6 +8,4 @@ script:
   - set -o pipefail
   - xcodebuild -version
   - xcodebuild -showsdks
-
-  - xcodebuild -workspace "Tracery.xcworkspace" -scheme "Tracery iOS" -sdk "iphonesimulator" -destination "name=iPhone SE" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test
-  - xcodebuild -workspace "Tracery.xcworkspace" -scheme "Tracery macOS" -sdk "macosx" -destination "arch=x86_64" -configuration Debug ONLY_ACTIVE_ARCH=NO
+  - xcodebuild -workspace "Tracery.xcworkspace" -scheme "Tracery macOS" -sdk "macosx" -destination "arch=x86_64" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test
