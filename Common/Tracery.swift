@@ -11,6 +11,12 @@ import Foundation
 struct RuleMapping {
     let candidates: [RuleCandidate]
     var selector: RuleCandidateSelector
+    
+    func select() -> RuleCandidate? {
+        let index = selector.pick(count: candidates.count)
+        guard index >= 0 && index < candidates.count else { return nil }
+        return candidates[index]
+    }
 }
 
 struct RuleCandidate {
@@ -68,7 +74,7 @@ public class Tracery {
     func add(rule: String, definition value: Any) {
         
         // validate the rule name
-        let tokens = Lexer.tokens(input: rule)
+        let tokens = Lexer.tokens(rule)
         guard tokens.count == 1, case let .text(name) = tokens[0] else {
             error("rule '\(rule)' ignored - names must be plaintext")
             return
@@ -124,7 +130,10 @@ public class Tracery {
         let e = error
         do {
             info("checking rule '\(rule)' - \(text)")
-            return RuleCandidate(text: text, nodes: try Parser.gen(tokens: Lexer.tokens(input: text)))
+            return RuleCandidate(
+                text: text,
+                nodes: try Parser.gen(Lexer.tokens(text))
+            )
         }
         catch {
             e("rule '\(rule)' parse error - \(error) in definition - \(text)")

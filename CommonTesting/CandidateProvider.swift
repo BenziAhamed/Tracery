@@ -50,5 +50,16 @@ class CandidateProvider: XCTestCase {
         
     }
     
-    
+    func testWeightedCandidateProvider() {
+        
+        let t = Tracery {[
+            "binary": WeightedCandidateSet([
+                "0#binary#": 10,
+                "1#binary#": 10,
+                "":  1
+                ])
+            ]}
+        
+        XCTAssertTrue(!t.expand("#binary#").contains("stack overflow"))
+    }
 }

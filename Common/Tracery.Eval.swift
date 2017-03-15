@@ -11,10 +11,14 @@ import Foundation
 
 extension Tracery {
     
+    // transforms input text to expanded text
+    // based on the rule set, run time tags, and modifiers
     func eval(_ text: String) throws -> String {
         trace("📘 input \(text)")
-        let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
+        
+        let nodes = try Parser.gen(Lexer.tokens(text))
         let output = try eval(nodes)
+        
         trace("📘 ouptut \(text) ==> \(output)")
         return output
     }
@@ -70,14 +74,16 @@ extension Tracery {
             
             let depth = stack.count - 1
             
+//            trace("----------")
+//            stack.enumerated().forEach { i, context in
+//                trace("\(i) \(context)")
+//            }
             
-            //            trace("stack-depth: \(stackDepth)")
-            //            trace("contexts:")
-            
-            trace("----------")
-            stack.enumerated().forEach { i, context in
-                trace("\(i) = \(context.nodes) pop: \(context.popAction) result: \(context.result) args: \(context.args)")
-            }
+//            do {
+//                let i = depth
+//                let context = stack[i]
+//                trace("\(i) \(context)")
+//            }
             
             
             // have we have finished processing
@@ -152,41 +158,43 @@ extension Tracery {
                 
             case let .ifBlock(condition, thenBlock, elseBlock):
                 trace("🕎 ⤵️ \(node)")
-                let nodes:[ParserNode] = [
-                    .evaluateArg(nodes: [condition.lhs]),
-                    .evaluateArg(nodes: [condition.rhs]),
-                    .branch(check: condition.op, thenBlock: thenBlock, elseBlock: elseBlock),
-                    ]
+                var nodes = expandCondition(condition)
+                nodes.append(.branch(check: condition.op, thenBlock: thenBlock, elseBlock: elseBlock))
                 try pushContext(nodes, affectsEvaluationLevel: false)
                 
                 
             case let .whileBlock(condition, doBlock):
                 trace("🕎 🔁 \(node)")
-                let nodes:[ParserNode] = [
-                    .evaluateArg(nodes: [condition.lhs]),
-                    .evaluateArg(nodes: [condition.rhs]),
+                var nodes = expandCondition(condition)
+                nodes.append(
                     .branch(
                         check: condition.op,
                         thenBlock: doBlock + [.whileBlock(condition: condition, doBlock: doBlock)],
                         elseBlock: nil
-                    ),
-                    
-                ]
+                    )
+                )
                 try pushContext(nodes, affectsEvaluationLevel: false)
                 
                 
             case let .branch(check, thenBlock, elseBlock):
-                guard stack[depth].args.count == 2 else {
-                    error("branching must be called after evaluating exactly two args")
-                    break
-                }
                 let conditionMet: Bool
-                switch check {
+                
+                checking: switch check {
                 case .equalTo:
                     conditionMet = (stack[depth].args[0] == stack[depth].args[1])
                 case .notEqualTo:
                     conditionMet = (stack[depth].args[0] != stack[depth].args[1])
+                case .valueIn:
+                    for i in 1..<stack[depth].args.count {
+                        let toCheckIfContained = stack[depth].args[0]
+                        if toCheckIfContained == stack[depth].args[i] {
+                            conditionMet = true
+                            break checking // exit out of switch
+                        }
+                    }
+                    conditionMet = false
                 }
+                
                 if conditionMet {
                     trace("🕎 ✅ branch to then")
                     try pushContext(thenBlock, affectsEvaluationLevel: false)
@@ -248,11 +256,10 @@ extension Tracery {
                     try applyMods(nodes: [.text(value)])
                     break
                 }
-                if let expansion = ruleSet[name] {
-                    let index = expansion.selector.pick(count: expansion.candidates.count)
-                    if index >= 0 && index < expansion.candidates.count {
+                if let mapping = ruleSet[name] {
+                    if let candidate = mapping.select() {
                         trace("📙 eval \(node)")
-                        try applyMods(nodes: expansion.candidates[index].nodes)
+                        try applyMods(nodes: candidate.nodes)
                     }
                     else {
                         warn("no candidate found for rule #\(name)#")
@@ -272,6 +279,26 @@ extension Tracery {
         // context and
         return popContext().result
         
+    }
+    
+    
+    // a condition is of the form 
+    // lhs op rhs
+    // of op is 'in' keyword, the rhs needs to be evaluated by expanding *all* its candidates
+    // else rhs will be evaluated as a rule
+    func expandCondition(_ condition: ParserCondition) -> [ParserNode] {
+        var nodes = [ParserNode]()
+        nodes.append(.evaluateArg(nodes: [condition.lhs]))
+        // support 'in' keyword in condition mapping
+        if condition.op == .valueIn, case let .rule(name, _) = condition.rhs, let mapping = ruleSet[name] {
+            for candidate in mapping.candidates {
+                nodes.append(.evaluateArg(nodes: candidate.nodes))
+            }
+        }
+        else {
+            nodes.append(.evaluateArg(nodes: [condition.rhs]))
+        }
+        return nodes
     }
 }
 
@@ -330,4 +357,11 @@ fileprivate struct ExecutionContext {
         nodes.append(token)
     }
     
+}
+
+
+extension ExecutionContext : CustomStringConvertible {
+    var description: String {
+        return "\(nodes) \(popAction) args\(args) result:\(result)"
+    }
 }

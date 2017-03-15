@@ -199,6 +199,6 @@ extension Tags {
         XCTAssertEqual(t.expand("#override_in_same_rule2#"), "value-out value-in ")
         XCTAssertEqual(t.expand("#sub_tag_not_visible#"), "#tag2#")
     }
-    
+
     
 }

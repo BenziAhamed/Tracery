@@ -7,11 +7,11 @@
 //
 
 import XCTest
-import Tracery
+@testable import Tracery
 
 class Keywords: XCTestCase {
     
-    let keywords = ["if","then","else"]
+    let keywords = ["if","then","else","do","while","in"]
     
     func testKeywordCanBeAcceptedAsStandaloneText() {
         let t = Tracery()
@@ -40,6 +40,22 @@ class Keywords: XCTestCase {
         let t = Tracery()
         for i in inputs {
             XCTAssertEqual(t.expand(i), i)
+        }
+    }
+    
+    func testKeywordsMustBePrecededAndSucceededBySpaces() {
+        keywords.forEach {
+            XCTAssertEqual(Lexer.tokens(" \($0) "), [Token.SPACE, Token.keyword($0), Token.SPACE])
+        }
+    }
+    
+    func testKeywordsOnlyIfAndThenCanBePrecededByLeftSquareBracket() {
+        
+        XCTAssertEqual(Lexer.tokens("[if "), [Token.LEFT_SQUARE_BRACKET, Token.keyword("if"), Token.SPACE])
+        XCTAssertEqual(Lexer.tokens("[while "), [Token.LEFT_SQUARE_BRACKET, Token.keyword("while"), Token.SPACE])
+        
+        keywords.filter{ !["if","while"].contains($0) }.forEach {
+            XCTAssertEqual(Lexer.tokens("[\($0) "), [Token.LEFT_SQUARE_BRACKET,Token.text("\($0) ")])
         }
     }
     

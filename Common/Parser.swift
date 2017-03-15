@@ -37,9 +37,10 @@ struct TagValue : CustomStringConvertible {
     var description: String { return rawText }
 }
 
-enum ParserConditionOperator : String {
-    case equalTo = "=="
-    case notEqualTo = "!="
+enum ParserConditionOperator {
+    case equalTo
+    case notEqualTo
+    case valueIn
 }
 
 struct ParserCondition: CustomStringConvertible {
@@ -53,18 +54,29 @@ struct ParserCondition: CustomStringConvertible {
 
 enum ParserNode : CustomStringConvertible {
     
+    // input nodes
+    
     case text(String)
     case rule(name:String, mods:[Modifier])
     case tag(name:String, values:[TagValue])
     
+    // control flow
+    
     indirect case ifBlock(condition:ParserCondition, thenBlock:[ParserNode], elseBlock:[ParserNode]?)
     indirect case whileBlock(condition:ParserCondition, doBlock:[ParserNode])
+
+    // procedures
     
     case runMod(name: String)
     case createTag(name: String)
     
+    // args handling
+    
     indirect case evaluateArg(nodes: [ParserNode])
     case clearArgs
+    
+    // low level flow control
+    
     indirect case branch(check:ParserConditionOperator, thenBlock:[ParserNode], elseBlock:[ParserNode]?)
     
     public var description: String {
@@ -73,44 +85,44 @@ enum ParserNode : CustomStringConvertible {
         case let .rule(name, mods):
             if mods.count > 0 {
                 let mods = mods.map { "." + $0.name }.reduce("") { $0.0 + $0.1 }
-                return "rule(\(name) \(mods))"
+                return "RULE (\(name) \(mods))"
             }
-            return "rule(\(name))"
+            return "RULE (\(name))"
             
         case let .tag(name, values):
             if values.count == 1 { return "tag(\(name)=\(values[0]))" }
-            return "tag(\(name)=\(values))"
+            return "TAG_DEFN (\(name)=\(values))"
             
         case let .text(text):
-            return "text(\(text))"
+            return "TXT (\(text))"
             
         case let .runMod(name):
-            return "runMod(\(name))"
+            return "MOD_RUN (\(name))"
             
         case let .createTag(name):
-            return "createTag(\(name))"
+            return "TAG_CREATE (\(name))"
             
         case let .evaluateArg(nodes):
-            return "evaluateArg(\(nodes))"
+            return "ARG_EVAL (\(nodes))"
             
         case .clearArgs:
-            return "clearArgs"
+            return "ARG_CLR"
             
         case let .ifBlock(condition, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "if(\(condition) then:\(thenBlock) else:\(elseBlock))"
+                return "IF (\(condition) THEN \(thenBlock) ELSE \(elseBlock))"
             }
-            return "if(\(condition) then:\(thenBlock))"
+            return "IF (\(condition) THEN \(thenBlock))"
             
             
         case let .branch(check, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "branch(args \(check) then:\(thenBlock) else:\(elseBlock))"
+                return "BRNCH (ARGS\(check) THEN \(thenBlock) ELSE \(elseBlock))"
             }
-            return "branch(args \(check) then:\(thenBlock))"
+            return "BRNCH (args \(check) THEN \(thenBlock))"
             
         case let .whileBlock(condition, doBlock):
-            return "while(\(condition) then:\(doBlock))"
+            return "WHILE (\(condition) THEN \(doBlock))"
             
         }
     }
@@ -135,7 +147,7 @@ struct Parser {
     
     // code generation stage
     // tokens -> nodes
-    static func gen(tokens: [Token]) throws -> [ParserNode] {
+    static func gen(_ tokens: [Token]) throws -> [ParserNode] {
         
         var nodes = [ParserNode]()
         var index = 0
@@ -257,7 +269,7 @@ struct Parser {
                                 throw ParserError.error("parameter expected, but not found in modifier '\(modName)'")
                             }
                             do {
-                                let nodes = try Parser.gen(tokens: paramTokens)
+                                let nodes = try Parser.gen(paramTokens)
                                 let parameter = ModifierParameter(rawText: paramText, nodes: nodes)
                                 modifier.parameters.append(parameter)
                             } catch {
@@ -308,7 +320,7 @@ struct Parser {
                     throw ParserError.error("value expected for tag '\(name)', but none found")
                 }
                 do {
-                    let nodes = try Parser.gen(tokens: tagValueTokens)
+                    let nodes = try Parser.gen(tagValueTokens)
                     let tagValue = TagValue(rawText: tagValueText, nodes: nodes)
                     values.append(tagValue)
                 }
@@ -369,7 +381,7 @@ struct Parser {
             if text.characters.last == " " {
                 text = text.substring(to: text.index(before: text.endIndex))
             }
-            let nodes = try Parser.gen(tokens: Lexer.tokens(input: text))
+            let nodes = try Parser.gen(Lexer.tokens(text))
             return nodes
         }
         
@@ -403,6 +415,9 @@ struct Parser {
         
         func parseCondition() throws -> ParserCondition {
             
+            // parses a condition of the form
+            // (rule|plain_text)[ ]*(!=|==|in)[ ]*(rule|plain_text)
+            
             let lhs = try parseConditionRuleComponent(error: "expected rule or text in condition clause")
             
             let op: ParserConditionOperator
@@ -414,18 +429,31 @@ struct Parser {
                 advance()
                 consumeOptionalWhitespace()
                 op = .equalTo
-                rhs = try parseConditionRuleComponent(error: "expected rule or text after \(op.rawValue)")
+                rhs = try parseConditionRuleComponent(error: "expected rule or text after ==")
                 
             case let x where x == Token.NOT_EQUAL_TO:
                 advance()
                 consumeOptionalWhitespace()
                 op = .notEqualTo
-                rhs = try parseConditionRuleComponent(error: "expected rule or text after \(op.rawValue)")
+                rhs = try parseConditionRuleComponent(error: "expected rule or text after !=")
+                
+            case let x where x == Token.KEYWORD_IN:
+                advance()
+                consumeOptionalWhitespace()
+                rhs = try parseConditionRuleComponent(error: "expected rule or text after in")
+                if case .text = rhs {
+                    op = .equalTo
+                }
+                else {
+                    op = .valueIn
+                }
                 
             default:
                 rhs = .text("")
                 op = .notEqualTo
             }
+            
+            
             
             return ParserCondition.init(lhs: lhs, rhs: rhs, op: op)
         }

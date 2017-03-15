@@ -92,6 +92,10 @@ class CandidateSelector : XCTestCase {
     }
     
 
+    func testSettingSelectorForNonExistentRuleHasNoEffectAndGeneratesAWarning() {
+        let t = Tracery()
+        t.setCandidateSelector(rule: "where", selector: SequentialSelector())
+    }
     
 }
 

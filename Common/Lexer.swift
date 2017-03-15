@@ -49,6 +49,7 @@ enum Token : CustomStringConvertible {
     static let KEYWORD_ELSE = Token.keyword("else")
     static let KEYWORD_WHILE = Token.keyword("while")
     static let KEYWORD_DO = Token.keyword("do")
+    static let KEYWORD_IN = Token.keyword("in")
     
     static let SPACE = Token.text(" ")
 }
@@ -73,23 +74,12 @@ extension Character {
     }
 }
 
-extension String {
-    var isKeyword: Bool {
-        switch self {
-        case "if", "then", "else":
-            return true
-        default:
-            return false
-        }
-    }
-}
-
 struct Lexer {
     
-    static func tokens(input: String) -> [Token] {
+    static func tokens(_ input: String) -> [Token] {
         
         var index = input.startIndex
-        
+        var tokens = [Token]()
         
         func advance() {
             input.characters.formIndex(after: &index)
@@ -172,22 +162,42 @@ struct Lexer {
                         if let c = getEscapedCharacter() {
                             text.append(c)
                         }
-                        continue
+                        return .text(text)
                     }
                     
                     // consume current character
                     text.append(c)
                     advance()
                     
-                    // if we have consumed free text that ends with
-                    // a keyword, split text into (previous, keyword)
-                    // and return previous, rewind by count of keyword
-                    let keywords = ["if","then","else","while","do"]
+                    // key word check needs to be performed
+                    // only if we have consumed at least one token
+                    guard tokens.count > 0, text.characters.count >= 3 else { continue }
+                    
+                    // check if we greedily consumed a keyword
+                    // keywords must be preceded by white space
+                    // unless its if or while, in which case
+                    // it must be preceded by [
+                    // all keywords must be followed by a space
+                    let keywords = ["if ","then ","else ","while ","do ","in "]
                     for keyword in keywords {
+                        
+                        // check if we have consumed at least x character
+                        // as the keyword
+                        guard let prevCharIndex = input.characters.index(index, offsetBy: -keyword.characters.count-1, limitedBy: input.startIndex) else { continue }
+                        let prevChar = input[prevCharIndex]
+                        
                         if text == keyword {
-                            return .keyword(text)
+                            if prevChar == " " {
+                                rewind(count: 1)
+                                return .keyword(text.trim(fromEnd: 1))
+                            }
+                            if prevChar == "[", keyword == "if " || keyword == "while " {
+                                rewind(count: 1)
+                                return .keyword(text.trim(fromEnd: 1))
+                            }
+                            
                         }
-                        if text.hasSuffix(keyword) {
+                        else if text.hasSuffix(keyword), prevChar == " " {
                             let end = text.index(text.endIndex, offsetBy: -keyword.characters.count)
                             rewind(count: keyword.characters.count)
                             return .text(text.substring(to: end))
@@ -201,7 +211,7 @@ struct Lexer {
         }
         
         
-        var tokens = [Token]()
+        
         while let token = getToken() {
             tokens.append(token)
         }
@@ -209,4 +219,14 @@ struct Lexer {
         
     }
     
+}
+
+
+extension String {
+    func trim(fromEnd i: Int) -> String {
+        return substring(to: index(endIndex, offsetBy: -i))
+    }
+    func trim(fromStart i: Int) -> String {
+        return substring(from: index(startIndex, offsetBy: i))
+    }
 }
