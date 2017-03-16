@@ -60,6 +60,9 @@ class Conditionals: XCTestCase {
         
         XCTAssertEqual(t.expand("[value:0]#msg_then_2word#"), "binary digit")
         XCTAssertEqual(t.expand("[value:1]#msg_then_2word#"), "binary digit")
+        
+        
+        XCTAssertEqual(t.expand("[tag:2,3][if #num# not in #tag# then ok]"), "ok")
     }
     
     
@@ -92,4 +95,45 @@ class Conditionals: XCTestCase {
         XCTAssertEqual(t.expand("#call_L2#"), "valid")
         XCTAssertEqual(t.expand("#call_L2B#"), "valid")
     }
+    
+    
+    func testIfBlockAllowsComplexConditionals() {
+        // XCTAssertEqual(Tracery().expandVerbose("[if #[tag1:name]tag1# == #[tag2:name]tag2# then ok else nope]"), "ok")
+        // XCTAssertEqual(Tracery().expandVerbose("[if #[tag1:name]tag1# in #[tag2:name]tag2# then ok else nope]"), "ok")
+        
+        let t = Tracery {[
+            "tag2": ["name1","name2","name3","#name4#"],
+            "name4": "name"
+        ]}
+        XCTAssertEqual(t.expandVerbose("[if #[tag1:name]tag1# in #tag2# then ok else nope]"), "ok")
+    }
+    
+    
+    func testBasicWhileBlockWorks() {
+        
+        let t = Tracery {[
+            "binary": WeightedCandidateSet([
+                        "0": 10,
+                        "1": 10,
+                        "": 1,
+                      ]),
+        ]}
+        
+        var generated = 0
+        t.add(call: "track") {
+            generated += 1
+        }
+        
+        let output = t.expand("[while #[digit:#binary#]digit# in #[options:0,1]options# do b]")
+        func isValid(input: String) -> Bool {
+            if input.isEmpty { return true }
+            for c in input.characters {
+                if c != "b" { return false }
+            }
+            return true
+        }
+        XCTAssertTrue(isValid(input: output))
+        
+    }
+    
 }

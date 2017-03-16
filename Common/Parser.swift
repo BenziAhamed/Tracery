@@ -41,11 +41,12 @@ enum ParserConditionOperator {
     case equalTo
     case notEqualTo
     case valueIn
+    case valueNotIn
 }
 
 struct ParserCondition: CustomStringConvertible {
-    let lhs: ParserNode
-    let rhs: ParserNode
+    let lhs: [ParserNode]
+    let rhs: [ParserNode]
     let op: ParserConditionOperator
     var description: String {
         return "\(lhs) \(op) \(rhs)"
@@ -343,12 +344,6 @@ struct Parser {
             return tag
         }
         
-        func parseOptional(token: Token) {
-            if let current = currentToken, current == token {
-                advance()
-            }
-        }
-        
         func consumeOptionalWhitespace() {
             guard let tok = currentToken else { return }
             for c in tok.rawText.characters {
@@ -357,71 +352,74 @@ struct Parser {
             advance()
         }
         
-        
-        // allows consuming matched [ ] pairs
-        func consumeTokensUntilRightSquareBracket(orReaching stoppers: [Token] = []) throws -> [ParserNode] {
-            var text = ""
-            var bracketLevel = 0
-            while let token = currentToken, stoppers.count > 0 && !stoppers.contains(token) || stoppers.count == 0 {
-                if token == .LEFT_SQUARE_BRACKET {
-                    bracketLevel += 1
+        // parse a conditional block component
+        // allowing inlining of sub-rules
+        // e.g.
+        // [if #[tag1:name]tag# == #[tag2:name]tag2# then ok else nope]
+        //
+        // to skip matching start and end token sets that need to 
+        // be consumed inline
+        // if allowsInlineToken matches [, inline counter is incremented
+        // if isEndToken matches ], inline counter is decremented
+        //
+        // if an end token is reached when inline counter is zero
+        // or the stop token is found, consumption stops immediately
+        func consumeAndParseTokens(
+                isInlineStartToken: (Token) -> Bool,
+                isEndToken: (Token) -> Bool,
+                orStopIfToken: Token? = nil, // halt immediately
+                trimmingEndSpace: Bool = true
+            ) throws -> [ParserNode] {
+            var tokens = [Token]()
+            var inlineCount = 0
+            while let token = currentToken {
+                if let stopper = orStopIfToken, token == stopper {
+                    break
                 }
-                if token == .RIGHT_SQUARE_BRACKET {
-                    if bracketLevel > 0 {
-                        bracketLevel -= 1
-                    }
-                    else {
+                if isEndToken(token) {
+                    if inlineCount == 0 {
                         break
                     }
+                    inlineCount -= 1
                 }
-                text.append(token.rawText)
+                else if isInlineStartToken(token) {
+                    inlineCount += 1
+                }
+                tokens.append(token)
                 advance()
             }
-            // strip trailing space
-            if text.characters.last == " " {
-                text = text.substring(to: text.index(before: text.endIndex))
-            }
-            let nodes = try Parser.gen(Lexer.tokens(text))
-            return nodes
-        }
-        
-        func parseConditionRuleComponent(error: @autoclosure ()->String) throws -> ParserNode {
-            // parse a rule component of a condition
-            // i.e. its lhs or rhs node
-            // it can be either a text or rule
-            guard let token = currentToken else { throw ParserError.error(error()) }
-            
-            // if we have a text token consume it,
-            // if it ends with a space, strip it
-            if case var .text(text) = token {
-                advance()
-                if text.hasSuffix(" ") {
-                    text = text.substring(to: text.index(before: text.endIndex))
+            if trimmingEndSpace {
+                // strip end space if present as token
+                if let last = tokens.last, last == .SPACE {
+                    _ = tokens.popLast()
                 }
-                return .text(text)
-            }
-            
-            // if we have a rule, parse it
-            if token == .HASH {
-                let rule = try parseRule(allowingTagsInside: false)
-                if let rule = rule {
-                    consumeOptionalWhitespace()
-                    return rule
+                // strip end space if present in text
+                if let last = tokens.last, case var .text(text) = last {
+                    if text.hasSuffix(" ") {
+                        text = text.substring(to: text.index(before: text.endIndex))
+                    }
+                    _ = tokens.popLast()
+                    tokens.append(.text(text))
                 }
             }
-            
-            throw ParserError.error(error())
+            return try Parser.gen(tokens)
         }
         
         func parseCondition() throws -> ParserCondition {
             
             // parses a condition of the form
-            // (rule|plain_text)[ ]*(!=|==|in)[ ]*(rule|plain_text)
+            // rule ==|!=|in rule
             
-            let lhs = try parseConditionRuleComponent(error: "expected rule or text in condition clause")
+            let lhs = try consumeAndParseTokens(
+                isInlineStartToken: { $0 == .KEYWORD_IF || $0 == .KEYWORD_WHILE },
+                isEndToken: { return $0.isConditionalOperator }
+            )
+            if lhs.count == 0 {
+                throw ParserError.error("expected rule or text in condition")
+            }
             
             let op: ParserConditionOperator
-            let rhs: ParserNode
+            let rhs: [ParserNode]
             
             switch currentToken {
                 
@@ -429,27 +427,50 @@ struct Parser {
                 advance()
                 consumeOptionalWhitespace()
                 op = .equalTo
-                rhs = try parseConditionRuleComponent(error: "expected rule or text after ==")
+                rhs =  try consumeAndParseTokens(
+                    isInlineStartToken: { $0 == .KEYWORD_IF || $0 == .KEYWORD_WHILE },
+                    isEndToken: { return $0 == .KEYWORD_THEN || $0 == .KEYWORD_DO }
+                )
+                if rhs.count == 0 {
+                    throw ParserError.error("expected rule or text after == in condition")
+                }
+
                 
             case let x where x == Token.NOT_EQUAL_TO:
                 advance()
                 consumeOptionalWhitespace()
                 op = .notEqualTo
-                rhs = try parseConditionRuleComponent(error: "expected rule or text after !=")
+                rhs =  try consumeAndParseTokens(
+                    isInlineStartToken: { $0 == .KEYWORD_IF || $0 == .KEYWORD_WHILE },
+                    isEndToken: { return $0 == .KEYWORD_THEN || $0 == .KEYWORD_DO }
+                )
+                if rhs.count == 0 {
+                    throw ParserError.error("expected rule or text after != in condition")
+                }
                 
-            case let x where x == Token.KEYWORD_IN:
+            case let x where x == Token.KEYWORD_IN || x == Token.KEYWORD_NOT_IN:
                 advance()
                 consumeOptionalWhitespace()
-                rhs = try parseConditionRuleComponent(error: "expected rule or text after in")
-                if case .text = rhs {
-                    op = .equalTo
+                rhs =  try consumeAndParseTokens(
+                    isInlineStartToken: { $0 == .KEYWORD_IF || $0 == .KEYWORD_WHILE },
+                    isEndToken: { return $0 == .KEYWORD_THEN || $0 == .KEYWORD_DO }
+                )
+                // the rhs should evaluate to a single token
+                // that is either a text or a rule
+                if rhs.count > 0 {
+                    if case .text = rhs[0] {
+                        op = x == Token.KEYWORD_IN ? .equalTo : .notEqualTo
+                    }
+                    else {
+                        op = x == Token.KEYWORD_IN ? .valueIn : .valueNotIn
+                    }
                 }
                 else {
-                    op = .valueIn
+                    throw ParserError.error("expected rule after in/not in keyword")
                 }
                 
             default:
-                rhs = .text("")
+                rhs = [.text("")]
                 op = .notEqualTo
             }
             
@@ -466,14 +487,21 @@ struct Parser {
             try parse(.KEYWORD_THEN, error: "expected 'then' after condition")
             try parse(.SPACE, error: "expected space after 'then'")
             
-            let thenBlock = try consumeTokensUntilRightSquareBracket(orReaching: [.KEYWORD_ELSE])
+            let thenBlock = try consumeAndParseTokens(
+                isInlineStartToken: { $0 == Token.LEFT_SQUARE_BRACKET },
+                isEndToken: {  $0 == Token.RIGHT_SQUARE_BRACKET },
+                orStopIfToken: Token.KEYWORD_ELSE
+            )
             guard thenBlock.count > 0 else { throw ParserError.error("'then' must be followed by rule(s)") }
 
             var elseBlock:[ParserNode]? = nil
             if currentToken == .KEYWORD_ELSE {
                 try parse(.KEYWORD_ELSE, error: nil) // will be there
                 try parse(.text(" "), error: "expected space after else")
-                let checkedElseBlock = try consumeTokensUntilRightSquareBracket()
+                let checkedElseBlock = try consumeAndParseTokens(
+                    isInlineStartToken: { $0 == Token.LEFT_SQUARE_BRACKET },
+                    isEndToken: {  $0 == Token.RIGHT_SQUARE_BRACKET }
+                )
                 if checkedElseBlock.count > 0 {
                     elseBlock = checkedElseBlock
                 }
@@ -498,7 +526,10 @@ struct Parser {
             let condition = try parseCondition()
             try parse(.KEYWORD_DO, error: "expected `do` in while after condition")
             try parse(.SPACE, error: "expected space after do in while")
-            let doBlock = try consumeTokensUntilRightSquareBracket()
+            let doBlock = try consumeAndParseTokens(
+                isInlineStartToken: { _ in false },
+                isEndToken: { $0 == Token.RIGHT_SQUARE_BRACKET }
+            )
             guard doBlock.count > 0 else { throw ParserError.error("'do' must be followed by rule(s)") }
             let whileBlock = ParserNode.whileBlock(condition: condition, doBlock: doBlock)
             trace("⚙️ parsed \(whileBlock)")
@@ -580,10 +611,6 @@ struct Parser {
                 trace("⚙️ parsed \(text)")
             }
         }
-        
-        
-        // trace("⚙️ lexed \(tokens)")
-        // trace("⚙️ parsed \(nodes)")
         
         return nodes
         

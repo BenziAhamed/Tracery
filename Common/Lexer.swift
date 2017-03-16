@@ -27,8 +27,8 @@ enum Token : CustomStringConvertible {
     var description: String {
         switch self {
         case let .text(text): return "'\(text)'"
-        case let .op(c): return "op\(c)"
-        case let .keyword(text): return "key_\(text)"
+        case let .op(c): return "\(c)"
+        case let .keyword(text): return "\(text.uppercased())"
         }
     }
     
@@ -50,8 +50,16 @@ enum Token : CustomStringConvertible {
     static let KEYWORD_WHILE = Token.keyword("while")
     static let KEYWORD_DO = Token.keyword("do")
     static let KEYWORD_IN = Token.keyword("in")
+    static let KEYWORD_NOT_IN = Token.keyword("not in")
     
     static let SPACE = Token.text(" ")
+    
+    var isConditionalOperator: Bool {
+        return self == .EQUAL_TO
+            || self == .NOT_EQUAL_TO
+            || self == .KEYWORD_IN
+            || self == .KEYWORD_NOT_IN
+    }
 }
 
 extension Token : Equatable { }
@@ -139,7 +147,7 @@ struct Lexer {
                 
             case let c where c == " ":
                 advance()
-                return .text(" ")
+                return Token.SPACE
                 
             default:
                 var text = ""
@@ -170,15 +178,23 @@ struct Lexer {
                     advance()
                     
                     // key word check needs to be performed
-                    // only if we have consumed at least one token
-                    guard tokens.count > 0, text.characters.count >= 3 else { continue }
+                    // only if we have consumed at least 3 characters
+                    guard text.characters.count >= 3 else { continue }
                     
                     // check if we greedily consumed a keyword
                     // keywords must be preceded by white space
                     // unless its if or while, in which case
                     // it must be preceded by [
                     // all keywords must be followed by a space
-                    let keywords = ["if ","then ","else ","while ","do ","in "]
+                    let keywords = [
+                        "if ",
+                        "then ",
+                        "else ",
+                        "while ",
+                        "do ",
+                        "not in ",
+                        "in ",
+                    ]
                     for keyword in keywords {
                         
                         // check if we have consumed at least x character

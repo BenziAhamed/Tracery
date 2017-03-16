@@ -79,11 +79,11 @@ extension Tracery {
 //                trace("\(i) \(context)")
 //            }
             
-//            do {
-//                let i = depth
-//                let context = stack[i]
-//                trace("\(i) \(context)")
-//            }
+            do {
+                let i = depth
+                let context = stack[i]
+                trace("\(i) \(context)")
+            }
             
             
             // have we have finished processing
@@ -189,10 +189,19 @@ extension Tracery {
                         let toCheckIfContained = stack[depth].args[0]
                         if toCheckIfContained == stack[depth].args[i] {
                             conditionMet = true
-                            break checking // exit out of switch
+                            break checking
                         }
                     }
                     conditionMet = false
+                case .valueNotIn:
+                    for i in 1..<stack[depth].args.count {
+                        let toCheckIfContained = stack[depth].args[0]
+                        if toCheckIfContained == stack[depth].args[i] {
+                            conditionMet = false
+                            break checking
+                        }
+                    }
+                    conditionMet = true
                 }
                 
                 if conditionMet {
@@ -288,16 +297,30 @@ extension Tracery {
     // else rhs will be evaluated as a rule
     func expandCondition(_ condition: ParserCondition) -> [ParserNode] {
         var nodes = [ParserNode]()
-        nodes.append(.evaluateArg(nodes: [condition.lhs]))
+        nodes.append(.evaluateArg(nodes: condition.lhs))
+        
         // support 'in' keyword in condition mapping
-        if condition.op == .valueIn, case let .rule(name, _) = condition.rhs, let mapping = ruleSet[name] {
-            for candidate in mapping.candidates {
-                nodes.append(.evaluateArg(nodes: candidate.nodes))
+        // if we have an rhs of a rule form #rule#
+        // we will add in *all* candidates of that rule to args list
+        // if rule maps to a tag, then all candidate tag values are added to the rule
+        // list
+        if condition.op == .valueIn, condition.rhs.count == 1, case let .rule(name, _) = condition.rhs[0] {
+            if let tag = tagStorage.get(name: name) {
+                for value in tag.candidates {
+                    nodes.append(.evaluateArg(nodes: [.text(value)]))
+                }
+                return nodes
+            }
+            if let mapping = ruleSet[name] {
+                for candidate in mapping.candidates {
+                    nodes.append(.evaluateArg(nodes: candidate.nodes))
+                }
+                return nodes
             }
         }
-        else {
-            nodes.append(.evaluateArg(nodes: [condition.rhs]))
-        }
+        
+        
+        nodes.append(.evaluateArg(nodes: condition.rhs))
         return nodes
     }
 }

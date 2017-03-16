@@ -39,6 +39,16 @@ class CyclicReferenceIdentifier : RulesetAnalyser {
         g.addEdge(v, w)
     }
     
+    
+    func addRuleDependency(from vertex: Vertex, to condition: ParserCondition) {
+        condition.lhs.forEach {
+            addRuleDependency(from: vertex, to: $0)
+        }
+        condition.rhs.forEach {
+            addRuleDependency(from: vertex, to: $0)
+        }
+    }
+    
     func addRuleDependency(from vertex: Vertex, to parserNode: ParserNode) {
         switch parserNode {
         case let .rule(name, mods):
@@ -67,14 +77,12 @@ class CyclicReferenceIdentifier : RulesetAnalyser {
             }
             
         case let .ifBlock(condition, thenBlock, elseBlock):
-            addRuleDependency(from: vertex, to: condition.lhs)
-            addRuleDependency(from: vertex, to: condition.rhs)
+            addRuleDependency(from: vertex, to: condition)
             thenBlock.forEach { addRuleDependency(from: vertex, to: $0) }
             elseBlock?.forEach { addRuleDependency(from: vertex, to: $0) }
             
         case let .whileBlock(condition, doBlock):
-            addRuleDependency(from: vertex, to: condition.lhs)
-            addRuleDependency(from: vertex, to: condition.rhs)
+            addRuleDependency(from: vertex, to: condition)
             doBlock.forEach { addRuleDependency(from: vertex, to: $0) }
             
         default:
