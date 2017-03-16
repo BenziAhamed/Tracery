@@ -149,21 +149,31 @@ struct Parser {
     // code generation stage
     // tokens -> nodes
     static func gen(_ tokens: [Token]) throws -> [ParserNode] {
+        return try gen(tokens[tokens.startIndex..<tokens.endIndex])
+    }
+    
+    // code generation stage
+    // tokens -> nodes
+    static func gen(_ tokens: ArraySlice<Token>) throws -> [ParserNode] {
+        
+        // make a copy of the tokens slice
+        // so that we can modify it
+        var tokens = tokens
         
         var nodes = [ParserNode]()
-        var index = 0
+        var index = tokens.startIndex
         
         func advance() {
             index += 1
         }
         
         var currentToken: Token? {
-            return index < tokens.count ? tokens[index] : nil
+            return index < tokens.endIndex ? tokens[index] : nil
         }
         
         func getErrorLocation() -> String {
             var parsedText = "'"
-            for i in 0..<index {
+            for i in tokens.startIndex..<index {
                 parsedText.append(tokens[i].rawText)
             }
             parsedText.append("'")
@@ -260,17 +270,16 @@ struct Parser {
                         
                         func parseParameter() throws {
                             var paramText = ""
-                            var paramTokens = [Token]()
+                            let currentIndex = index
                             while let tok = currentToken, tok != .COMMA, tok != .RIGHT_ROUND_BRACKET {
                                 paramText.append(tok.rawText)
-                                paramTokens.append(tok)
                                 advance()
                             }
                             if paramText.isEmpty {
                                 throw ParserError.error("parameter expected, but not found in modifier '\(modName)'")
                             }
                             do {
-                                let nodes = try Parser.gen(paramTokens)
+                                let nodes = try Parser.gen(tokens[currentIndex..<index])
                                 let parameter = ModifierParameter(rawText: paramText, nodes: nodes)
                                 modifier.parameters.append(parameter)
                             } catch {
@@ -311,9 +320,8 @@ struct Parser {
             // consume a rule stream
             func consumeTagValue() throws {
                 var tagValueText = ""
-                var tagValueTokens = [Token]()
+                let currentIndex = index
                 while let token = currentToken, token != .COMMA, token != .RIGHT_SQUARE_BRACKET {
-                    tagValueTokens.append(token)
                     tagValueText.append(token.rawText)
                     advance()
                 }
@@ -321,7 +329,7 @@ struct Parser {
                     throw ParserError.error("value expected for tag '\(name)', but none found")
                 }
                 do {
-                    let nodes = try Parser.gen(tagValueTokens)
+                    let nodes = try Parser.gen(tokens[currentIndex..<index])
                     let tagValue = TagValue(rawText: tagValueText, nodes: nodes)
                     values.append(tagValue)
                 }
@@ -370,7 +378,8 @@ struct Parser {
                 orStopIfToken: Token? = nil, // halt immediately
                 trimmingEndSpace: Bool = true
             ) throws -> [ParserNode] {
-            var tokens = [Token]()
+            
+            let currentIndex = index
             var inlineCount = 0
             while let token = currentToken {
                 if let stopper = orStopIfToken, token == stopper {
@@ -385,24 +394,23 @@ struct Parser {
                 else if isInlineStartToken(token) {
                     inlineCount += 1
                 }
-                tokens.append(token)
                 advance()
             }
+            var endIndex = index
             if trimmingEndSpace {
                 // strip end space if present as token
-                if let last = tokens.last, last == .SPACE {
-                    _ = tokens.popLast()
+                if tokens[endIndex-1] == .SPACE {
+                    endIndex -= 1
                 }
                 // strip end space if present in text
-                if let last = tokens.last, case var .text(text) = last {
+                if case var .text(text) = tokens[endIndex-1] {
                     if text.hasSuffix(" ") {
                         text = text.substring(to: text.index(before: text.endIndex))
                     }
-                    _ = tokens.popLast()
-                    tokens.append(.text(text))
+                    tokens[endIndex-1] = .text(text)
                 }
             }
-            return try Parser.gen(tokens)
+            return try Parser.gen(tokens[currentIndex..<endIndex])
         }
         
         func parseCondition() throws -> ParserCondition {

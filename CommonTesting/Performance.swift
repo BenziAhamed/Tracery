@@ -38,21 +38,22 @@ class Performance: XCTestCase {
 
 
 
-// MARK:- Lexical Analysis
-extension Performance {
-    
-    func testLexer() {
-        // let line = "th[is ][els els\\e of :,! ,that [type do\\# then [#file#] can }}[you see"
-        let line = "[name:benzi][if #name# == benzi then ok]"
-        let tokens = Lexer.tokens(line)
-        let nodes = (try? Parser.gen(tokens)) ?? []
-        print("    tokens", tokens)
-        print("    nodes", nodes)
-        print(Tracery().expand(line))
-    }
-    
-    
-    
-}
-
-
+//// MARK:- Lexical Analysis
+//extension Performance {
+//    
+//    func testLexer() {
+//        
+//        // let line = "th[is ][els els\\e of :,! ,that [type do\\# then [#file#] can }}[you see"
+//        let line = "[name:benzi][if #name# == benzi then ok]"
+//        let tokens = Lexer.tokens(line)
+//        let nodes = (try? Parser.gen(tokens)) ?? []
+//        print("    tokens", tokens)
+//        print("    nodes", nodes)
+//        print(Tracery().expand(line))
+//    }
+//    
+//    
+//    
+//}
+//
+//
