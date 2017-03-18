@@ -1,7 +1,7 @@
 //: [Previous](@previous)
 
 /*:
- ## Calls
+ # Calls
  
  There is one more type of rule extension, which is a `call`. Unlike modifiers and methods that work with arguments, parameters and are expected to return some string value, calls do not need to do these.
  

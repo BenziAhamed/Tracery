@@ -4,8 +4,7 @@
  
  {{GEN:TOC}}
  
- # Tracery
- ## Introduction
+ # Introduction
 
 
  Tracery is a content generation library originally created by [@GalaxyKate](http://www.galaxykate.com/); you can find more information at [Tracery.io](http://www.tracery.io)
@@ -15,13 +14,13 @@
  
  The content generation in Tracery works based on an input set of rules. The rules determine how content should be generated.
  
- ### Installation
+ ## Installation
  
 - Clone or download this repository
 - To work with the playground, open Playgrounds/Tracery.playground
 - The project builds `iOS` and `macOS` framework targets, which can be linked to your projects
  
- ### Basic usage
+ ## Basic usage
  
 
 */
@@ -117,7 +116,7 @@ t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl#"
  
  In order to remember values, we can use tags.
  
- ## Tags
+ # Tags
  
  Tags allow to persist the result of a rule expansion to a temporary variable.
  
@@ -139,7 +138,7 @@ t.expand("#sentence#")
  Tags can also simply contain a value, or a group of values. Tags can also appear inside `#rules#`. Tags are variable, they can be set any number of times.
  
  
- ### Simple story
+ ## Simple story
  
  Here is a more complex example that generates a _short_ story.
  
@@ -161,7 +160,7 @@ t.expand("#origin#")
 
 /*:
  
- ### Random numbers
+ ## Random numbers
  
  Here's another example to generate a random number:
  

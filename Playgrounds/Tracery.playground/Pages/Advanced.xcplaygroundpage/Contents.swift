@@ -1,9 +1,9 @@
 //: [Previous](@previous)
 
 /*:
- ## Advanced Usage
+ # Advanced Usage
  
- ### Custom Content Selectors
+ ## Custom Content Selectors
  
  We know that a rule can have multiple candidates. By default, Tracery chooses a candidate option randomly, but the selection process is guaranteed to be strictly uniform. 
  
@@ -61,7 +61,7 @@ runOptionRule(times: 100, header: "default")
  To support these cases and more, Tracery provides the option to specify custom content selectors for each rule.
  
  
- #### Pick First Item Selector
+ ### Pick First Item Selector
  
  Let us look at a simple example.
  
@@ -88,7 +88,7 @@ runOptionRule(times: 100, header: "pick first")
  
  As you can see, only `a` was selected. 
  
- #### Custom Random Item Selector
+ ### Custom Random Item Selector
  
  For another example, let's create a custom random selector.
  
@@ -169,9 +169,9 @@ runOptionRule(times: 100, header: "default - weighted")
  
  In order to provide more flexibility over candidate representation, Tracery allows custom candidate providers.
  
- ### Custom Candidate Provider
+ ## Custom Candidate Provider
  
- #### Weighted Distributions
+ ### Weighted Distributions
  
  */
 

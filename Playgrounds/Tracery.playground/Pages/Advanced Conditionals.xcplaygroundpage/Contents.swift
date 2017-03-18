@@ -4,8 +4,10 @@ import Foundation
 import Tracery
 
 /*:
- ### Condition Statments
- ### `if` block
+ 
+ ## Control Flow
+ 
+ ### if block
  
  If blocks are supported. You can use if blocks to check if a rule matches a condition, and based on that, output different content. The format is `[if condition then rule (else rule)]`. The `else` part is optional.
  
@@ -13,10 +15,10 @@ import Tracery
  
  The following conditional operators are permitted:
  
- - `==` check if LHS matches RHS
- - `!=` check if LHS does not match RHS
- - `in` check if LHS is contained in RHS
- - `not in` check if LHS is not contained in RHS
+ - `==` check if LHS equals RHS after expansion
+ - `!=` check if LHS does not equal RHS after expansion
+ - `in` check if LHS expanded is contained in RHS's expansion candidates
+ - `not in` check if LHS expanded is not contained in RHS's expansion candidates
  
  
  */
@@ -39,7 +41,7 @@ t.expand("#msg_if_binary#")
 t.expand("#msg_if_zero#")
 
 /*:
- ### `while` block
+ ### while block
  
  While blocks can be used to create loops. It takes the form `[while condition do rule]`. As long as the `condition` evaluates to true, the `rule` specified in the `do` section gets expanded.
  
