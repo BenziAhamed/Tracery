@@ -124,18 +124,7 @@ enum ParserNode : CustomStringConvertible {
             
         case let .whileBlock(condition, doBlock):
             return "WHILE (\(condition) THEN \(doBlock))"
-            
-        case let .runMod(name):
-            return "runMod(\(name))"
-            
-        case let .createTag(name):
-            return "createTag(\(name))"
-            
-        case let .evaluateArg(nodes):
-            return "evaluateArg(\(nodes))"
-            
-        case .clearArgs:
-            return "clearArgs"
+
         }
     }
 }
