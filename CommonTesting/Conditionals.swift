@@ -13,8 +13,6 @@ class Conditionals: XCTestCase {
     
     func testBasicIfBlockWorks() {
         
-//        Tracery.logLevel = .verbose
-        
         let t = Tracery {[
             "name": ["benzi"]
         ]}
@@ -98,9 +96,6 @@ class Conditionals: XCTestCase {
     
     
     func testIfBlockAllowsComplexConditionals() {
-        // XCTAssertEqual(Tracery().expandVerbose("[if #[tag1:name]tag1# == #[tag2:name]tag2# then ok else nope]"), "ok")
-        // XCTAssertEqual(Tracery().expandVerbose("[if #[tag1:name]tag1# in #[tag2:name]tag2# then ok else nope]"), "ok")
-        
         let t = Tracery {[
             "tag2": ["name1","name2","name3","#name4#"],
             "name4": "name"
@@ -119,20 +114,15 @@ class Conditionals: XCTestCase {
                       ]),
         ]}
         
-        var generated = 0
+        var generated = -1 // start from -1 because the last generated binary will be empty
         t.add(call: "track") {
             generated += 1
         }
         
-        let output = t.expand("[while #[digit:#binary#]digit# in #[options:0,1]options# do b]")
-        func isValid(input: String) -> Bool {
-            if input.isEmpty { return true }
-            for c in input.characters {
-                if c != "b" { return false }
-            }
-            return true
-        }
-        XCTAssertTrue(isValid(input: output))
+        let output = t.expand("[while #[digit:#binary.track#]digit# in #[options:0,1]options# do b]")
+        
+        XCTAssertFalse(output.contains("stack overflow"))
+        XCTAssertEqual(output, String(repeating: "b", count: generated))
         
     }
     
