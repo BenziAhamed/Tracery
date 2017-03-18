@@ -6,6 +6,7 @@
 //  Copyright © 2017 Benzi Ahamed. All rights reserved.
 //
 
+import Foundation
 import XCTest
 @testable import Tracery
 
@@ -125,5 +126,16 @@ class Conditionals: XCTestCase {
         XCTAssertEqual(output, String(repeating: "b", count: generated))
         
     }
+    
+    func testWhileLoopGenerateNumberNotContainingZeroOrOne() {
+        let t = Tracery {[
+            "digit" : [0,1,2,3,4,5,6,7,8,9],
+            "binary": [0,1],
+        ]}
+        let output = t.expand("[while #[d:#digit#]d# not in #binary# do #d#]")
+        XCTAssertNil(output.range(of: "0"))
+        XCTAssertNil(output.range(of: "1"))
+    }
+        
     
 }

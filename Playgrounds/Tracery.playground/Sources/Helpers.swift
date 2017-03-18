@@ -1,6 +1,7 @@
 import Foundation
 import Tracery
 
+
 // scan is similar to reduce, but accumulates the intermediate results
 public extension Sequence {
     @discardableResult
@@ -46,3 +47,4 @@ public class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelecto
     }
     
 }
+

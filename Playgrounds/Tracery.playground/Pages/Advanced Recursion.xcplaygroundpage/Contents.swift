@@ -195,4 +195,4 @@ h.expand("#origin#")
 // ⌈C C⌉
 // <K K>
 
-//: [Conclusion](@next)
+//: [Advanced contd.](@next)

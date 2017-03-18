@@ -79,11 +79,11 @@ extension Tracery {
 //                trace("\(i) \(context)")
 //            }
             
-            do {
-                let i = depth
-                let context = stack[i]
-                trace("\(i) \(context)")
-            }
+//            do {
+//                let i = depth
+//                let context = stack[i]
+//                trace("\(i) \(context)")
+//            }
             
             
             // have we have finished processing
@@ -299,12 +299,14 @@ extension Tracery {
         var nodes = [ParserNode]()
         nodes.append(.evaluateArg(nodes: condition.lhs))
         
-        // support 'in' keyword in condition mapping
+        // support 'in'/'not in' keyword in condition mapping
         // if we have an rhs of a rule form #rule#
         // we will add in *all* candidates of that rule to args list
         // if rule maps to a tag, then all candidate tag values are added to the rule
         // list
-        if condition.op == .valueIn, condition.rhs.count == 1, case let .rule(name, _) = condition.rhs[0] {
+        if condition.op == .valueIn || condition.op == .valueNotIn,
+            condition.rhs.count == 1,
+            case let .rule(name, _) = condition.rhs[0] {
             if let tag = tagStorage.get(name: name) {
                 for value in tag.candidates {
                     nodes.append(.evaluateArg(nodes: [.text(value)]))
