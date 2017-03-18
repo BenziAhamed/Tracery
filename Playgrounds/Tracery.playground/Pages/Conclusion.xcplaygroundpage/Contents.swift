@@ -20,7 +20,7 @@
         tag_value_candidate -> rule_candidate
  
  
- rule -> # (tag)* | rule_name(.modifier|.call|.method)* #
+ rule -> # (tag)* | rule_name(.modifier|.call|.method)* | control_block* #
  
     rule_name -> plain_text
  
@@ -33,6 +33,19 @@
         method_name -> plain_text
  
         param -> plain_text | rule
+ 
+ 
+ 
+ control_block -> if_block | while_block
+ 
+    condition_operator -> == | != | in | not in
+ 
+    condition -> rule condition_operator rule
+ 
+    if_block -> [if condition then rule (else rule)]
+ 
+    while_block -> [while condition do rule]
+ 
  
  
 ```

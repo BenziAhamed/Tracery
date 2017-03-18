@@ -1,17 +1,14 @@
 //: Loops
 //: Powered by [Tracery](https://github.com/BenziAhamed/Tracery)
 
-import UIKit
 import Tracery
 
-Tracery.logLevel = .verbose
-
 let t = Tracery {[
-    "init" : [10],
+    "init" : [10,5,6],
     "item" : "apple",
     "line" : [
         "I had #count# #item.plural(#count#)#. I ate one. #next_line#",
-        "Then I had #count#."
+        "Then I had none."
     ],
     "next_line": "\n[#.decrement#]#line#",
     "story": "[count:#init#]#line#"
@@ -37,4 +34,4 @@ t.setCandidateSelector(rule: "line", selector: {
     return LineSelector()
 }())
 
-t.expand("#story#")
+print(t.expand("#story#"))

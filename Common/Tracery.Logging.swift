@@ -27,7 +27,7 @@ extension Tracery {
     }
 
     func trace(_ message: @autoclosure () -> String) {
-        let indent = String(repeating: "   ", count: stackDepth)
+        let indent = String(repeating: "   ", count: ruleEvaluationLevel)
         Tracery.log(level: .verbose, message: "\(indent)\(message())")
     }
     

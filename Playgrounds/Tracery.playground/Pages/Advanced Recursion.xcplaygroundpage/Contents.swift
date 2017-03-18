@@ -2,9 +2,9 @@
 
 /*:
  
- ### Recursion
- 
- #### Rule Expansions
+ ## Recursion
+
+ ### Rule Expansions
  
  It is possible to define recursive rules. When doing so, you must provide at least one rule candidate that exits out of the recursion.
  
@@ -195,4 +195,4 @@ h.expand("#origin#")
 // ⌈C C⌉
 // <K K>
 
-//: [Conclusion](@next)
+//: [Advanced contd.](@next)

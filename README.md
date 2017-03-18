@@ -3,32 +3,33 @@
  ![Tracery - powerful content generation](logo.png)
  
 # Contents
-- [Tracery](#tracery)
-    - [Introduction](#introduction)
-        - [Installation](#installation)
-        - [Basic usage](#basic-usage)
-    - [Tags](#tags)
-        - [Simple story](#simple-story)
-        - [Random numbers](#random-numbers)
-    - [Modifiers](#modifiers)
-    - [Methods](#methods)
-    - [Calls](#calls)
-    - [Advanced Usage](#advanced-usage)
-        - [Custom Content Selectors](#custom-content-selectors)
-            - [Pick First Item Selector](#pick-first-item-selector)
-            - [Custom Random Item Selector](#custom-random-item-selector)
-        - [Custom Candidate Provider](#custom-candidate-provider)
-            - [Weighted Distributions](#weighted-distributions)
-        - [Recursion](#recursion)
-            - [Rule Expansions](#rule-expansions)
+- [Introduction](#introduction)
+    - [Installation](#installation)
+    - [Basic usage](#basic-usage)
+- [Tags](#tags)
+    - [Simple story](#simple-story)
+    - [Random numbers](#random-numbers)
+- [Modifiers](#modifiers)
+- [Methods](#methods)
+- [Calls](#calls)
+- [Advanced Usage](#advanced-usage)
+    - [Custom Content Selectors](#custom-content-selectors)
+        - [Pick First Item Selector](#pick-first-item-selector)
+        - [Custom Random Item Selector](#custom-random-item-selector)
+    - [Custom Candidate Provider](#custom-candidate-provider)
+        - [Weighted Distributions](#weighted-distributions)
+    - [Recursion](#recursion)
+        - [Rule Expansions](#rule-expansions)
         - [Logging](#logging)
         - [Chaining Evaluations](#chaining-evaluations)
         - [Hierarchical Tag Storage](#hierarchical-tag-storage)
+    - [Control Flow](#control-flow)
+        - [if block](#if-block)
+        - [while block](#while-block)
 - [Tracery Grammar](#tracery-grammar)
 - [Conclusion](#conclusion)
  
-# Tracery
-## Introduction
+# Introduction
 
 
  Tracery is a content generation library originally created by [@GalaxyKate](http://www.galaxykate.com/); you can find more information at [Tracery.io](http://www.tracery.io)
@@ -38,13 +39,17 @@
  
  The content generation in Tracery works based on an input set of rules. The rules determine how content should be generated.
  
-### Installation
+## Installation
  
 - Clone or download this repository
 - To work with the playground, open Playgrounds/Tracery.playground
 - The project builds `iOS` and `macOS` framework targets, which can be linked to your projects
  
-### Basic usage
+
+[top](#contents)
+****
+
+## Basic usage
  
 
 
@@ -155,7 +160,11 @@ t.expand("#boy# and #girl# went up the hill, #boy# fell down, and so did #girl#"
  
  In order to remember values, we can use tags.
  
-## Tags
+
+[top](#contents)
+****
+
+# Tags
  
  Tags allow to persist the result of a rule expansion to a temporary variable.
  
@@ -180,7 +189,11 @@ t.expand("#sentence#")
  Tags can also simply contain a value, or a group of values. Tags can also appear inside `#rules#`. Tags are variable, they can be set any number of times.
  
  
-### Simple story
+
+[top](#contents)
+****
+
+## Simple story
  
  Here is a more complex example that generates a _short_ story.
  
@@ -205,7 +218,11 @@ t.expand("#origin#")
 
 
  
-### Random numbers
+
+[top](#contents)
+****
+
+## Random numbers
  
  Here's another example to generate a random number:
  
@@ -233,7 +250,11 @@ t.expand("[d:0,1,2,3,4,5,6,7,8,9] random 5-digit number: #d##d##d##d##d#")
 
 
 
-## Modifiers
+
+[top](#contents)
+****
+
+# Modifiers
  
  When expanding a rule, sometimes we may need to capitalize its output, or transform it in some way. The Tracery engine allows for defining rule extensions.
  
@@ -293,7 +314,11 @@ t.expand("There once was a man named #city.reverse.title#, who came from the cit
 
 
  
-## Methods
+
+[top](#contents)
+****
+
+# Methods
  
  While modifiers would receive as input the current candidate value of a rule, methods can be used to define modifiers that can accept parameters.
  
@@ -362,7 +387,11 @@ t.expand("[name:benzi]#name.repeat(3)#")
 
 
 
-## Calls
+
+[top](#contents)
+****
+
+# Calls
  
  There is one more type of rule extension, which is a `call`. Unlike modifiers and methods that work with arguments, parameters and are expected to return some string value, calls do not need to do these.
  
@@ -403,9 +432,17 @@ t.expand("#letter#")
 
 
 
-## Advanced Usage
+
+[top](#contents)
+****
+
+# Advanced Usage
  
-### Custom Content Selectors
+
+[top](#contents)
+****
+
+## Custom Content Selectors
  
  We know that a rule can have multiple candidates. By default, Tracery chooses a candidate option randomly, but the selection process is guaranteed to be strictly uniform. 
  
@@ -466,7 +503,7 @@ runOptionRule(times: 100, header: "default")
  To support these cases and more, Tracery provides the option to specify custom content selectors for each rule.
  
  
-#### Pick First Item Selector
+### Pick First Item Selector
  
  Let us look at a simple example.
  
@@ -496,7 +533,7 @@ runOptionRule(times: 100, header: "pick first")
  
  As you can see, only `a` was selected. 
  
-#### Custom Random Item Selector
+### Custom Random Item Selector
  
  For another example, let's create a custom random selector.
  
@@ -586,9 +623,13 @@ runOptionRule(times: 100, header: "default - weighted")
  
  In order to provide more flexibility over candidate representation, Tracery allows custom candidate providers.
  
-### Custom Candidate Provider
+
+[top](#contents)
+****
+
+## Custom Candidate Provider
  
-#### Weighted Distributions
+### Weighted Distributions
  
 
 
@@ -677,9 +718,13 @@ runOptionRule(times: 100, header: "custom weighted")
 
 
  
-### Recursion
- 
-#### Rule Expansions
+
+[top](#contents)
+****
+
+## Recursion
+
+### Rule Expansions
  
  It is possible to define recursive rules. When doing so, you must provide at least one rule candidate that exits out of the recursion.
  
@@ -883,8 +928,77 @@ h.expand("#origin#")
 ```
 
 
+```swift
+import Foundation
+import Tracery
+```
+
+
 
  
+
+[top](#contents)
+****
+
+## Control Flow
+ 
+### if block
+ 
+ If blocks are supported. You can use if blocks to check if a rule matches a condition, and based on that, output different content. The format is `[if condition then rule (else rule)]`. The `else` part is optional.
+ 
+ A condition is expressed as: `rule condition_operator rule`. Both the left hand side and right hand side `rule`s are expanded, and their ouput is checked based on the `condition operator` specified.
+ 
+ The following conditional operators are permitted:
+ 
+ - `==` check if LHS equals RHS after expansion
+ - `!=` check if LHS does not equal RHS after expansion
+ - `in` check if LHS expanded is contained in RHS's expansion candidates
+ - `not in` check if LHS expanded is not contained in RHS's expansion candidates
+ 
+ 
+
+
+```swift
+var t = Tracery {[
+    
+    "digit" : [0,1,2,3,4,5,6,7,8,9],
+    "binary": [0,1],
+    "is_binary": "is binary",
+    "not_binary": "is not binary",
+    
+    // check if generated digit is binary
+    "msg_if_binary" : "[d:#digit#][if #d# in #binary# then #d# #is_binary# else #d# #not_binary#]",
+    
+    // ouput only if generated digit is zero
+    "msg_if_zero" : "[d:#digit#][if #d# == 0 then #d# zero]"
+]}
+
+t.expand("#msg_if_binary#")
+t.expand("#msg_if_zero#")
+```
+
+
+
+### while block
+ 
+ While blocks can be used to create loops. It takes the form `[while condition do rule]`. As long as the `condition` evaluates to true, the `rule` specified in the `do` section gets expanded.
+ 
+
+
+
+```swift
+// print out a number that does not contain digits 0 or 1
+t.expand("[while #[d:#digit#]d# not in #binary# do #d#]")
+
+```
+
+
+
+ 
+
+[top](#contents)
+****
+
 # Tracery Grammar
  
  This section attempts to describe the grammar specification for Tracery.
@@ -903,7 +1017,7 @@ h.expand("#origin#")
         tag_value_candidate -> rule_candidate
  
  
- rule -> # (tag)* | rule_name(.modifier|.call|.method)* #
+ rule -> # (tag)* | rule_name(.modifier|.call|.method)* | control_block* #
  
     rule_name -> plain_text
  
@@ -918,8 +1032,25 @@ h.expand("#origin#")
         param -> plain_text | rule
  
  
+ 
+ control_block -> if_block | while_block
+ 
+    condition_operator -> == | != | in | not in
+ 
+    condition -> rule condition_operator rule
+ 
+    if_block -> [if condition then rule (else rule)]
+ 
+    while_block -> [while condition do rule]
+ 
+ 
+ 
 ```
  
+
+[top](#contents)
+****
+
 # Conclusion
  
  Tracery in Swift was developed by [Benzi](https://twitter.com/benziahamed).

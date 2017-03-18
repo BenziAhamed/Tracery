@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<playground version='6.0' target-platform='ios' display-mode='rendered' executeOnSourceChanges='false'>
+<playground version='6.0' target-platform='macos' display-mode='raw' executeOnSourceChanges='false'>
     <pages>
         <page name='Introduction'/>
         <page name='Modifiers'/>
         <page name='Methods'/>
         <page name='Calls'/>
         <page name='Advanced'/>
-        <page name='Advanced2'/>
+        <page name='Advanced Recursion'/>
+        <page name='Advanced Conditionals'/>
         <page name='Conclusion'/>
     </pages>
 </playground>

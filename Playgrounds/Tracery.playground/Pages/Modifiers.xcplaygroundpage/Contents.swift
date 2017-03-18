@@ -2,7 +2,7 @@
 
 
 /*:
- ## Modifiers
+ # Modifiers
  
  When expanding a rule, sometimes we may need to capitalize its output, or transform it in some way. The Tracery engine allows for defining rule extensions.
  

@@ -1,6 +1,7 @@
 import Foundation
 import Tracery
 
+
 // scan is similar to reduce, but accumulates the intermediate results
 public extension Sequence {
     @discardableResult
@@ -13,7 +14,6 @@ public extension Sequence {
     }
 }
 
-
 // This class implements two protocols
 // RuleCandidateSelector - which as we have seen before is used to
 //                         to select content in a custom way
@@ -21,41 +21,30 @@ public extension Sequence {
 //                          adhered to to provide customised content
 public class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
     
-    // required for RuleCandidatesProvider
     public let candidates: [String]
-    
-    let runningWeights: [(total:Int, target:Int)]
-    let totalWeights: UInt32
+    let weights: [Int]
     
     public init(_ distribution:[String:Int]) {
         distribution.values.map { $0 }.forEach {
             assert($0 > 0, "weights must be positive")
         }
-        let weightedCandidates = distribution
-            .map { ($0, $1) }
-        candidates = weightedCandidates
-            .map { $0.0 }
-        runningWeights = weightedCandidates
-            .map { $0.1 }
-            .scan(0, +)
-            .enumerated()
-            .map { ($0.element, $0.offset) }
-        totalWeights = distribution
-            .values
-            .map { $0 }
-            .reduce(0) { $0.0 + UInt32($0.1) }
+        candidates = distribution.map { $0.key }
+        weights = distribution.map { $0.value }
     }
     
-    // required for RuleCandidateSelector
     public func pick(count: Int) -> Int {
-        let choice = Int(arc4random_uniform(totalWeights) + 1) // since running weight start at 1
-        for weight in runningWeights {
-            if choice <= weight.total {
-                return weight.target
+        let sum = UInt32(weights.reduce(0, +))
+        var choice = Int(arc4random_uniform(sum))
+        var index = 0
+        for weight in weights {
+            choice = choice - weight
+            if choice <= 0 {
+                return index
             }
+            index += 1
         }
-        // we will never reach here
         fatalError()
     }
     
 }
+

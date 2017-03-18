@@ -2,7 +2,7 @@
 
 /*:
  
- ## Methods
+ # Methods
  
  While modifiers would receive as input the current candidate value of a rule, methods can be used to define modifiers that can accept parameters.
  
