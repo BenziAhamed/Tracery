@@ -59,6 +59,12 @@
 		B96DC0321E72F2B7008623B8 /* Tracery.Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */; };
 		B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0281E72F2B7008623B8 /* Tracery.swift */; };
 		B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975BB7D1E75C91C0076A1EA /* TagStorage.swift */; };
+		B9A248E61E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
+		B9A248E71E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
+		B9A248E91E81859A004D60C9 /* TextFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E81E81859A004D60C9 /* TextFormat.swift */; };
+		B9A248EA1E81859A004D60C9 /* TextFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E81E81859A004D60C9 /* TextFormat.swift */; };
+		B9A248EE1E818FC0004D60C9 /* fable.txt in Resources */ = {isa = PBXBuildFile; fileRef = B9A248EB1E818FB3004D60C9 /* fable.txt */; };
+		B9A248EF1E818FC0004D60C9 /* fable.txt in Resources */ = {isa = PBXBuildFile; fileRef = B9A248EB1E818FB3004D60C9 /* fable.txt */; };
 		B9FCA7F51E73D2D20069F8B6 /* CyclicReferenceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01E1E72F2B7008623B8 /* CyclicReferenceIdentifier.swift */; };
 		B9FCA7F61E73D2D20069F8B6 /* EmptyRulesetDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01F1E72F2B7008623B8 /* EmptyRulesetDetector.swift */; };
 		B9FCA7F71E73D2D20069F8B6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0201E72F2B7008623B8 /* Lexer.swift */; };
@@ -127,6 +133,9 @@
 		B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Logging.swift; sourceTree = "<group>"; };
 		B96DC0281E72F2B7008623B8 /* Tracery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.swift; sourceTree = "<group>"; };
 		B975BB7D1E75C91C0076A1EA /* TagStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagStorage.swift; sourceTree = "<group>"; };
+		B9A248E51E817216004D60C9 /* Tracery.Text.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Text.swift; sourceTree = "<group>"; };
+		B9A248E81E81859A004D60C9 /* TextFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFormat.swift; sourceTree = "<group>"; };
+		B9A248EB1E818FB3004D60C9 /* fable.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fable.txt; sourceTree = "<group>"; };
 		B9FCA8071E73D6FA0069F8B6 /* Tracery Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tracery Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9FCA80B1E73D6FA0069F8B6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -192,6 +201,8 @@
 				B91280091E77AF980063D5A8 /* Rules.swift */,
 				B912800A1E77AF980063D5A8 /* Tags.swift */,
 				B912800B1E77AF980063D5A8 /* TraceryioSamples.swift */,
+				B9A248E81E81859A004D60C9 /* TextFormat.swift */,
+				B9A248EB1E818FB3004D60C9 /* fable.txt */,
 			);
 			name = CommonTesting;
 			path = ../CommonTesting;
@@ -256,6 +267,7 @@
 				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B975BB7D1E75C91C0076A1EA /* TagStorage.swift */,
 				B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */,
+				B9A248E51E817216004D60C9 /* Tracery.Text.swift */,
 			);
 			name = Common;
 			path = ../Common;
@@ -418,6 +430,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A248EF1E818FC0004D60C9 /* fable.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +454,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A248EE1E818FC0004D60C9 /* fable.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +466,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B91280401E77B0530063D5A8 /* CandidateSelector.swift in Sources */,
+				B9A248EA1E81859A004D60C9 /* TextFormat.swift in Sources */,
 				B91280441E77B0530063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912803F1E77B0530063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280411E77B0530063D5A8 /* CustomProviders.swift in Sources */,
@@ -476,6 +491,7 @@
 			files = (
 				B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */,
 				B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */,
+				B9A248E61E817216004D60C9 /* Tracery.Text.swift in Sources */,
 				B96DC02C1E72F2B7008623B8 /* Parser.swift in Sources */,
 				B96DC02F1E72F2B7008623B8 /* RuleSelfReferenceIdentifer.swift in Sources */,
 				B96DC02A1E72F2B7008623B8 /* EmptyRulesetDetector.swift in Sources */,
@@ -496,6 +512,7 @@
 			files = (
 				B953F8AE1E771704001D6052 /* TagStorage.swift in Sources */,
 				B9FCA7F51E73D2D20069F8B6 /* CyclicReferenceIdentifier.swift in Sources */,
+				B9A248E71E817216004D60C9 /* Tracery.Text.swift in Sources */,
 				B9FCA7F61E73D2D20069F8B6 /* EmptyRulesetDetector.swift in Sources */,
 				B9FCA7F71E73D2D20069F8B6 /* Lexer.swift in Sources */,
 				B9FCA7F81E73D2D20069F8B6 /* Parser.swift in Sources */,
@@ -515,6 +532,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B91280301E77B0520063D5A8 /* CandidateSelector.swift in Sources */,
+				B9A248E91E81859A004D60C9 /* TextFormat.swift in Sources */,
 				B91280341E77B0520063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912802F1E77B0520063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280311E77B0520063D5A8 /* CustomProviders.swift in Sources */,
