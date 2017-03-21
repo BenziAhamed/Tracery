@@ -19,7 +19,7 @@ extension Tracery {
         let nodes = try Parser.gen(Lexer.tokens(text))
         let output = try eval(nodes)
         
-        trace("📘 ouptut \(text) ==> \(output)")
+        trace("📘 output \(text) ==> \(output)")
         return output
     }
     
