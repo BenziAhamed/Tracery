@@ -26,6 +26,7 @@
     - [Control Flow](#control-flow)
         - [if block](#if-block)
         - [while block](#while-block)
+    - [Text Format](#text-format)
 - [Tracery Grammar](#tracery-grammar)
 - [Conclusion](#conclusion)
  
@@ -928,11 +929,6 @@ h.expand("#origin#")
 ```
 
 
-```swift
-import Foundation
-import Tracery
-```
-
 
 
  
@@ -959,6 +955,10 @@ import Tracery
 
 
 ```swift
+import Foundation
+import Tracery
+
+
 var t = Tracery {[
     
     "digit" : [0,1,2,3,4,5,6,7,8,9],
@@ -989,8 +989,78 @@ t.expand("#msg_if_zero#")
 ```swift
 // print out a number that does not contain digits 0 or 1
 t.expand("[while #[d:#digit#]d# not in #binary# do #d#]")
-
 ```
+
+
+
+
+ 
+
+[top](#contents)
+****
+
+## Text Format
+ 
+ Tracery can recognize rules defined in plain text files as well. The file must contain a set of rule definitions, with the rule specified inside square brackets, and its expansion candidates defined one per line. Here is a sample file:
+ 
+```
+[binary]
+0#binary#
+1#binary#
+#empty#
+ 
+[empty]
+```
+ The above file is a basic binary number generator.
+ Here's another one for fable names.
+ 
+```
+[fable]
+#the# #adjective# #noun#
+#the# #noun#
+#the# #noun# Who #verb# The #adjective# #noun#
+ 
+[the]
+The
+The Strange Story of The
+The Tale of The
+A
+The Origin of The
+ 
+[adjective]
+Lonely
+Missing
+Greedy
+Valiant
+Blind
+ 
+[noun]
+Hare
+Hound
+Beggar
+Lion
+Frog
+ 
+[verb]
+Finds
+Meets
+Tricks
+Outwits
+```
+ 
+ This input file will generate output like:
+ 
+```
+ A Greedy Frog
+ The Beggar
+ The Origin of The Hare Who Finds The Missing Lion
+ The Strange Story of The Hound
+ The Tale of The Blind Frog
+```
+ 
+ You use the `Tracery.init(path:)` constructor to consume rules from a plain text file.
+ 
+
 
 
 

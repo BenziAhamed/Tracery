@@ -1,0 +1,31 @@
+[fable]
+#the# #adjective# #noun#
+#the# #noun#
+#the# #noun# Who #verb# The #adjective# #noun#
+
+[the]
+The
+The Strange Story of The
+The Tale of The
+A
+The Origin of The
+
+[adjective]
+Lonely
+Missing
+Greedy
+Valiant
+Blind
+
+[noun]
+Hare
+Hound
+Beggar
+Lion
+Frog
+
+[verb]
+Finds
+Meets
+Tricks
+Outwits

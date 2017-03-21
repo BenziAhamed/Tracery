@@ -43,4 +43,15 @@ class TextFormat: XCTestCase {
 
     }
     
+    func testPlaintextFile() {
+        
+        let fableFile = Bundle(for: type(of: self)).path(forResource: "fable", ofType: "txt")!
+        let t = Tracery.init(path: fableFile)
+        
+        for _ in 0..<10 {
+            XCTAssertFalse(t.expand("#fable#").isEmpty)
+        }
+        
+    }
+    
 }
