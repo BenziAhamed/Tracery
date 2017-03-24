@@ -86,44 +86,44 @@ enum ParserNode : CustomStringConvertible {
         case let .rule(name, mods):
             if mods.count > 0 {
                 let mods = mods.map { "." + $0.name }.reduce("") { $0.0 + $0.1 }
-                return "RULE (\(name) \(mods))"
+                return "RULE(\(name) \(mods))"
             }
-            return "RULE (\(name))"
+            return "RULE(\(name))"
             
         case let .tag(name, values):
             if values.count == 1 { return "tag(\(name)=\(values[0]))" }
-            return "TAG_DEFN (\(name)=\(values))"
+            return "TAG(\(name)=\(values))"
             
         case let .text(text):
-            return "TXT (\(text))"
+            return "TXT(\(text))"
             
         case let .runMod(name):
-            return "MOD_RUN (\(name))"
+            return "RUN_MOD(\(name))"
             
         case let .createTag(name):
-            return "TAG_CREATE (\(name))"
+            return "CREATE_TAG(\(name))"
             
         case let .evaluateArg(nodes):
-            return "ARG_EVAL (\(nodes))"
+            return "EVAL_ARG(\(nodes))"
             
         case .clearArgs:
-            return "ARG_CLR"
+            return "CLEAR_ARGS"
             
         case let .ifBlock(condition, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "IF (\(condition) THEN \(thenBlock) ELSE \(elseBlock))"
+                return "IF(\(condition) THEN \(thenBlock) ELSE \(elseBlock))"
             }
-            return "IF (\(condition) THEN \(thenBlock))"
+            return "IF(\(condition) THEN \(thenBlock))"
             
             
         case let .branch(check, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "BRNCH (ARGS\(check) THEN \(thenBlock) ELSE \(elseBlock))"
+                return "JUMP(args \(check) THEN \(thenBlock) ELSE \(elseBlock))"
             }
-            return "BRNCH (args \(check) THEN \(thenBlock))"
+            return "JUMP(args \(check) THEN \(thenBlock))"
             
         case let .whileBlock(condition, doBlock):
-            return "WHILE (\(condition) THEN \(doBlock))"
+            return "WHILE(\(condition) THEN \(doBlock))"
 
         }
     }
@@ -244,9 +244,9 @@ struct Parser {
             if currentToken == .HASH {
                 try parse(.HASH, error: nil)
                 if !foundSomethingInsideHash {
-                    warn("repeating ## treated as empty rule")
+                    warn("repeating ## treated as empty string")
                 }
-                return nil
+                return .text("")
             }
             
             // a single hash token?

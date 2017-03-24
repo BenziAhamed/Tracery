@@ -79,11 +79,11 @@ extension Tracery {
 //                trace("\(i) \(context)")
 //            }
             
-//            do {
-//                let i = depth
-//                let context = stack[i]
-//                trace("\(i) \(context)")
-//            }
+            do {
+                let i = depth
+                let context = stack[i]
+                trace("\(i) \(context)")
+            }
             
             
             // have we have finished processing
@@ -169,7 +169,7 @@ extension Tracery {
                 nodes.append(
                     .branch(
                         check: condition.op,
-                        thenBlock: doBlock + [.whileBlock(condition: condition, doBlock: doBlock)],
+                        thenBlock: doBlock + [node], // the while block again
                         elseBlock: nil
                     )
                 )

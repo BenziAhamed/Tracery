@@ -57,3 +57,22 @@ class Performance: XCTestCase {
 //}
 //
 //
+
+
+
+extension Performance {
+    
+    func testWhile() {
+        
+        let t = Tracery.init(lines: [
+            "[binary]",
+            "0",
+            "1",
+            "##",
+        ])
+        
+        print(t.expandVerbose("[while [d:#binary#]#d# != ## do #d#]"))
+        
+    }
+    
+}
