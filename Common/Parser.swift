@@ -175,6 +175,11 @@ struct Parser {
         if tokens.count > 2, tokens[endIndex-2] == .op(":"), case let .number(value) = tokens[endIndex-1] {
             endIndex -= 2
             weight = .weight(value: value)
+            // ignore leading spaces towards a weight
+            // spec
+            while endIndex > index, tokens[endIndex-1] == Token.SPACE {
+                endIndex -= 1
+            }
         }
         
         func advance() {

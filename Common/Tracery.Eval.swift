@@ -26,7 +26,8 @@ extension Tracery {
     func eval(_ nodes: [ParserNode]) throws -> String {
         
         // the execution stack
-        var stack = [ExecutionContext]()
+        // var stack = [ExecutionContext]()
+        contextStack.reset()
         
         // push a new execution context
         // onto the stack
@@ -35,34 +36,21 @@ extension Tracery {
                 try incrementEvaluationLevel()
             }
             // if we are logically increasing the stack size
-            if stack.count > Tracery.maxStackDepth {
+            if contextStack.top > Tracery.maxStackDepth {
                 throw ParserError.error("stack overflow")
             }
-            stack.append(ExecutionContext(nodes, popAction, affectsEvaluationLevel))
+
+            contextStack.push(nodes, popAction, affectsEvaluationLevel)
         }
         
         // pop an evaluated context
         // from the stack
         @discardableResult
         func popContext() -> ExecutionContext {
-            
-            let context = stack.removeLast()
+            let context = contextStack.pop()
             if context.affectsEvaluationLevel {
                 decrementEvaluationLevel()
             }
-            
-            // check if this is the last context
-            guard stack.count > 0 else { return context }
-            
-            switch context.popAction {
-            case .appendToResult:
-                stack[stack.count-1].result.append(context.result)
-            case .addArg:
-                stack[stack.count-1].args.append(context.result)
-            case .nothing:
-                break
-            }
-            
             return context
         }
         
@@ -72,35 +60,37 @@ extension Tracery {
         
         while true {
             
-            let depth = stack.count - 1
+            let top = contextStack.top - 1
             
-//            trace("----------")
-//            stack.enumerated().forEach { i, context in
+            trace("----------")
+            contextStack.contexts.enumerated().forEach { i, context in
+                if i <= top {
+                    trace("\(i) \(context)")
+                }
+            }
+            
+//            do {
+//                let i = depth
+//                let context = stack[i]
 //                trace("\(i) \(context)")
 //            }
-            
-            do {
-                let i = depth
-                let context = stack[i]
-                trace("\(i) \(context)")
-            }
             
             
             // have we have finished processing
             // the stack?
-            if depth == 0 && stack[depth].isEmpty {
+            if contextStack.executionComplete {
                 break
             }
             
             // if we are at the end of evaluating a context
             // pop it and continue
-            if stack[depth].isEmpty {
+            if contextStack.contexts[top].isEmpty {
                 popContext()
                 continue
             }
             
             // execute the current node
-            let node = stack[depth].pop()
+            let node = contextStack.contexts[top].pop()
             
             switch node {
                 
@@ -110,7 +100,7 @@ extension Tracery {
             case let .text(text):
                 trace("📘 text (\(text))")
                 // commit result to context
-                stack[depth].result.append(text)
+                contextStack.contexts[top].result.append(text)
                 
             case let .evaluateArg(nodes):
                 // special node that evaluates
@@ -119,7 +109,7 @@ extension Tracery {
                 try pushContext(nodes, .addArg)
                 
             case .clearArgs:
-                stack[depth].args.removeAll()
+                contextStack.contexts[top].args.removeAll()
                 
                 
             case let .tag(name, values):
@@ -144,7 +134,7 @@ extension Tracery {
                 
             case let .createTag(name):
                 
-                let context = stack[depth]
+                let context = contextStack.contexts[top]
                 
                 // context.args will have the accumulated
                 // values if the current context
@@ -184,22 +174,22 @@ extension Tracery {
                 
                 checking: switch check {
                 case .equalTo:
-                    conditionMet = (stack[depth].args[0] == stack[depth].args[1])
+                    conditionMet = (contextStack.contexts[top].args[0] == contextStack.contexts[top].args[1])
                 case .notEqualTo:
-                    conditionMet = (stack[depth].args[0] != stack[depth].args[1])
+                    conditionMet = (contextStack.contexts[top].args[0] != contextStack.contexts[top].args[1])
                 case .valueIn:
-                    for i in 1..<stack[depth].args.count {
-                        let toCheckIfContained = stack[depth].args[0]
-                        if toCheckIfContained == stack[depth].args[i] {
+                    for i in 1..<contextStack.contexts[top].args.count {
+                        let toCheckIfContained = contextStack.contexts[top].args[0]
+                        if toCheckIfContained == contextStack.contexts[top].args[i] {
                             conditionMet = true
                             break checking
                         }
                     }
                     conditionMet = false
                 case .valueNotIn:
-                    for i in 1..<stack[depth].args.count {
-                        let toCheckIfContained = stack[depth].args[0]
-                        if toCheckIfContained == stack[depth].args[i] {
+                    for i in 1..<contextStack.contexts[top].args.count {
+                        let toCheckIfContained = contextStack.contexts[top].args[0]
+                        if toCheckIfContained == contextStack.contexts[top].args[i] {
                             conditionMet = false
                             break checking
                         }
@@ -223,9 +213,9 @@ extension Tracery {
                 
             case let .runMod(name):
                 guard let mod = mods[name] else { break }
-                let context = stack[depth]
+                let context = contextStack.contexts[top]
                 trace("🔰 run mod \(name)(\(context.result) params: \(context.args.joined(separator: ",")))")
-                stack[depth].result = mod(context.result, context.args)
+                contextStack.contexts[top].result = mod(context.result, context.args)
                 
                 
             case let .rule(name, mods):
@@ -275,12 +265,12 @@ extension Tracery {
                     }
                     else {
                         warn("no candidate found for rule #\(name)#")
-                        stack[depth].result.append("#\(name)#")
+                        contextStack.contexts[top].result.append("#\(name)#")
                     }
                 }
                 else {
                     warn("rule #\(name)# cannot be expanded")
-                    stack[depth].result.append("#\(name)#")
+                    contextStack.contexts[top].result.append("#\(name)#")
                 }
                 
                 
@@ -331,7 +321,7 @@ extension Tracery {
 }
 
 
-fileprivate struct ExecutionContext {
+struct ExecutionContext {
     
     // Identifies what should happen
     // when this context is removed from
@@ -357,12 +347,12 @@ fileprivate struct ExecutionContext {
     
     // what happens after evaluation
     // is complete
-    let popAction: PopAction
+    var popAction: PopAction
     
     // does this context affect the
     // stack depth? - required for setting tags
     // using hierarchical storage
-    let affectsEvaluationLevel: Bool
+    var affectsEvaluationLevel: Bool
     
     init(_ nodes: [ParserNode], _ popAction: PopAction, _ affectsEvaluationLevel: Bool) {
         // store in reversed order
@@ -393,3 +383,73 @@ extension ExecutionContext : CustomStringConvertible {
         return "\(nodes) \(popAction) args\(args) result:\(result)"
     }
 }
+
+
+
+// object pool like context stack
+// that can be reused as often as needed
+struct ContextStack {
+    
+    var contexts: [ExecutionContext]
+    var top: Int
+
+    init() {
+        contexts = [ExecutionContext].init(repeating: ExecutionContext.init([], .nothing, false), count: 32)
+        top = 0
+    }
+    
+    mutating func reset() {
+        top = 0
+    }
+    
+    var executionComplete: Bool {
+        return top == 0 && contexts[0].isEmpty
+    }
+    
+    mutating func push(_ nodes: [ParserNode], _ popAction: ExecutionContext.PopAction = .appendToResult, _ affectsEvaluationLevel: Bool = false) {
+        
+        if top == contexts.count {
+            trace("⚙️ context stack size increased to \(contexts.count * 2)")
+            contexts = contexts + [ExecutionContext].init(repeating: ExecutionContext.init([], .nothing, false), count: contexts.count)
+        }
+        
+        contexts[top].nodes = nodes.reversed()
+        if !contexts[top].args.isEmpty {
+            contexts[top].args.removeAll()
+        }
+        contexts[top].affectsEvaluationLevel = affectsEvaluationLevel
+        contexts[top].popAction = popAction
+        contexts[top].result = ""
+        
+        top += 1
+    }
+    
+    mutating func pop() -> ExecutionContext {
+        
+        if top == 0 {
+            return contexts[0]
+        }
+        
+        let context = contexts[top-1]
+        top -= 1
+        
+        guard top > 0 else { return context }
+        
+        switch context.popAction {
+        case .appendToResult:
+            contexts[top-1].result.append(context.result)
+        case .addArg:
+            contexts[top-1].args.append(context.result)
+        case .nothing:
+            break
+        }
+        
+        return context
+    }
+    
+    
+    
+}
+
+
+

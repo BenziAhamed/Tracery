@@ -21,7 +21,7 @@ struct RuleMapping {
 
 struct RuleCandidate {
     let text: String
-    let nodes: [ParserNode]
+    var nodes: [ParserNode]
 }
 
 
@@ -41,6 +41,7 @@ public class Tracery {
     var ruleSet: [String: RuleMapping]
     var mods: [String: (String,[String])->String]
     var tagStorage: TagStorage
+    var contextStack: ContextStack
     
     public var ruleNames: [String] { return ruleSet.keys.map { $0 } }
     
@@ -51,10 +52,12 @@ public class Tracery {
     let options: TraceryOptions
     
     public init(_ options: TraceryOptions = TraceryOptions.defaultSet, rules: () -> [String: Any]) {
+        
         self.options = options
         mods = [:]
         ruleSet = [:]
         tagStorage = options.tagStorageType.storage()
+        contextStack = ContextStack()
         tagStorage.tracery = self
         
         let rules = rules()
@@ -106,7 +109,7 @@ public class Tracery {
             values = ["\(value)"]
         }
         
-        let candidates = values.flatMap { createRuleCandidate(rule: rule, text: $0) }
+        var candidates = values.flatMap { createRuleCandidate(rule: rule, text: $0) }
         if candidates.count == 0 {
             warn("rule '\(rule)' does not have any definitions, will be ignored")
             return
@@ -131,11 +134,17 @@ public class Tracery {
                 return false
             }
             if hasWeights() {
-                let weights:[Int] = candidates.map {
-                    if let last = $0.nodes.last, case let .weight(value) = last {
-                        return value
+                var weights = [Int]()
+                for i in candidates.indices {
+                    let c = candidates[i]
+                    if let last = c.nodes.last, case let .weight(value) = last {
+                        weights.append(value)
+                        // remove the weight node since we are done with it
+                        candidates[i].nodes.removeLast()
                     }
-                    return 1
+                    else {
+                        weights.append(1)
+                    }
                 }
                 selector = WeightedSelector(weights)
             }
