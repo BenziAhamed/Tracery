@@ -38,7 +38,7 @@ public class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelecto
         var index = 0
         for weight in weights {
             choice = choice - weight
-            if choice <= 0 {
+            if choice < 0 {
                 return index
             }
             index += 1

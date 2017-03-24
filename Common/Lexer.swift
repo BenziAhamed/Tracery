@@ -15,12 +15,14 @@ enum Token : CustomStringConvertible {
     case text(String)
     case op(String)
     case keyword(String)
+    case number(Int)
     
     var rawText: String {
         switch self {
         case let .text(text): return text
         case let .op(c): return c
         case let .keyword(text): return text
+        case let .number(value): return "\(value)"
         }
     }
     
@@ -29,6 +31,7 @@ enum Token : CustomStringConvertible {
         case let .text(text): return "'\(text)'"
         case let .op(c): return "\(c)"
         case let .keyword(text): return "\(text.uppercased())"
+        case let .number(value): return "d(\(value))"
         }
     }
     
@@ -69,6 +72,7 @@ func ==(lhs: Token, rhs: Token) -> Bool {
     case let (.op(lhs), .op(rhs)): return lhs == rhs
     case let (.text(lhs), .text(rhs)): return lhs == rhs
     case let (.keyword(lhs), .keyword(rhs)): return lhs == rhs
+    case let (.number(lhs), .number(rhs)): return lhs == rhs
     default: return false
     }
 }
@@ -144,6 +148,15 @@ struct Lexer {
             case let x where x.isReserved:
                 advance()
                 return .op("\(c)")
+                
+            case let x where "0"..."9" ~= x:
+                var number = ""
+                while let c = current, "0"..."9" ~= c {
+                    number.append(c)
+                    advance()
+                }
+                guard let value = Int(number) else { return .text(number) }
+                return .number(value)
                 
             case let c where c == " ":
                 advance()

@@ -58,6 +58,8 @@
 		B96DC0311E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */; };
 		B96DC0321E72F2B7008623B8 /* Tracery.Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */; };
 		B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0281E72F2B7008623B8 /* Tracery.swift */; };
+		B96F75991E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
+		B96F759A1E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
 		B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975BB7D1E75C91C0076A1EA /* TagStorage.swift */; };
 		B9A248E61E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
 		B9A248E71E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
@@ -132,6 +134,7 @@
 		B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagOverrideRuleIdentifier.swift; sourceTree = "<group>"; };
 		B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Logging.swift; sourceTree = "<group>"; };
 		B96DC0281E72F2B7008623B8 /* Tracery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.swift; sourceTree = "<group>"; };
+		B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeightedCandidates.swift; sourceTree = "<group>"; };
 		B975BB7D1E75C91C0076A1EA /* TagStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagStorage.swift; sourceTree = "<group>"; };
 		B9A248E51E817216004D60C9 /* Tracery.Text.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Text.swift; sourceTree = "<group>"; };
 		B9A248E81E81859A004D60C9 /* TextFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFormat.swift; sourceTree = "<group>"; };
@@ -203,6 +206,7 @@
 				B912800B1E77AF980063D5A8 /* TraceryioSamples.swift */,
 				B9A248E81E81859A004D60C9 /* TextFormat.swift */,
 				B9A248EB1E818FB3004D60C9 /* fable.txt */,
+				B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */,
 			);
 			name = CommonTesting;
 			path = ../CommonTesting;
@@ -479,6 +483,7 @@
 				B91280451E77B0530063D5A8 /* ExtensionMethod.swift in Sources */,
 				B91280431E77B0530063D5A8 /* ErrorMessages.swift in Sources */,
 				B91280461E77B0530063D5A8 /* ExtensionModifier.swift in Sources */,
+				B96F759A1E84D0CF00C324AB /* WeightedCandidates.swift in Sources */,
 				B912804B1E77B0530063D5A8 /* RecursiveRules.swift in Sources */,
 				B91280421E77B0530063D5A8 /* CustomSelectors.swift in Sources */,
 				B91280491E77B0530063D5A8 /* Keywords.swift in Sources */,
@@ -545,6 +550,7 @@
 				B91280351E77B0520063D5A8 /* ExtensionMethod.swift in Sources */,
 				B91280331E77B0520063D5A8 /* ErrorMessages.swift in Sources */,
 				B91280361E77B0520063D5A8 /* ExtensionModifier.swift in Sources */,
+				B96F75991E84D0CF00C324AB /* WeightedCandidates.swift in Sources */,
 				B912803B1E77B0520063D5A8 /* RecursiveRules.swift in Sources */,
 				B91280321E77B0520063D5A8 /* CustomSelectors.swift in Sources */,
 				B91280391E77B0520063D5A8 /* Keywords.swift in Sources */,

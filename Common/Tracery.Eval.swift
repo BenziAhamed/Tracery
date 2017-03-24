@@ -104,6 +104,9 @@ extension Tracery {
             
             switch node {
                 
+            case .weight:
+                break
+                
             case let .text(text):
                 trace("📘 text (\(text))")
                 // commit result to context

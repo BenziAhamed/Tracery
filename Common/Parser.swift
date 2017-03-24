@@ -60,6 +60,7 @@ enum ParserNode : CustomStringConvertible {
     case text(String)
     case rule(name:String, mods:[Modifier])
     case tag(name:String, values:[TagValue])
+    case weight(value: Int)
     
     // control flow
     
@@ -96,6 +97,9 @@ enum ParserNode : CustomStringConvertible {
             
         case let .text(text):
             return "TXT(\(text))"
+            
+        case let .weight(value):
+            return "WEIGHT(\(value))"
             
         case let .runMod(name):
             return "RUN_MOD(\(name))"
@@ -162,13 +166,23 @@ struct Parser {
         
         var nodes = [ParserNode]()
         var index = tokens.startIndex
+        var endIndex = tokens.endIndex
+        
+        // check if the token stream ends with
+        // a weighted candidate specifier?
+        // rule_candidate(:weight)
+        var weight: ParserNode? = nil
+        if tokens.count > 2, tokens[endIndex-2] == .op(":"), case let .number(value) = tokens[endIndex-1] {
+            endIndex -= 2
+            weight = .weight(value: value)
+        }
         
         func advance() {
             index += 1
         }
         
         var currentToken: Token? {
-            return index < tokens.endIndex ? tokens[index] : nil
+            return index < endIndex ? tokens[index] : nil
         }
         
         func getErrorLocation() -> String {
@@ -618,6 +632,10 @@ struct Parser {
                 
                 trace("⚙️ parsed \(text)")
             }
+        }
+        
+        if let weight = weight {
+            nodes.append(weight)
         }
         
         return nodes

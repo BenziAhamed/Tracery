@@ -62,3 +62,27 @@ class DefaultContentSelector : RuleCandidateSelector {
     
 }
 
+
+class WeightedSelector :  RuleCandidateSelector {
+    
+    let weights: [Int]
+    let sum: UInt32
+    
+    init(_ distribution:[Int]) {
+        weights = distribution
+        sum = UInt32(weights.reduce(0, +))
+    }
+    
+    func pick(count: Int) -> Int {
+        var choice = Int(arc4random_uniform(sum))
+        var index = 0
+        for weight in weights {
+            choice = choice - weight
+            if choice < 0 {
+                return index
+            }
+            index += 1
+        }
+        fatalError()
+    }
+}

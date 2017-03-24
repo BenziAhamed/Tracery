@@ -120,7 +120,28 @@ public class Tracery {
             selector = PickFirstContentSelector.shared
         }
         else {
-            selector = DefaultContentSelector(candidates.count)
+            // check if any of the candidates have a weight
+            // attached? if so, we attach a weighted selector
+            func hasWeights() -> Bool {
+                for candidate in candidates {
+                    if let last = candidate.nodes.last, case .weight = last {
+                        return true
+                    }
+                }
+                return false
+            }
+            if hasWeights() {
+                let weights:[Int] = candidates.map {
+                    if let last = $0.nodes.last, case let .weight(value) = last {
+                        return value
+                    }
+                    return 1
+                }
+                selector = WeightedSelector(weights)
+            }
+            else {
+                selector = DefaultContentSelector(candidates.count)
+            }
         }
         
         ruleSet[rule] = RuleMapping(candidates: candidates, selector: selector)
