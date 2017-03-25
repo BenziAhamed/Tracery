@@ -14,27 +14,32 @@ import Foundation
 
 struct Modifier : CustomStringConvertible {
     var name: String
-    var parameters: [ModifierParameter]
+    var parameters: [ValueCandidate]
     
     var description: String {
-        return ".\(name)(\(parameters))"
+        return ".\(name)(\(parameters.map { $0.description }.joined(separator: ", ")))"
     }
 }
 
-struct ModifierParameter: CustomStringConvertible {
-    var rawText: String
-    var nodes: [ParserNode]
-    
-    var description: String {
-        return rawText
-    }
+protocol ValueCandidateProtocol {
+    var nodes: [ParserNode] { get }
+    var hasWeight: Bool { get }
+    var weight: Int { get }
 }
 
-struct TagValue : CustomStringConvertible {
-    var rawText: String
+struct ValueCandidate: ValueCandidateProtocol {
     var nodes: [ParserNode]
-    
-    var description: String { return rawText }
+    var hasWeight: Bool {
+        if let last = nodes.last, case .weight = last { return true }
+        return false
+    }
+    var weight: Int {
+        if let last = nodes.last, case let .weight(value) = last { return value }
+        return 1
+    }
+    var description: String {
+        return nodes.map { "\($0)" }.joined(separator: "-")
+    }
 }
 
 enum ParserConditionOperator {
@@ -59,7 +64,7 @@ enum ParserNode : CustomStringConvertible {
     
     case text(String)
     case rule(name:String, mods:[Modifier])
-    case tag(name:String, values:[TagValue])
+    case tag(name:String, values:[ValueCandidate])
     case weight(value: Int)
     
     // control flow
@@ -70,7 +75,7 @@ enum ParserNode : CustomStringConvertible {
     // procedures
     
     case runMod(name: String)
-    case createTag(name: String)
+    case createTag(name: String, selector: RuleCandidateSelector)
     
     // args handling
     
@@ -86,7 +91,7 @@ enum ParserNode : CustomStringConvertible {
             
         case let .rule(name, mods):
             if mods.count > 0 {
-                let mods = mods.map { "." + $0.name }.reduce("") { $0.0 + $0.1 }
+                let mods = mods.reduce("") { $0.0 + $0.1.description }
                 return "RULE(\(name) \(mods))"
             }
             return "RULE(\(name))"
@@ -104,8 +109,8 @@ enum ParserNode : CustomStringConvertible {
         case let .runMod(name):
             return "RUN_MOD(\(name))"
             
-        case let .createTag(name):
-            return "CREATE_TAG(\(name))"
+        case let .createTag(name, selector):
+            return "CREATE_TAG(\(name) \(selector))"
             
         case let .evaluateArg(nodes):
             return "EVAL_ARG(\(nodes))"
@@ -148,7 +153,9 @@ enum ParserError : Error, CustomStringConvertible {
 
 
 
-struct Parser {
+struct Parser { }
+
+extension Parser {
     
     // code generation stage
     // tokens -> nodes
@@ -299,7 +306,7 @@ struct Parser {
                             }
                             do {
                                 let nodes = try Parser.gen(tokens[currentIndex..<index])
-                                let parameter = ModifierParameter(rawText: paramText, nodes: nodes)
+                                let parameter = ValueCandidate(nodes: nodes)
                                 modifier.parameters.append(parameter)
                             } catch {
                                 throw ParserError.error("parameter '\(paramText)' of modifier '\(modName)' in invalid, reason - \(error)")
@@ -334,27 +341,17 @@ struct Parser {
             
             try parse(.COLON, error: "tag '\(name)' must be followed by a :")
             
-            var values = [TagValue]()
+            var values = [ValueCandidate]()
             
             // consume a rule stream
             func consumeTagValue() throws {
-                var tagValueText = ""
                 let currentIndex = index
                 while let token = currentToken, token != .COMMA, token != .RIGHT_SQUARE_BRACKET {
-                    tagValueText.append(token.rawText)
                     advance()
                 }
-                if tagValueText.isEmpty {
-                    throw ParserError.error("value expected for tag '\(name)', but none found")
-                }
-                do {
-                    let nodes = try Parser.gen(tokens[currentIndex..<index])
-                    let tagValue = TagValue(rawText: tagValueText, nodes: nodes)
-                    values.append(tagValue)
-                }
-                catch  {
-                    throw ParserError.error("unable to parse value '\(tagValueText)' for tag '\(name)' reason - \(error)")
-                }
+                let nodes = try Parser.gen(tokens[currentIndex..<index])
+                let tagValue = ValueCandidate(nodes: nodes)
+                values.append(tagValue)
             }
             
             try consumeTagValue()
@@ -362,7 +359,6 @@ struct Parser {
                 try parse(.COMMA, error: nil)
                 try consumeTagValue()
             }
-            
             
             let tag = ParserNode.tag(name: name, values: values)
             
@@ -647,4 +643,27 @@ struct Parser {
         
     }
     
+}
+
+
+extension Array where Element: ValueCandidateProtocol {
+    func selector() -> RuleCandidateSelector {
+        if count < 2 {
+            return PickFirstContentSelector.shared
+        }
+        func hasWeights() -> Bool {
+            for i in self {
+                if i.hasWeight { return true }
+            }
+            return false
+        }
+        if hasWeights() {
+            var weights = [Int]()
+            for i in self {
+                weights.append(i.weight)
+            }
+            return WeightedSelector(weights)
+        }
+        return DefaultContentSelector(count)
+    }
 }

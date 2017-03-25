@@ -17,7 +17,7 @@ class Performance: XCTestCase {
                 "name": ["Arjun","Yuuma","Darcy","Mia","Chiaki","Izzi","Azra","Lina"]
                 ,	"animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten"]
                 ,	"occupationBase": ["wizard","witch","detective","ballerina","criminal","pirate","lumberjack","spy","doctor","scientist","captain","priest"]
-                ,	"occupationMod": ["occult ","space ","professional ","gentleman ","erotic ","time ","cyber","paleo","techno","super"]
+                ,	"occupationMod": ["occult ","space ","professional ","gentleman ","erotic ","time ","cyber ","paleo ","techno ","super "]
                 ,	"strange": ["mysterious","portentous","enchanting","strange","eerie"]
                 ,	"tale": ["story","saga","tale","legend"]
                 ,	"occupation": ["#occupationMod##occupationBase#"]
@@ -29,10 +29,25 @@ class Performance: XCTestCase {
                 ,	"story": ["#hero# the #heroJob# #setSailForAdventure#. #openBook#"]
                 ,	"origin": ["Once upon a time, #[#setCharacter#]story#"]
                 ]}
-            _ = t.expand("#origin")
+            print(t.expand("- #origin#"))
         }
     }
+
     
+    func test() {
+        
+        // Tracery.logLevel = .verbose
+        // let tokens = Lexer.tokens("[if name == benzi then ok]")
+        let tokens = Lexer.tokens("[tag:value1:up#many#,value2:10]")
+        // let tokens = Lexer.tokens("#.name(#a#)###")
+        // let tokens = Lexer.tokens("[lemons:pie,#maybe#]")
+        let nodes = try! Parser.gen2(tokens)
+        
+        print(tokens)
+        print(nodes)
+        
+        
+    }
 
 }
 

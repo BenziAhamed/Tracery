@@ -16,7 +16,9 @@ extension Tracery {
     func eval(_ text: String) throws -> String {
         trace("📘 input \(text)")
         
-        let nodes = try Parser.gen(Lexer.tokens(text))
+        // let nodes = try Parser.gen(Lexer.tokens(text))
+        let nodes = try Parser.gen2(Lexer.tokens(text))
+        
         let output = try eval(nodes)
         
         trace("📘 output \(text) ==> \(output)")
@@ -124,7 +126,7 @@ extension Tracery {
                 // a tag mapping
                 
                 var nodes = values.map { ParserNode.evaluateArg(nodes: $0.nodes) }
-                nodes.append(.createTag(name: name))
+                nodes.append(.createTag(name: name, selector: values.selector()))
                 
                 // creating a tag should not
                 // affect the stack depth, since hierarchical tags
@@ -132,16 +134,13 @@ extension Tracery {
                 try pushContext(nodes, .nothing, affectsEvaluationLevel: false)
                 
                 
-            case let .createTag(name):
+            case let .createTag(name, selector):
                 
                 let context = contextStack.contexts[top]
                 
                 // context.args will have the accumulated
                 // values if the current context
-                let mapping = TagMapping(
-                    candidates: context.args,
-                    selector: context.args.count < 2 ? PickFirstContentSelector.shared : DefaultContentSelector(context.args.count)
-                )
+                let mapping = TagMapping(candidates: context.args, selector: selector)
                 
                 if let existing = tagStorage.get(name: name) {
                     trace("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
@@ -261,7 +260,7 @@ extension Tracery {
                 if let mapping = ruleSet[name] {
                     if let candidate = mapping.select() {
                         trace("📙 eval \(node)")
-                        try applyMods(nodes: candidate.nodes)
+                        try applyMods(nodes: candidate.value.nodes)
                     }
                     else {
                         warn("no candidate found for rule #\(name)#")
@@ -308,7 +307,7 @@ extension Tracery {
             }
             if let mapping = ruleSet[name] {
                 for candidate in mapping.candidates {
-                    nodes.append(.evaluateArg(nodes: candidate.nodes))
+                    nodes.append(.evaluateArg(nodes: candidate.value.nodes))
                 }
                 return nodes
             }

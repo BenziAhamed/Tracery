@@ -21,7 +21,7 @@ struct RuleMapping {
 
 struct RuleCandidate {
     let text: String
-    var nodes: [ParserNode]
+    var value: ValueCandidate
 }
 
 
@@ -127,7 +127,7 @@ public class Tracery {
             // attached? if so, we attach a weighted selector
             func hasWeights() -> Bool {
                 for candidate in candidates {
-                    if let last = candidate.nodes.last, case .weight = last {
+                    if candidate.value.hasWeight {
                         return true
                     }
                 }
@@ -136,14 +136,9 @@ public class Tracery {
             if hasWeights() {
                 var weights = [Int]()
                 for i in candidates.indices {
-                    let c = candidates[i]
-                    if let last = c.nodes.last, case let .weight(value) = last {
-                        weights.append(value)
-                        // remove the weight node since we are done with it
-                        candidates[i].nodes.removeLast()
-                    }
-                    else {
-                        weights.append(1)
+                    weights.append(candidates[i].value.weight)
+                    if candidates[i].value.hasWeight {
+                       candidates[i].value.nodes.removeLast()
                     }
                 }
                 selector = WeightedSelector(weights)
@@ -162,7 +157,7 @@ public class Tracery {
             info("checking rule '\(rule)' - \(text)")
             return RuleCandidate(
                 text: text,
-                nodes: try Parser.gen(Lexer.tokens(text))
+                value: ValueCandidate(nodes: try Parser.gen2(Lexer.tokens(text)))
             )
         }
         catch {

@@ -43,8 +43,8 @@ class WeightedCandidates: XCTestCase {
         
         let t = Tracery.init(lines: [
             "[binary]",
-            "1#binary#      :2",
-            "0#binary#  :0",
+            "1#binary#:2",
+            "0#binary#:0",
             "##",
             ])
         
@@ -60,16 +60,16 @@ class WeightedCandidates: XCTestCase {
         
         let t = Tracery.init(lines: [
             "[binary]",
-            "0",
-            "1",
+            "A",
+            "B",
             "",
             "[number]",
-            "#binary##number#     :10",
-            "#binary#             :1",
+            "#binary##number#:10",
+            "#binary#:1",
             ])
         
         
-        let count = 10
+        let count = 100
         var total = 0
         
         for i in 0..<count {
@@ -82,6 +82,13 @@ class WeightedCandidates: XCTestCase {
         let average = Double(total)/Double(count)
         print("AVG", average, "should be close to 11")
         // XCTAssertTrue(abs(average - 11.0) < 0.5, "\(average) is not close to 11.0")
+    }
+    
+    
+    func testTagValuesCanBeWeighted() {
+        
+        Tracery().expandVerbose("[b:0#b#:4,1#b#:4,0,1]#b#")
+        
     }
     
 }

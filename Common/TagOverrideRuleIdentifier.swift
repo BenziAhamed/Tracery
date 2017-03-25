@@ -22,7 +22,7 @@ class UnilevelStorageTagOverrideRuleIndentifer : RulesetAnalyser {
     func end() {
         mappings.forEach { entry in
             entry.mapping.candidates.forEach { candidate in
-                candidate.nodes.forEach { node in
+                candidate.value.nodes.forEach { node in
                     if case let .tag(name, _) = node, allRules.contains(name) {
                         print("⚠️ tag override in rule '\(entry.rule)', creating tag '\(name)' overrides pre-defined rule '\(name)'")
                     }
