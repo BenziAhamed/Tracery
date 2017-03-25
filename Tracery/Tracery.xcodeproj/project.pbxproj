@@ -264,6 +264,7 @@
 				B96DC01F1E72F2B7008623B8 /* EmptyRulesetDetector.swift */,
 				B912802C1E77AFEE0063D5A8 /* Info.plist */,
 				B96DC0201E72F2B7008623B8 /* Lexer.swift */,
+				B99F305B1E869E08005B0808 /* Parser.Gen2.swift */,
 				B96DC0211E72F2B7008623B8 /* Parser.swift */,
 				B96DC0221E72F2B7008623B8 /* RuleCandidateSelector.swift */,
 				B96DC0231E72F2B7008623B8 /* RuleCandidatesProvider.swift */,
@@ -275,7 +276,6 @@
 				B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */,
 				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B9A248E51E817216004D60C9 /* Tracery.Text.swift */,
-				B99F305B1E869E08005B0808 /* Parser.Gen2.swift */,
 			);
 			name = Common;
 			path = ../Common;

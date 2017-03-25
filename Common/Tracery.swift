@@ -39,6 +39,7 @@ extension TraceryOptions {
 public class Tracery {
     
     var ruleSet: [String: RuleMapping]
+    var runTimeRuleSet = [String: RuleMapping]()
     var mods: [String: (String,[String])->String]
     var tagStorage: TagStorage
     var contextStack: ContextStack
@@ -119,33 +120,8 @@ public class Tracery {
         if let s = value as? RuleCandidateSelector {
             selector = s
         }
-        else if candidates.count == 1 {
-            selector = PickFirstContentSelector.shared
-        }
         else {
-            // check if any of the candidates have a weight
-            // attached? if so, we attach a weighted selector
-            func hasWeights() -> Bool {
-                for candidate in candidates {
-                    if candidate.value.hasWeight {
-                        return true
-                    }
-                }
-                return false
-            }
-            if hasWeights() {
-                var weights = [Int]()
-                for i in candidates.indices {
-                    weights.append(candidates[i].value.weight)
-                    if candidates[i].value.hasWeight {
-                       candidates[i].value.nodes.removeLast()
-                    }
-                }
-                selector = WeightedSelector(weights)
-            }
-            else {
-                selector = DefaultContentSelector(candidates.count)
-            }
+            selector = candidates.map { $0.value }.selector()
         }
         
         ruleSet[rule] = RuleMapping(candidates: candidates, selector: selector)
@@ -200,10 +176,11 @@ public class Tracery {
         ruleSet[rule]?.selector = selector
     }
     
-    public func expand(_ input: String, resetTags: Bool = true) -> String {
+    public func expand(_ input: String, maintainContext: Bool = false) -> String {
         do {
-            if resetTags {
+            if !maintainContext {
                 ruleEvaluationLevel = 0
+                runTimeRuleSet.removeAll()
                 tagStorage.removeAll()
             }
             return try eval(input)

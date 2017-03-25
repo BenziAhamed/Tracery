@@ -75,6 +75,30 @@ extension Parser {
             
             let name = parseOptionalText() ?? ""
             
+            // #new_rule(fragment_list)#
+            if currentToken == .LEFT_ROUND_BRACKET {
+                if name == "" {
+                    throw ParserError.error("new rule must have a name")
+                }
+                try parse(.LEFT_ROUND_BRACKET)
+                let list = try parseFragmentList(context: "rule candidate")
+                var candidates = [ValueCandidate]()
+                // we can clear an existing rule
+                // or create an empty rule
+                // using #rule()# syntax
+                if list[0].count == 0 {
+                    candidates.append(ValueCandidate(nodes: [.text("")]))
+                }
+                else {
+                    candidates = list.map { return ValueCandidate(nodes: $0) }
+                }
+                nodes.append(.createRule(name: name, values: candidates))
+                try parse(.RIGHT_ROUND_BRACKET, "expected ) after rule candidates list")
+                try parse(.HASH, "expected # after rule definition")
+                return nodes
+            }
+            
+            // #rule?.mod1.mod2().mod3(list)#
             var modifiers = [Modifier]()
             while let token = currentToken, token == .DOT {
                 try parse(.DOT)
@@ -82,7 +106,7 @@ extension Parser {
                 var params = [ValueCandidate]()
                 if currentToken == .LEFT_ROUND_BRACKET {
                     try parse(.LEFT_ROUND_BRACKET)
-                    let argsList = try parseFragmentList()
+                    let argsList = try parseFragmentList(context: "parameter")
                     params = argsList.map {
                         return ValueCandidate.init(nodes: $0)
                     }
@@ -112,9 +136,9 @@ extension Parser {
                 default:
                     let name = try parseText("expected tag name")
                     try parse(.COLON, "expected : after tag '\(name)'")
-                    let values = try parseFragmentList()
+                    let values = try parseFragmentList(context: "tag value")
                     if values[0].count == 0 {
-                        throw ParserError.error("expected some value")
+                        throw ParserError.error("expected a tag value")
                     }
                     let tagValues = values.map { return ValueCandidate.init(nodes: $0) }
                     nodes.append(ParserNode.tag(name: name, values: tagValues))
@@ -253,7 +277,7 @@ extension Parser {
             return [whileBlock]
         }
         
-        func parseFragmentList() throws -> [[ParserNode]] {
+        func parseFragmentList(context: String) throws -> [[ParserNode]] {
             var list = [[ParserNode]]()
             
             // list -> fragment more_fragments
@@ -263,7 +287,7 @@ extension Parser {
                 try parse(.COMMA)
                 let moreFragments = try parseFragmentBlock()
                 if moreFragments.count == 0 {
-                    throw ParserError.error("expected value after ,")
+                    throw ParserError.error("expected \(context) after ,")
                 }
                 list.append(moreFragments)
                 try parseMoreFragments(list: &list)
@@ -294,12 +318,9 @@ extension Parser {
         func parseFragment() throws -> [ParserNode]? {
             var nodes = [ParserNode]()
             guard let token = currentToken else { return nil }
-            
             switch token {
-            
             case Token.HASH:
                 nodes.append(contentsOf: try parseRule())
-
             case Token.LEFT_SQUARE_BRACKET:
                 guard let next = nextToken else { return nil }
                 switch next {
@@ -310,37 +331,45 @@ extension Parser {
                 default:
                     nodes.append(contentsOf: try parseTag())
                 }
-
             case Token.COLON:
                 nodes.append(contentsOf: try parseWeight())
-                
             case .text, .number:
                 nodes.append(.text(token.rawText))
                 advance()
-                
             default:
                 return nil
             
             }
-            
             return nodes
         }
         
-        
-        var parsedNodes = [ParserNode]()
-        
-        while currentToken != nil {
-            parsedNodes.append(contentsOf: try parseFragmentBlock())
-            // at this stage, we may have consumed
-            // all tokens, or reached a lone token that we can
-            // treat as text
-            if let token = currentToken {
-                parsedNodes.append(.text(token.rawText))
-                advance()
+        do {
+            var parsedNodes = [ParserNode]()
+            while currentToken != nil {
+                parsedNodes.append(contentsOf: try parseFragmentBlock())
+                // at this stage, we may have consumed
+                // all tokens, or reached a lone token that we can
+                // treat as text
+                if let token = currentToken {
+                    parsedNodes.append(.text(token.rawText))
+                    advance()
+                }
             }
+            return parsedNodes
         }
-        
-        return parsedNodes
+        catch ParserError.error(let message) {
+            let end = min(index, endIndex-1)
+            let consumed = tokens[0...end].map { $0.rawText }.joined()
+            var all = tokens.map { $0.rawText }.joined()
+            let location = index == endIndex ? consumed.characters.count : consumed.characters.count-1
+            all.insert("❌", at: all.index(all.startIndex, offsetBy: location, limitedBy: all.endIndex)!)
+            let lines = [
+                message,
+                "    " + all,
+                "    " + String(repeating: ".", count: location) + "^"
+            ]
+            throw ParserError.error(lines.joined(separator: "\n"))
+        }
         
     }
     

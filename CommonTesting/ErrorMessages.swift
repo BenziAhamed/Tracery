@@ -13,20 +13,25 @@ class ErrorMessages: XCTestCase {
     
     func testErrorMessages() {
         
-        let t = Tracery{[:]}
-        
-        XCTAssertEqual(t.expand("#rule"),       "error: closing # not found for rule 'rule'")
-        XCTAssertEqual(t.expand("#.#"),         "error: expected modifier name after . in rule ''")
-        XCTAssertEqual(t.expand("#.(#"),        "error: expected modifier name after . in rule ''")
-        XCTAssertEqual(t.expand("#.call(#"),    "error: expected ) to close modifier call")
-        XCTAssertEqual(t.expand("#.call(a,#"),  "error: expected ) to close modifier call")
-        XCTAssertEqual(t.expand("#.call(a,)#"), "error: expected value after ,")
-        XCTAssertEqual(t.expand("#[]#"),        "")
-        XCTAssertEqual(t.expand("#[tag]#"),     "error: expected : after tag 'tag'")
-        XCTAssertEqual(t.expand("#[tag:]#"),    "error: expected some value")
-        XCTAssertEqual(t.expand("#[tag:#.(]#"), "error: expected modifier name after . in rule ''")
-        XCTAssertEqual(t.expand("[:number]"),   "error: expected tag name")
+        checkRule("#.#",         "error: expected modifier name after . in rule ''")
+        checkRule("#rule",       "error: closing # not found for rule 'rule'")
+        checkRule("#.(#",        "error: expected modifier name after . in rule ''")
+        checkRule("#.call(#",    "error: expected ) to close modifier call")
+        checkRule("#.call(a,#",  "error: expected ) to close modifier call")
+        checkRule("#.call(a,)#", "error: expected parameter after ,")
+        checkRule("#[]#",        "")
+        checkRule("#[tag]#",     "error: expected : after tag 'tag'")
+        checkRule("#[tag:]#",    "error: expected a tag value")
+        checkRule("#[tag:#.(]#", "error: expected modifier name after . in rule ''")
+        checkRule("[:number]",   "error: expected tag name")
+        checkRule("#rule(a,)#",  "error: expected rule candidate after ,")
+        checkRule("[tag:a,]",  "error: expected tag value after ,")
     }
 
-    
+    func checkRule(_ target: String, _ prefix: String) {
+        let output = Tracery().expand(target)
+        print("expanding: \(target)")
+        print("\(output)\n")
+        XCTAssertTrue(output.hasPrefix(prefix))
+    }
 }

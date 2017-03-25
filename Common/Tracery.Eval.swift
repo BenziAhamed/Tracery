@@ -216,6 +216,19 @@ extension Tracery {
                 trace("🔰 run mod \(name)(\(context.result) params: \(context.args.joined(separator: ",")))")
                 contextStack.contexts[top].result = mod(context.result, context.args)
                 
+              
+            case let .createRule(name, values):
+                let mapping = RuleMapping(
+                    candidates: values.map { RuleCandidate.init(text: "", value: $0) },
+                    selector: values.selector()
+                )
+                if runTimeRuleSet[name] != nil {
+                    warn("overwriting rule '\(name)'")
+                }
+                else {
+                    trace("⚙️ added rule '\(name)'")
+                }
+                runTimeRuleSet[name] = mapping
                 
             case let .rule(name, mods):
                 
@@ -257,7 +270,17 @@ extension Tracery {
                     try applyMods(nodes: [.text(value)])
                     break
                 }
-                if let mapping = ruleSet[name] {
+                else if let mapping = runTimeRuleSet[name] {
+                    if let candidate = mapping.select() {
+                        trace("📙 eval runtime \(node)")
+                        try applyMods(nodes: candidate.value.nodes)
+                    }
+                    else {
+                        warn("no candidate found for rule #\(name)#")
+                        contextStack.contexts[top].result.append("#\(name)#")
+                    }
+                }
+                else if let mapping = ruleSet[name] {
                     if let candidate = mapping.select() {
                         trace("📙 eval \(node)")
                         try applyMods(nodes: candidate.value.nodes)

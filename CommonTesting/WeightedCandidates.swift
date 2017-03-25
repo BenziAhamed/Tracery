@@ -69,12 +69,12 @@ class WeightedCandidates: XCTestCase {
             ])
         
         
-        let count = 100
+        let count = 20
         var total = 0
-        
-        for i in 0..<count {
+        print("iterations", count)
+        for i in 1...count {
             let output = t.expand("#number#")
-            // print(i, output)
+            print(i, "-", output, "(\(output.characters.count))")
             total += output.characters.count
             XCTAssertFalse(output.contains("stack overflow"))
         }
@@ -85,10 +85,26 @@ class WeightedCandidates: XCTestCase {
     }
     
     
-    func testTagValuesCanBeWeighted() {
+    func testNewRulesCanBeWeighted() {
         
-        Tracery().expandVerbose("[b:0#b#:4,1#b#:4,0,1]#b#")
-        
+        let t = Tracery {[
+            "b" : ["a#b#:10","b#b#:10","a","b"]
+        ]}
+        let count = 20
+        var total = 0
+        var target = -1
+        print("iterations", count)
+        for i in 1...count {
+            // let output = t.expand("#b(0#b#:4,1#b#:4,0,1)##b#"); target = 10
+            // let output = t.expand("#b#"); target = 22
+            // let output = t.expand("#b(0,1)##n(b#n#:21,b)##n#"); target = 22
+            let output = t.expand("#b(0,1)##n(#b##n#:21,#b#)##n#"); target = 22
+            print(i, "-", output, "(\(output.characters.count))")
+            total += output.characters.count
+            XCTAssertFalse(output.contains("stack overflow"))
+        }
+        let average = Double(total)/Double(count)
+        print("AVG", average, "should be close to \(target)")
     }
     
 }

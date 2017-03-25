@@ -55,29 +55,30 @@ class TraceryioSamples: XCTestCase {
         let o = TraceryOptions()
         o.tagStorageType = .heirarchical
         
-        let braces = ["()","{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
-        let braceTypes = braces
+        let braces = ["{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+        var braceTypes = braces
             .map { braces -> String in
                 let open = braces[braces.startIndex]
                 let close = braces[braces.index(after: braces.startIndex)]
                 return "[open:\(open)][close:\(close)]"
             }
+        braceTypes.append("[open:\\(][close:\\)]")
         
         let t = Tracery(o) {[
             "letter": ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],
             "bracetypes": braceTypes,
             "brace": [
-                "#open##symbol# #origin##symbol##close# ",
-                "#open##symbol##close# #origin# #open##symbol##close#",
-                "#open##symbol# #origin##symbol##close# #origin#",
-                "",
+                "#open##symbol##origin##symbol##close# ",
+                "#open##symbol##close##origin##open##symbol##close# ",
+                "#open##symbol##origin##symbol##close##origin# ",
+                " ",
             ],
             "origin": ["#[symbol:#letter#][#bracetypes#]brace#"]
         ]}
         
         // Tracery.logLevel = .verbose
         let output = t.expand("#origin#")
-        
+        print(output)
         XCTAssertFalse(output.contains("stack overflow"))
         
         // track open and close
