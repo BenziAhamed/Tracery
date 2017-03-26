@@ -36,19 +36,26 @@ class Performance: XCTestCase {
     
     func test() {
         
-        
-        let tokens = Lexer.tokens("hello.")
-        // let tokens = Lexer.tokens("hello. #word(lemon.,start.)")
-        
-        let nodes = try! Parser.gen2(tokens)
-        
-        print(tokens)
-        print(nodes)
-        
+        do {
+            
+             let tokens = Lexer.tokens("hello. #word(lemon.,start)#")
+//            let tokens = Lexer.tokens("#r1#,#r2#")
+            
+            let nodes = try Parser.gen2(tokens)
+            
+            print(tokens.joined(separator: "🔸"))
+            print(nodes.joined(separator: "🔸"))
+        } catch {
+            print(error)
+        }
         
     }
 
 }
 
-
+extension Sequence {
+    func joined(separator: String = ",") -> String {
+        return self.map { "\($0)" }.joined(separator: separator)
+    }
+}
 

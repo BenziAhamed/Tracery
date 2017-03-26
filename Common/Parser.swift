@@ -93,35 +93,35 @@ enum ParserNode : CustomStringConvertible {
         case let .rule(name, mods):
             if mods.count > 0 {
                 let mods = mods.reduce("") { $0.0 + $0.1.description }
-                return "RULE(\(name) \(mods))"
+                return "RULE_\(name)_\(mods))"
             }
-            return "RULE(\(name))"
+            return "RULE_\(name)"
 
         case let .createRule(name, values):
             if values.count == 1 { return "NEW_RULE(\(name)=\(values[0]))" }
-            return "NEW_RULE(\(name)=\(values))"
+            return "+RULE_\(name)=\(values)"
             
         case let .tag(name, values):
             if values.count == 1 { return "TAG(\(name)=\(values[0]))" }
-            return "TAG(\(name)=\(values))"
+            return "TAG_\(name)=\(values)"
             
         case let .text(text):
-            return "TXT(\(text))"
+            return "TXT_\(text)"
             
         case let .weight(value):
-            return "WEIGHT(\(value))"
+            return "WEIGHT_\(value)"
             
         case let .runMod(name):
-            return "RUN_MOD(\(name))"
+            return "RUN_MOD_\(name)"
             
-        case let .createTag(name, selector):
-            return "CREATE_TAG(\(name) \(selector))"
+        case let .createTag(name, _):
+            return "+TAG_\(name)"
             
         case let .evaluateArg(nodes):
-            return "EVAL_ARG(\(nodes))"
+            return "EVAL_ARG<\(nodes)>"
             
         case .clearArgs:
-            return "CLEAR_ARGS"
+            return "CLR_ARGS"
             
         case let .ifBlock(condition, thenBlock, elseBlock):
             if let elseBlock = elseBlock {

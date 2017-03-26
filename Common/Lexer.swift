@@ -28,10 +28,10 @@ enum Token : CustomStringConvertible {
     
     var description: String {
         switch self {
-        case let .text(text): return "'\(text)'"
-        case let .op(c): return "\(c)"
-        case let .keyword(text): return "\(text.uppercased())"
-        case let .number(value): return "d(\(value))"
+        case let .text(text): return "txt(\(text))"
+        case let .op(c): return "op(\(c))"
+        case let .keyword(text): return "key(\(text.uppercased()))"
+        case let .number(value): return "num(\(value))"
         }
     }
     

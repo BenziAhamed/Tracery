@@ -25,7 +25,9 @@ class ErrorMessages: XCTestCase {
         checkRule("#[tag:#.(]#", "error: expected modifier name after . in rule ''")
         checkRule("[:number]",   "error: expected tag name")
         checkRule("#rule(a,)#",  "error: expected rule candidate after ,")
-        checkRule("[tag:a,]",  "error: expected tag value after ,")
+        checkRule("[tag:a,]",    "error: expected tag value after ,")
+        checkRule("#(huh)#",     "error: new rule must have a name")
+        
     }
 
     func checkRule(_ target: String, _ prefix: String) {
