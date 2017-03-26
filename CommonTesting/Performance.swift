@@ -36,11 +36,10 @@ class Performance: XCTestCase {
     
     func test() {
         
-        // Tracery.logLevel = .verbose
-        // let tokens = Lexer.tokens("[if name == benzi then ok]")
-        let tokens = Lexer.tokens("#new(lemon:10,pie:1)#")
-        // let tokens = Lexer.tokens("#.name(#a#)###")
-        // let tokens = Lexer.tokens("[lemons:pie,#maybe#]")
+        
+        let tokens = Lexer.tokens("hello.")
+        // let tokens = Lexer.tokens("hello. #word(lemon.,start.)")
+        
         let nodes = try! Parser.gen2(tokens)
         
         print(tokens)

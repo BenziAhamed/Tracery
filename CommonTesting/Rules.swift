@@ -18,6 +18,13 @@ class Rules : XCTestCase {
         XCTAssert(t.expand("#msg#") == "hello world")
     }
     
+    func testExpandSimpleRuleWithDot() {
+        let t = Tracery {[
+            "msg" : "hello world."
+            ]}
+        XCTAssert(t.expand("#msg#") == "hello world.")
+    }
+    
     func testInputWithNoRulesProvidesTheSameAsOutput() {
         let t = Tracery()
         XCTAssert(t.expand("hello world") == "hello world")

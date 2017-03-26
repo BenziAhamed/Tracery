@@ -230,12 +230,12 @@ extension Tracery {
                 }
                 runTimeRuleSet[name] = mapping
                 
+                
+                
             case let .rule(name, mods):
                 
                 func applyMods(nodes: [ParserNode]) throws {
-                    
                     var nodes = nodes
-                    
                     for mod in mods {
                         guard self.mods[mod.name] != nil else {
                             warn("modifier '\(mod.name)' not defined")
@@ -247,7 +247,6 @@ extension Tracery {
                         nodes.append(.runMod(name: mod.name))
                         nodes.append(.clearArgs)
                     }
-                    
                     // at this stage nodes will be
                     // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod, clearArgs)* ]
                     
@@ -255,47 +254,53 @@ extension Tracery {
                     // evalArgs will update the args list, and runMod will use the args list to run a mod,
                     // replacing the context.result with its computed value
                     // clearArgs empties args list for consequent processing by any chained modifier nodes
-                    
                     try pushContext(nodes, .appendToResult)
                 }
                 
-                if name.isEmpty {
-                    try applyMods(nodes: [.text("")])
-                    break
+                enum ExpansionState {
+                    case apply([ParserNode])
+                    case noExpansion(reason: String)
                 }
-                if let mapping = tagStorage.get(name: name) {
+
+                var state: ExpansionState = .noExpansion(reason: "not defined")
+                
+                func selectCandidate(_ mapping: RuleMapping, runTime: Bool) {
+                    guard let candidate = mapping.select() else {
+                        state = .noExpansion(reason: "no candidates found")
+                        return
+                    }
+                    state = .apply(candidate.value.nodes)
+                    trace("📙 eval \(runTime ? "runtime" : "") \(node)")
+                }
+                
+                if name.isEmpty {
+                    state = .apply([.text("")])
+                }
+                else if let mapping = tagStorage.get(name: name) {
                     let i = mapping.selector.pick(count: mapping.candidates.count)
                     let value = mapping.candidates[i]
                     trace("📗 get tag[\(name)] --> \(value)")
-                    try applyMods(nodes: [.text(value)])
-                    break
+                    state = .apply([.text(value)])
+                }
+                else if let object = objects[name] {
+                    let value = "\(object)"
+                    trace("📘 eval object \(value)")
+                    state = .apply([.text(value)])
                 }
                 else if let mapping = runTimeRuleSet[name] {
-                    if let candidate = mapping.select() {
-                        trace("📙 eval runtime \(node)")
-                        try applyMods(nodes: candidate.value.nodes)
-                    }
-                    else {
-                        warn("no candidate found for rule #\(name)#")
-                        contextStack.contexts[top].result.append("#\(name)#")
-                    }
+                    selectCandidate(mapping, runTime: true)
                 }
                 else if let mapping = ruleSet[name] {
-                    if let candidate = mapping.select() {
-                        trace("📙 eval \(node)")
-                        try applyMods(nodes: candidate.value.nodes)
-                    }
-                    else {
-                        warn("no candidate found for rule #\(name)#")
-                        contextStack.contexts[top].result.append("#\(name)#")
-                    }
+                    selectCandidate(mapping, runTime: false)
                 }
-                else {
-                    warn("rule #\(name)# cannot be expanded")
+                
+                switch state {
+                case .apply(let nodes):
+                    try applyMods(nodes: nodes)
+                case .noExpansion(let reason):
+                    warn("rule #\(name)# expansion failed - \(reason)")
                     contextStack.contexts[top].result.append("#\(name)#")
                 }
-                
-                
             }
         }
         
