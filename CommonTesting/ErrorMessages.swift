@@ -16,8 +16,8 @@ class ErrorMessages: XCTestCase {
         checkRule("#.#",         "error: expected modifier name after . in rule ''")
         checkRule("#rule",       "error: closing # not found for rule 'rule'")
         checkRule("#.(#",        "error: expected modifier name after . in rule ''")
-        checkRule("#.call(#",    "error: expected ) to close modifier call")
-        checkRule("#.call(a,#",  "error: expected ) to close modifier call")
+        checkRule("#.call(#",    "error: closing # not found for rule ''")
+        checkRule("#.call(a,#",  "error: closing # not found for rule ''")
         checkRule("#.call(a,)#", "error: expected parameter after ,")
         checkRule("#[]#",        "")
         checkRule("#[tag]#",     "error: expected : after tag 'tag'")
@@ -26,14 +26,12 @@ class ErrorMessages: XCTestCase {
         checkRule("[:number]",   "error: expected tag name")
         checkRule("#rule(a,)#",  "error: expected rule candidate after ,")
         checkRule("[tag:a,]",    "error: expected tag value after ,")
-        checkRule("#(huh)#",     "error: new rule must have a name")
-        
     }
 
     func checkRule(_ target: String, _ prefix: String) {
         let output = Tracery().expand(target)
         print("expanding: \(target)")
         print("\(output)\n")
-        XCTAssertTrue(output.hasPrefix(prefix))
+        XCTAssertEqual(output.hasPrefix(prefix), true)
     }
 }

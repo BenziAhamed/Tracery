@@ -92,19 +92,79 @@ class WeightedCandidates: XCTestCase {
         ]}
         let count = 20
         var total = 0
-        var target = -1
+        let target = 10
         print("iterations", count)
         for i in 1...count {
-            // let output = t.expand("#b(0#b#:4,1#b#:4,0,1)##b#"); target = 10
-            // let output = t.expand("#b#"); target = 22
-            // let output = t.expand("#b(0,1)##n(b#n#:21,b)##n#"); target = 22
-            let output = t.expand("#b(0,1)##n(#b##n#:21,#b#)##n#"); target = 22
+            let output = t.expand("#b(0,1)##n(#b##n#:\(target-1),#b#)##n#")
             print(i, "-", output, "(\(output.characters.count))")
             total += output.characters.count
-            XCTAssertFalse(output.contains("stack overflow"))
+            XCTAssertTrue(!output.contains("stack overflow"))
+            if output.contains("stack overflow") {
+                return
+            }
         }
         let average = Double(total)/Double(count)
         print("AVG", average, "should be close to \(target)")
     }
     
+    
+    func testInlineRulesCanBeWeighted() {
+        
+        // binary number generator
+        
+        let t = Tracery()
+        let count = 1
+        var total = 0
+        let target = 10
+        print("iterations", count)
+        for i in 1...count {
+            // define inline rule b
+            // choices
+            // 0
+            // 1
+            // any(0,1) and then b  : weighted to target-1
+            // then trigger b
+            let output = t.expand("#b(0,1,#(0,1)##b#:\(target-1))##b#")
+            print(i, "-", output, "(\(output.characters.count))")
+            total += output.characters.count
+            XCTAssertTrue(!output.contains("stack overflow"))
+            if output.contains("stack overflow") {
+                return
+            }
+        }
+        let average = Double(total)/Double(count)
+        print("AVG", average, " after \(count) iterations, should be close to \(target)")
+    }
+    
+    
+    func testInlineRulesCanCallExistingRulesWithWeights() {
+        
+        // prints hi 'x' times more than bye
+        // x = 9 means of 0.9 probability of gtting hi
+        let x = 9
+        
+        let t = Tracery.init(lines:[
+            "[say_hi]",
+            "hi",
+            "",
+            "[say_bye]",
+            "bye",
+            "",
+            "[msg]",
+            "#(#say_hi#:\(x),#say_bye#)#"
+        ])
+        
+        let iterations = 100
+        
+        var hiCount = 0, byeCount = 0
+        for _ in 1...iterations {
+            let output = t.expand("#msg#")
+            XCTAssertItemInArray(item: output, array: ["hi","bye"])
+            hiCount += output == "hi" ? 1 : 0
+            byeCount += output == "bye" ? 1 : 0
+        }
+        
+        let moreness = Double(hiCount)/Double(hiCount + byeCount)
+        print("after \(iterations) iterations, hi=\(hiCount) bye=\(byeCount) [by: \(moreness) expected: \(Double(x)/10.0)]")
+    }
 }

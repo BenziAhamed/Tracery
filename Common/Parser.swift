@@ -64,6 +64,7 @@ enum ParserNode : CustomStringConvertible {
     
     case text(String)
     case rule(name:String, mods:[Modifier])
+    case any(values:[ValueCandidate], selector:RuleCandidateSelector)
     case tag(name:String, values:[ValueCandidate])
     case weight(value: Int)
     case createRule(name:String, values:[ValueCandidate])
@@ -107,6 +108,9 @@ enum ParserNode : CustomStringConvertible {
             
         case let .text(text):
             return "TXT_\(text)"
+            
+        case let .any(values, _):
+            return "ANY\(values)"
             
         case let .weight(value):
             return "WEIGHT_\(value)"

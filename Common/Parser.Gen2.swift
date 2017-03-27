@@ -25,6 +25,10 @@ extension Parser {
             index += 1
         }
         
+        func rewind(by: Int) {
+            index = max(index - by, tokens.startIndex)
+        }
+        
         var currentToken: Token? {
             return index < endIndex ? tokens[index] : nil
         }
@@ -68,12 +72,31 @@ extension Parser {
                 return nodes
             }
             
-            // lonely hash? 
-            // input = "...#"
-            if currentToken == nil {
-                nodes.append(.text("#"))
+            
+            // inline rules
+            // #(a|b|c|d)#
+            if currentToken == .LEFT_ROUND_BRACKET {
+                
+                try parse(.LEFT_ROUND_BRACKET)
+                let candidates = try parseFragmentList(
+                    separator: .COMMA,
+                    context: "inline rule canadidate",
+                    stopParsingFragmentBlockOnToken: .RIGHT_ROUND_BRACKET
+                ).map {
+                    return ValueCandidate(nodes: $0)
+                }
+                try parse(.RIGHT_ROUND_BRACKET, "expected ) after inline rule candidates")
+                try parse(.HASH, "expected # after inline rule definition")
+                
+                if candidates.count == 0 || candidates[0].nodes.count == 0 {
+                    nodes.append(.text(""))
+                    return nodes
+                }
+                
+                nodes.append(.any(values: candidates, selector: candidates.selector()))
                 return nodes
             }
+            
             
             let name = parseOptionalText() ?? ""
             
@@ -83,7 +106,11 @@ extension Parser {
                     throw ParserError.error("new rule must have a name")
                 }
                 try parse(.LEFT_ROUND_BRACKET)
-                let list = try parseFragmentList(context: "rule candidate", stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET)
+                let list = try parseFragmentList(
+                    separator: .COMMA,
+                    context: "rule candidate",
+                    stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET
+                )
                 var candidates = [ValueCandidate]()
                 // we can clear an existing rule
                 // or create an empty rule
@@ -108,7 +135,7 @@ extension Parser {
                 var params = [ValueCandidate]()
                 if currentToken == .LEFT_ROUND_BRACKET {
                     try parse(.LEFT_ROUND_BRACKET)
-                    let argsList = try parseFragmentList(context: "parameter", stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET)
+                    let argsList = try parseFragmentList(separator: .COMMA, context: "parameter", stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET)
                     params = argsList.map {
                         return ValueCandidate.init(nodes: $0)
                     }
@@ -139,7 +166,7 @@ extension Parser {
                 default:
                     let name = try parseText("expected tag name")
                     try parse(.COLON, "expected : after tag '\(name)'")
-                    let values = try parseFragmentList(context: "tag value", stopParsingFragmentBlockOnToken: Token.RIGHT_SQUARE_BRACKET)
+                    let values = try parseFragmentList(separator: .COMMA, context: "tag value", stopParsingFragmentBlockOnToken: Token.RIGHT_SQUARE_BRACKET)
                     if values[0].count == 0 {
                         throw ParserError.error("expected a tag value")
                     }
@@ -253,18 +280,18 @@ extension Parser {
             return [whileBlock]
         }
         
-        func parseFragmentList(context: String, stopParsingFragmentBlockOnToken: Token) throws -> [[ParserNode]] {
-            let stoppers = [Token.COMMA, stopParsingFragmentBlockOnToken]
+        func parseFragmentList(separator: Token, context: String, stopParsingFragmentBlockOnToken: Token) throws -> [[ParserNode]] {
+            let stoppers = [separator, stopParsingFragmentBlockOnToken]
             var list = [[ParserNode]]()
             
             // list -> fragment more_fragments
-            // more_fragments -> , fragment more_fragments | e
+            // more_fragments -> separator fragment more_fragments | e
             func parseMoreFragments(list: inout [[ParserNode]]) throws {
-                if currentToken != Token.COMMA { return }
-                try parse(.COMMA)
+                if currentToken != separator { return }
+                try parse(separator)
                 let moreFragments = try parseFragmenSequenceWithContext(until: stoppers)
                 if moreFragments.count == 0 {
-                    throw ParserError.error("expected \(context) after ,")
+                    throw ParserError.error("expected \(context) after \(separator.rawText)")
                 }
                 list.append(moreFragments)
                 try parseMoreFragments(list: &list)
@@ -352,18 +379,19 @@ extension Parser {
         // with a stopper of 1 comma
         func parseFragmenSequenceWithContext(until stoppers: [Token] = []) throws -> [ParserNode] {
             var nodes = [ParserNode]()
+            
             while currentToken != nil {
+                
                 nodes.append(contentsOf: try parseFragmentSequence())
-                guard let token = currentToken, !stoppers.contains(token) else {
-                    break
-                }
+                
+                guard let token = currentToken, !stoppers.contains(token) else { break }
                 // at this stage, we may have consumed
                 // all tokens, or reached a lone token that we can
                 // treat as text since it is not a stopper
                 nodes.append(.text(token.rawText))
                 advance()
             }
-            return flattenText(nodes)
+            return nodes.count > 1 ? flattenText(nodes) : nodes
         }
         
         do {
@@ -389,10 +417,10 @@ extension Parser {
             //     .....^                     # location highlighter
 
             
-            let end = min(index, endIndex-1)
-            let consumed = tokens[0...end].map { $0.rawText }.joined()
+            let end = min(index, endIndex)
+            let consumed = tokens[0..<end].map { $0.rawText }.joined()
             var all = tokens.map { $0.rawText }.joined()
-            let location = index == endIndex ? consumed.characters.count : consumed.characters.count-1
+            let location = consumed.characters.count
             all.insert("❌", at: all.index(all.startIndex, offsetBy: location, limitedBy: all.endIndex)!)
             let lines = [
                 message,

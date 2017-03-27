@@ -36,15 +36,15 @@ class Performance: XCTestCase {
     
     func test() {
         
+        
+        let input = "#(hello:100,konichiwa:1000)#"
+        let tokens = Lexer.tokens(input)
+        print(tokens)
         do {
-            
-             let tokens = Lexer.tokens("hello. #word(lemon.,start)#")
-//            let tokens = Lexer.tokens("#r1#,#r2#")
-            
             let nodes = try Parser.gen2(tokens)
+            print(nodes)
+            print(Tracery().expandVerbose(input))
             
-            print(tokens.joined(separator: "🔸"))
-            print(nodes.joined(separator: "🔸"))
         } catch {
             print(error)
         }
@@ -53,9 +53,4 @@ class Performance: XCTestCase {
 
 }
 
-extension Sequence {
-    func joined(separator: String = ",") -> String {
-        return self.map { "\($0)" }.joined(separator: separator)
-    }
-}
 

@@ -113,6 +113,9 @@ extension Tracery {
             case .clearArgs:
                 contextStack.contexts[top].args.removeAll()
                 
+            case let .any(values, selector):
+                let choice = values[selector.pick(count: values.count)]
+                try pushContext(choice.nodes)
                 
             case let .tag(name, values):
                 

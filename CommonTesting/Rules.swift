@@ -45,11 +45,9 @@ class Rules : XCTestCase {
     
     func testEscapseSequences() {
         let t = Tracery{[:]}
-        XCTAssertEqual(t.expand("#"), "#") // trailing hash treated as character
         XCTAssertEqual(t.expand("##"), "") // treated as empty rule
         XCTAssertEqual(t.expand("\\#"), "#")
-        XCTAssertEqual(t.expand("\\##"), "##") // trailing hash treated as character
-        XCTAssertEqual(t.expand("\\#hello#"), "#hello#") // trailing hash treated as character
+        XCTAssertEqual(t.expand("\\#hello\\#"), "#hello#") // trailing hash treated as character
         XCTAssertEqual(t.expand("\\["), "[")
         XCTAssertEqual(t.expand("\\[]"), "[]")
         XCTAssertEqual(t.expand("\\[hello]"), "[hello]")
