@@ -115,7 +115,7 @@ extension Tracery {
                 
             case let .any(values, selector):
                 let choice = values[selector.pick(count: values.count)]
-                try pushContext(choice.nodes)
+                try pushContext(choice.nodes, affectsEvaluationLevel: false)
                 
             case let .tag(name, values):
                 
