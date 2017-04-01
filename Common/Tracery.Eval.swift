@@ -124,7 +124,7 @@ extension Tracery {
                 break
                 
             case let .text(text):
-                trace("📘 text (\(text))")
+                trace("📘 text '\(text)'")
                 // commit result to context
                 contextStack.contexts[top].result.append(text)
                 

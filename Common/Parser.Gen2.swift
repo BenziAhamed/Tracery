@@ -25,10 +25,6 @@ extension Parser {
             index += 1
         }
         
-        func rewind(by: Int) {
-            index = max(index - by, tokens.startIndex)
-        }
-        
         var currentToken: Token? {
             return index < endIndex ? tokens[index] : nil
         }
@@ -89,62 +85,51 @@ extension Parser {
             }
             
             
-            // inline rules
-            // #(a,b,c)# {(a,b,c)}
-            if currentToken == .LEFT_ROUND_BRACKET {
-                
+            // parses a comma separated list of value candidates
+            // (a,b,c) -> value candidates [a,b,c]
+            func parseValueCandidateList(context: String) throws -> [ValueCandidate] {
                 try parse(.LEFT_ROUND_BRACKET)
                 let candidates = try parseFragmentList(
                     separator: .COMMA,
-                    context: "inline rule canadidate",
+                    context: context,
                     stopParsingFragmentBlockOnToken: .RIGHT_ROUND_BRACKET
-                ).map {
-                    return ValueCandidate(nodes: $0)
-                }
-                try parse(.RIGHT_ROUND_BRACKET, "expected ) after inline rule candidates")
+                    )
+                    .map {
+                        return ValueCandidate(nodes: $0)
+                    }
+                try parse(.RIGHT_ROUND_BRACKET, "expected ) after \(context) list")
+                return candidates
+            }
+            
+            
+            let name = parseOptionalText()
+            
+            switch (name, currentToken) {
+                
+            case (nil, .some(Token.LEFT_ROUND_BRACKET)):
+                // inline rules
+                // #(a,b,c)# 
+                // {(a,b,c).mod1.mod2}
+                let candidates = try parseValueCandidateList(context: "inline rule candidate")
                 let mods = try parseModifiers(for: "inline rule")
                 nodes.append(.any(values: candidates, selector: candidates.selector(), mods: mods))
                 try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after inline rule definition")
                 return nodes
-            }
-            
-            
-            let name = parseOptionalText() ?? ""
-            
-            // #new_rule(fragment_list)#
-            if currentToken == .LEFT_ROUND_BRACKET {
-                if name == "" {
-                    throw ParserError.error("new rule must have a name")
-                }
-                try parse(.LEFT_ROUND_BRACKET)
-                let list = try parseFragmentList(
-                    separator: .COMMA,
-                    context: "rule candidate",
-                    stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET
-                )
-                var candidates = [ValueCandidate]()
-                // we can clear an existing rule
-                // or create an empty rule
-                // using #rule()# syntax
-                if list[0].count == 0 {
-                    candidates.append(ValueCandidate(nodes: [.text("")]))
-                }
-                else {
-                    candidates = list.map { return ValueCandidate(nodes: $0) }
-                }
+                
+            case (let .some(name), .some(Token.LEFT_ROUND_BRACKET)):
+                let candidates = try parseValueCandidateList(context: "rule candidate")
                 nodes.append(.createRule(name: name, values: candidates))
-                try parse(.RIGHT_ROUND_BRACKET, "expected ) after rule candidates list")
                 try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after new rule definition")
                 return nodes
+                
+            case (_, _):
+                // #rule?.mod1.mod2().mod3(list)#
+                let name = name ?? ""
+                let modifiers = try parseModifiers(for: name)
+                nodes.append(ParserNode.rule(name: name, mods: modifiers))
+                try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "closing # or } not found for rule '\(name)'")
+                return nodes
             }
-            
-            // #rule?.mod1.mod2().mod3(list)#
-            let modifiers = try parseModifiers(for: name)
-            nodes.append(ParserNode.rule(name: name, mods: modifiers))
-            
-            try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "closing # or } not found for rule '\(name)'")
-            
-            return nodes
         }
         
         func parseTag() throws -> [ParserNode] {

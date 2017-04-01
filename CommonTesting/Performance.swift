@@ -37,34 +37,18 @@ class Performance: XCTestCase {
     func test() {
         
         
-//        // let input = "{(hello:100,konichiwa:1000)}"
-//        let input = "{(a,b,c,d,e).track}"
-//        let tokens = Lexer.tokens(input)
-//        print(tokens)
-//        do {
-//            let nodes = try Parser.gen2(tokens)
-//            print(nodes)
-//            print(Tracery().expandVerbose(input))
-//            
-//        } catch {
-//            print(error)
-//        }
-        
-        
-        let t = Tracery {
-            ["word" : "{(a,b,c,d,e).track}"]
+        // let input = "{(hello:100,konichiwa:1000)}"
+        let input = "{b} can you please . let me know? (i am ok)"
+        let tokens = Lexer.tokens(input)
+        print(tokens)
+        do {
+            let nodes = try Parser.gen2(tokens)
+            print(nodes)
+            print(Tracery().expandVerbose(input))
+            
+        } catch {
+            print(error)
         }
-        t.add(modifier: "caps") { $0.uppercased() }
-        t.add(modifier: "quoted") { "\"" + $0.uppercased() + "\"" }
-        var tracker = [String: Int]()
-        t.add(modifier: "track") {
-            tracker[$0] = (tracker[$0] ?? 0) + 1
-            return $0
-        }
-        for i in 0..<100 {
-            print(i, t.expand("{word}"))
-        }
-        print(tracker)
         
     }
 

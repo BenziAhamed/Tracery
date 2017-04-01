@@ -122,7 +122,14 @@ class Tags: XCTestCase {
         
     }
 
+    func testTagsCanBeSetInsideAnonymousRules() {
+        XCTAssertEqual("hello", Tracery().expand("{([tag:hello]{tag})}"))
+    }
     
+    
+    func testTagsCanBeSetInsideNamedRules() {
+        XCTAssertEqual("hello", Tracery().expand("{rule([tag:hello]{tag})}{rule}"))
+    }
 
     
 }

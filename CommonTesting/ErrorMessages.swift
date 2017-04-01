@@ -26,6 +26,8 @@ class ErrorMessages: XCTestCase {
         checkRule("[:number]",   "error: expected tag name")
         checkRule("#rule(a,)#",  "error: expected rule candidate after ,")
         checkRule("[tag:a,]",    "error: expected tag value after ,")
+        checkRule("{new(a,b}",   "error: expected ) after rule candidate list")
+        checkRule("{new(a,b)",   "error: expected # or } after new rule definition")
     }
 
     func checkRule(_ target: String, _ prefix: String) {
