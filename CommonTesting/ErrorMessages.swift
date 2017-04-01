@@ -14,10 +14,10 @@ class ErrorMessages: XCTestCase {
     func testErrorMessages() {
         
         checkRule("#.#",         "error: expected modifier name after . in rule ''")
-        checkRule("#rule",       "error: closing # not found for rule 'rule'")
+        checkRule("#rule",       "error: closing # or } not found for rule 'rule'")
         checkRule("#.(#",        "error: expected modifier name after . in rule ''")
-        checkRule("#.call(#",    "error: closing # not found for rule ''")
-        checkRule("#.call(a,#",  "error: closing # not found for rule ''")
+        checkRule("#.call(#",    "error: closing # or } not found for rule ''")
+        checkRule("#.call(a,#",  "error: closing # or } not found for rule ''")
         checkRule("#.call(a,)#", "error: expected parameter after ,")
         checkRule("#[]#",        "")
         checkRule("#[tag]#",     "error: expected : after tag 'tag'")

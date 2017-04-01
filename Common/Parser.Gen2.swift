@@ -52,11 +52,8 @@ extension Parser {
         }
         
         func parseRule() throws -> [ParserNode] {
-            
             var nodes = [ParserNode]()
-            
-            // rules will alwatys start with a hash
-            try parse(.HASH)
+            try parseAny([.HASH, .LEFT_CURLY_BRACKET])
             
             // a rule may contain sub rules
             // or tags
@@ -66,8 +63,8 @@ extension Parser {
             
             // empty rule
             // ##
-            if currentToken == .HASH {
-                try parse(.HASH)
+            if currentToken == .HASH || currentToken == .RIGHT_CURLY_BRACKET {
+                try parseAny([.HASH, .RIGHT_CURLY_BRACKET])
                 nodes.append(.text(""))
                 return nodes
             }
@@ -86,7 +83,7 @@ extension Parser {
                     return ValueCandidate(nodes: $0)
                 }
                 try parse(.RIGHT_ROUND_BRACKET, "expected ) after inline rule candidates")
-                try parse(.HASH, "expected # after inline rule definition")
+                try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after inline rule definition")
                 
                 if candidates.count == 0 || candidates[0].nodes.count == 0 {
                     nodes.append(.text(""))
@@ -123,7 +120,7 @@ extension Parser {
                 }
                 nodes.append(.createRule(name: name, values: candidates))
                 try parse(.RIGHT_ROUND_BRACKET, "expected ) after rule candidates list")
-                try parse(.HASH, "expected # after rule definition")
+                try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after inline rule definition")
                 return nodes
             }
             
@@ -146,7 +143,7 @@ extension Parser {
             
             nodes.append(ParserNode.rule(name: name, mods: modifiers))
             
-            try parse(.HASH, "closing # not found for rule '\(name)'")
+            try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "closing # or } not found for rule '\(name)'")
             
             return nodes
         }
@@ -157,7 +154,7 @@ extension Parser {
             try parse(.LEFT_SQUARE_BRACKET)
             scanning: while let token = currentToken {
                 switch token {
-                case Token.HASH:
+                case Token.HASH, Token.LEFT_CURLY_BRACKET:
                     nodes.append(contentsOf: try parseRule())
                 case Token.LEFT_SQUARE_BRACKET:
                     nodes.append(contentsOf: try parseTag())
@@ -314,6 +311,16 @@ extension Parser {
             advance()
         }
         
+        func parseAny(_ tokens: [Token], _ error: @autoclosure () -> String? = nil) throws {
+            guard let c = currentToken else {
+                throw ParserError.error(error() ?? "unexpected eof")
+            }
+            guard tokens.contains(c) else {
+                throw ParserError.error(error() ?? "token mismatch expected \(tokens), got: \(c)")
+            }
+            advance()
+        }
+        
         func parseOptional(_ token: Token) {
             guard let c = currentToken, c == token else { return }
             advance()
@@ -327,7 +334,7 @@ extension Parser {
             var nodes = [ParserNode]()
             guard let token = currentToken else { return nil }
             switch token {
-            case Token.HASH:
+            case Token.HASH, Token.LEFT_CURLY_BRACKET:
                 nodes.append(contentsOf: try parseRule())
             case Token.LEFT_SQUARE_BRACKET:
                 guard let next = nextToken else { return nil }
