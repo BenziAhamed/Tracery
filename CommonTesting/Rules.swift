@@ -34,9 +34,9 @@ class Rules : XCTestCase {
         let t = Tracery {[:]}
         let inputs = [
             "hello world",
-            "#rule#",
+            "{rule}",
             "no validation",
-            "#what# #can# you #say#"
+            "{what} {can} you {say}"
         ]
         for input in inputs {
             XCTAssertEqual(input, t.expand(input))

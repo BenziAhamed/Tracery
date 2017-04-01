@@ -29,7 +29,7 @@ class Objects: XCTestCase {
     func testNotFoundObjectsAreNotExpanded() {
         let t = Tracery()
         t.add(object: "jack", named: "person")
-        XCTAssertEqual(t.expand("#person1#"), "#person1#")
+        XCTAssertEqual(t.expand("#person1#"), "{person1}")
     }
     
     func testObjectsCanBeAccessedFromDynamicRules() {

@@ -301,8 +301,8 @@ extension Tracery {
                 case .apply(let nodes):
                     try applyMods(nodes: nodes)
                 case .noExpansion(let reason):
-                    warn("rule #\(name)# expansion failed - \(reason)")
-                    contextStack.contexts[top].result.append("#\(name)#")
+                    warn("rule '\(name)' expansion failed - \(reason)")
+                    contextStack.contexts[top].result.append("{\(name)}")
                 }
             }
         }

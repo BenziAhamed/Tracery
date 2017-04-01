@@ -37,7 +37,8 @@ class Performance: XCTestCase {
     func test() {
         
         
-        let input = "#(hello:100,konichiwa:1000)#"
+        // let input = "{(hello:100,konichiwa:1000)}"
+        let input = "{nomansland}"
         let tokens = Lexer.tokens(input)
         print(tokens)
         do {
