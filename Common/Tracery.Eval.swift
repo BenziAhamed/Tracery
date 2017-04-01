@@ -56,6 +56,30 @@ extension Tracery {
             return context
         }
         
+        
+        func applyMods(nodes: [ParserNode], mods: [Modifier]) throws {
+            var nodes = nodes
+            for mod in mods {
+                guard self.mods[mod.name] != nil else {
+                    warn("modifier '\(mod.name)' not defined")
+                    continue
+                }
+                for param in mod.parameters {
+                    nodes.append(.evaluateArg(nodes: param.nodes))
+                }
+                nodes.append(.runMod(name: mod.name))
+                nodes.append(.clearArgs)
+            }
+            // at this stage nodes will be
+            // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod, clearArgs)* ]
+            
+            // rule_expansion_nodes evaluate as normal, and updates context.result
+            // evalArgs will update the args list, and runMod will use the args list to run a mod,
+            // replacing the context.result with its computed value
+            // clearArgs empties args list for consequent processing by any chained modifier nodes
+            try pushContext(nodes, .appendToResult)
+        }
+        
         // push initial context which is the
         // set of nodes that are parsed from the input
         try pushContext(nodes, .appendToResult)
@@ -113,9 +137,11 @@ extension Tracery {
             case .clearArgs:
                 contextStack.contexts[top].args.removeAll()
                 
-            case let .any(values, selector):
+            case let .any(values, selector, mods):
                 let choice = values[selector.pick(count: values.count)]
-                try pushContext(choice.nodes, affectsEvaluationLevel: false)
+                try applyMods(nodes: choice.nodes, mods: mods)
+                // try pushContext(choice.nodes, affectsEvaluationLevel: false)
+                trace("🎲 picked \(choice.nodes)")
                 
             case let .tag(name, values):
                 
@@ -236,30 +262,7 @@ extension Tracery {
                 
                 
             case let .rule(name, mods):
-                
-                func applyMods(nodes: [ParserNode]) throws {
-                    var nodes = nodes
-                    for mod in mods {
-                        guard self.mods[mod.name] != nil else {
-                            warn("modifier '\(mod.name)' not defined")
-                            continue
-                        }
-                        for param in mod.parameters {
-                            nodes.append(.evaluateArg(nodes: param.nodes))
-                        }
-                        nodes.append(.runMod(name: mod.name))
-                        nodes.append(.clearArgs)
-                    }
-                    // at this stage nodes will be
-                    // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod, clearArgs)* ]
-                    
-                    // rule_expansion_nodes evaluate as normal, and updates context.result
-                    // evalArgs will update the args list, and runMod will use the args list to run a mod,
-                    // replacing the context.result with its computed value
-                    // clearArgs empties args list for consequent processing by any chained modifier nodes
-                    try pushContext(nodes, .appendToResult)
-                }
-                
+
                 enum ExpansionState {
                     case apply([ParserNode])
                     case noExpansion(reason: String)
@@ -299,7 +302,7 @@ extension Tracery {
                 
                 switch state {
                 case .apply(let nodes):
-                    try applyMods(nodes: nodes)
+                    try applyMods(nodes: nodes, mods: mods)
                 case .noExpansion(let reason):
                     warn("rule '\(name)' expansion failed - \(reason)")
                     contextStack.contexts[top].result.append("{\(name)}")

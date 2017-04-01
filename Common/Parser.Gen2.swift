@@ -51,6 +51,25 @@ extension Parser {
             return text
         }
         
+        func parseModifiers(for rule: String) throws -> [Modifier] {
+            var modifiers = [Modifier]()
+            while let token = currentToken, token == .DOT {
+                try parse(.DOT)
+                let modName = try parseText("expected modifier name after . in rule '\(rule)'")
+                var params = [ValueCandidate]()
+                if currentToken == .LEFT_ROUND_BRACKET {
+                    try parse(.LEFT_ROUND_BRACKET)
+                    let argsList = try parseFragmentList(separator: .COMMA, context: "parameter", stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET)
+                    params = argsList.map {
+                        return ValueCandidate.init(nodes: $0)
+                    }
+                    try parse(.RIGHT_ROUND_BRACKET, "expected ) to close modifier call")
+                }
+                modifiers.append(Modifier(name: modName, parameters: params))
+            }
+            return modifiers
+        }
+        
         func parseRule() throws -> [ParserNode] {
             var nodes = [ParserNode]()
             try parseAny([.HASH, .LEFT_CURLY_BRACKET])
@@ -61,8 +80,8 @@ extension Parser {
                 nodes.append(contentsOf: try parseTag())
             }
             
-            // empty rule
-            // ##
+            // empty rules evaluate to empty strings
+            // ##, {}
             if currentToken == .HASH || currentToken == .RIGHT_CURLY_BRACKET {
                 try parseAny([.HASH, .RIGHT_CURLY_BRACKET])
                 nodes.append(.text(""))
@@ -71,7 +90,7 @@ extension Parser {
             
             
             // inline rules
-            // #(a|b|c|d)#
+            // #(a,b,c)# {(a,b,c)}
             if currentToken == .LEFT_ROUND_BRACKET {
                 
                 try parse(.LEFT_ROUND_BRACKET)
@@ -83,14 +102,9 @@ extension Parser {
                     return ValueCandidate(nodes: $0)
                 }
                 try parse(.RIGHT_ROUND_BRACKET, "expected ) after inline rule candidates")
+                let mods = try parseModifiers(for: "inline rule")
+                nodes.append(.any(values: candidates, selector: candidates.selector(), mods: mods))
                 try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after inline rule definition")
-                
-                if candidates.count == 0 || candidates[0].nodes.count == 0 {
-                    nodes.append(.text(""))
-                    return nodes
-                }
-                
-                nodes.append(.any(values: candidates, selector: candidates.selector()))
                 return nodes
             }
             
@@ -120,27 +134,12 @@ extension Parser {
                 }
                 nodes.append(.createRule(name: name, values: candidates))
                 try parse(.RIGHT_ROUND_BRACKET, "expected ) after rule candidates list")
-                try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after inline rule definition")
+                try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "expected # or } after new rule definition")
                 return nodes
             }
             
             // #rule?.mod1.mod2().mod3(list)#
-            var modifiers = [Modifier]()
-            while let token = currentToken, token == .DOT {
-                try parse(.DOT)
-                let modName = try parseText("expected modifier name after . in rule '\(name)'")
-                var params = [ValueCandidate]()
-                if currentToken == .LEFT_ROUND_BRACKET {
-                    try parse(.LEFT_ROUND_BRACKET)
-                    let argsList = try parseFragmentList(separator: .COMMA, context: "parameter", stopParsingFragmentBlockOnToken: Token.RIGHT_ROUND_BRACKET)
-                    params = argsList.map {
-                        return ValueCandidate.init(nodes: $0)
-                    }
-                    try parse(.RIGHT_ROUND_BRACKET, "expected ) to close modifier call")
-                }
-                modifiers.append(Modifier(name: modName, parameters: params))
-            }
-            
+            let modifiers = try parseModifiers(for: name)
             nodes.append(ParserNode.rule(name: name, mods: modifiers))
             
             try parseAny([.HASH, .RIGHT_CURLY_BRACKET], "closing # or } not found for rule '\(name)'")

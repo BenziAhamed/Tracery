@@ -55,14 +55,17 @@ class TraceryioSamples: XCTestCase {
         let o = TraceryOptions()
         o.tagStorageType = .heirarchical
         
-        let braces = ["{}","<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
+        let braces = ["<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
         var braceTypes = braces
             .map { braces -> String in
                 let open = braces[braces.startIndex]
                 let close = braces[braces.index(after: braces.startIndex)]
                 return "[open:\(open)][close:\(close)]"
             }
+        
+        // round and curly braces needs to be escaped
         braceTypes.append("[open:\\(][close:\\)]")
+        braceTypes.append("[open:\\{][close:\\}]")
         
         let t = Tracery(o) {[
             "letter": ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],
