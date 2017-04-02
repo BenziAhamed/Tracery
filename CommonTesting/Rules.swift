@@ -18,6 +18,13 @@ class Rules : XCTestCase {
         XCTAssert(t.expand("#msg#") == "hello world")
     }
     
+    func testExpandSimpleRuleWithDot() {
+        let t = Tracery {[
+            "msg" : "hello world."
+            ]}
+        XCTAssert(t.expand("#msg#") == "hello world.")
+    }
+    
     func testInputWithNoRulesProvidesTheSameAsOutput() {
         let t = Tracery()
         XCTAssert(t.expand("hello world") == "hello world")
@@ -27,9 +34,9 @@ class Rules : XCTestCase {
         let t = Tracery {[:]}
         let inputs = [
             "hello world",
-            "#rule#",
+            "{rule}",
             "no validation",
-            "#what# #can# you #say#"
+            "{what} {can} you {say}"
         ]
         for input in inputs {
             XCTAssertEqual(input, t.expand(input))
@@ -38,11 +45,9 @@ class Rules : XCTestCase {
     
     func testEscapseSequences() {
         let t = Tracery{[:]}
-        XCTAssertEqual(t.expand("#"), "#") // trailing hash treated as character
         XCTAssertEqual(t.expand("##"), "") // treated as empty rule
         XCTAssertEqual(t.expand("\\#"), "#")
-        XCTAssertEqual(t.expand("\\##"), "##") // trailing hash treated as character
-        XCTAssertEqual(t.expand("\\#hello#"), "#hello#") // trailing hash treated as character
+        XCTAssertEqual(t.expand("\\#hello\\#"), "#hello#") // trailing hash treated as character
         XCTAssertEqual(t.expand("\\["), "[")
         XCTAssertEqual(t.expand("\\[]"), "[]")
         XCTAssertEqual(t.expand("\\[hello]"), "[hello]")
@@ -58,6 +63,10 @@ class Rules : XCTestCase {
         for rule in rules {
             XCTAssertTrue(processedRules.contains(rule))
         }
+    }
+    
+    func testInlineRulesCanBeCleared() {
+        XCTAssertEqual(Tracery().expand("{b(0)}{b}{b()}{b}"), "0")
     }
     
 }

@@ -17,7 +17,7 @@ class Performance: XCTestCase {
                 "name": ["Arjun","Yuuma","Darcy","Mia","Chiaki","Izzi","Azra","Lina"]
                 ,	"animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten"]
                 ,	"occupationBase": ["wizard","witch","detective","ballerina","criminal","pirate","lumberjack","spy","doctor","scientist","captain","priest"]
-                ,	"occupationMod": ["occult ","space ","professional ","gentleman ","erotic ","time ","cyber","paleo","techno","super"]
+                ,	"occupationMod": ["occult ","space ","professional ","gentleman ","erotic ","time ","cyber ","paleo ","techno ","super "]
                 ,	"strange": ["mysterious","portentous","enchanting","strange","eerie"]
                 ,	"tale": ["story","saga","tale","legend"]
                 ,	"occupation": ["#occupationMod##occupationBase#"]
@@ -29,31 +29,29 @@ class Performance: XCTestCase {
                 ,	"story": ["#hero# the #heroJob# #setSailForAdventure#. #openBook#"]
                 ,	"origin": ["Once upon a time, #[#setCharacter#]story#"]
                 ]}
-            _ = t.expand("#origin")
+            print(t.expand("- #origin#"))
         }
     }
+
     
+    func test() {
+        
+        
+        // let input = "{(hello:100,konichiwa:1000)}"
+        let input = "{b} can you please . let me know? (i am ok)"
+        let tokens = Lexer.tokens(input)
+        print(tokens)
+        do {
+            let nodes = try Parser.gen2(tokens)
+            print(nodes)
+            print(Tracery().expandVerbose(input))
+            
+        } catch {
+            print(error)
+        }
+        
+    }
 
 }
 
 
-
-//// MARK:- Lexical Analysis
-//extension Performance {
-//    
-//    func testLexer() {
-//        
-//        // let line = "th[is ][els els\\e of :,! ,that [type do\\# then [#file#] can }}[you see"
-//        let line = "[name:benzi][if #name# == benzi then ok]"
-//        let tokens = Lexer.tokens(line)
-//        let nodes = (try? Parser.gen(tokens)) ?? []
-//        print("    tokens", tokens)
-//        print("    nodes", nodes)
-//        print(Tracery().expand(line))
-//    }
-//    
-//    
-//    
-//}
-//
-//

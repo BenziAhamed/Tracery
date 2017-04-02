@@ -93,7 +93,7 @@ class CyclicReferenceIdentifier : RulesetAnalyser {
     func visit(rule: String, mapping: RuleMapping) {
         let v = getVertex(rule)
         for candidate in mapping.candidates {
-            for node in candidate.nodes {
+            for node in candidate.value.nodes {
                 addRuleDependency(from: v, to: node)
             }
         }

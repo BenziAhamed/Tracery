@@ -10,8 +10,8 @@ import Foundation
 import XCTest
 @testable import Tracery
 
-func XCTAssertItemInArray<T: Comparable>(item: T, array: [T]) {
-    XCTAssert(array.contains(item), "\(item) was not found in \(array)")
+func XCTAssertItemInArray<T: Equatable>(item: T, array: [T]) {
+    XCTAssert(array.contains(where: { $0 == item }), "\(item) was not found in \(array)")
 }
 
 extension Array {

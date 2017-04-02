@@ -15,20 +15,23 @@ enum Token : CustomStringConvertible {
     case text(String)
     case op(String)
     case keyword(String)
+    case number(Int)
     
     var rawText: String {
         switch self {
         case let .text(text): return text
         case let .op(c): return c
         case let .keyword(text): return text
+        case let .number(value): return "\(value)"
         }
     }
     
     var description: String {
         switch self {
-        case let .text(text): return "'\(text)'"
-        case let .op(c): return "\(c)"
-        case let .keyword(text): return "\(text.uppercased())"
+        case let .text(text): return "txt(\(text))"
+        case let .op(c): return "op(\(c))"
+        case let .keyword(text): return "key(\(text.uppercased()))"
+        case let .number(value): return "num(\(value))"
         }
     }
     
@@ -40,6 +43,8 @@ enum Token : CustomStringConvertible {
     static let DOT = Token.op(".")
     static let LEFT_ROUND_BRACKET = Token.op("(")
     static let RIGHT_ROUND_BRACKET = Token.op(")")
+    static let LEFT_CURLY_BRACKET = Token.op("{")
+    static let RIGHT_CURLY_BRACKET = Token.op("}")
     
     static let EQUAL_TO = Token.op("==")
     static let NOT_EQUAL_TO = Token.op("!=")
@@ -69,6 +74,7 @@ func ==(lhs: Token, rhs: Token) -> Bool {
     case let (.op(lhs), .op(rhs)): return lhs == rhs
     case let (.text(lhs), .text(rhs)): return lhs == rhs
     case let (.keyword(lhs), .keyword(rhs)): return lhs == rhs
+    case let (.number(lhs), .number(rhs)): return lhs == rhs
     default: return false
     }
 }
@@ -76,7 +82,7 @@ func ==(lhs: Token, rhs: Token) -> Bool {
 extension Character {
     var isReserved: Bool {
         switch self {
-        case "[","]",":","#",",","(",")",".": return true
+        case "[","]",":","#",",","(",")",".","{","}": return true
         default: return false
         }
     }
@@ -144,6 +150,15 @@ struct Lexer {
             case let x where x.isReserved:
                 advance()
                 return .op("\(c)")
+                
+            case let x where "0"..."9" ~= x:
+                var number = ""
+                while let c = current, "0"..."9" ~= c {
+                    number.append(c)
+                    advance()
+                }
+                guard let value = Int(number) else { return .text(number) }
+                return .number(value)
                 
             case let c where c == " ":
                 advance()

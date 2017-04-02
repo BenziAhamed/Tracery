@@ -58,13 +58,19 @@
 		B96DC0311E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */; };
 		B96DC0321E72F2B7008623B8 /* Tracery.Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */; };
 		B96DC0331E72F2B7008623B8 /* Tracery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0281E72F2B7008623B8 /* Tracery.swift */; };
+		B96F75991E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
+		B96F759A1E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
 		B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975BB7D1E75C91C0076A1EA /* TagStorage.swift */; };
+		B99F305C1E869E08005B0808 /* Parser.Gen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99F305B1E869E08005B0808 /* Parser.Gen2.swift */; };
+		B99F305D1E869E08005B0808 /* Parser.Gen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99F305B1E869E08005B0808 /* Parser.Gen2.swift */; };
 		B9A248E61E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
 		B9A248E71E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
 		B9A248E91E81859A004D60C9 /* TextFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E81E81859A004D60C9 /* TextFormat.swift */; };
 		B9A248EA1E81859A004D60C9 /* TextFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E81E81859A004D60C9 /* TextFormat.swift */; };
 		B9A248EE1E818FC0004D60C9 /* fable.txt in Resources */ = {isa = PBXBuildFile; fileRef = B9A248EB1E818FB3004D60C9 /* fable.txt */; };
 		B9A248EF1E818FC0004D60C9 /* fable.txt in Resources */ = {isa = PBXBuildFile; fileRef = B9A248EB1E818FB3004D60C9 /* fable.txt */; };
+		B9B9CC421E882E260080881D /* Objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B9CC411E882E260080881D /* Objects.swift */; };
+		B9B9CC431E882E260080881D /* Objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B9CC411E882E260080881D /* Objects.swift */; };
 		B9FCA7F51E73D2D20069F8B6 /* CyclicReferenceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01E1E72F2B7008623B8 /* CyclicReferenceIdentifier.swift */; };
 		B9FCA7F61E73D2D20069F8B6 /* EmptyRulesetDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC01F1E72F2B7008623B8 /* EmptyRulesetDetector.swift */; };
 		B9FCA7F71E73D2D20069F8B6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96DC0201E72F2B7008623B8 /* Lexer.swift */; };
@@ -132,10 +138,13 @@
 		B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagOverrideRuleIdentifier.swift; sourceTree = "<group>"; };
 		B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Logging.swift; sourceTree = "<group>"; };
 		B96DC0281E72F2B7008623B8 /* Tracery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.swift; sourceTree = "<group>"; };
+		B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeightedCandidates.swift; sourceTree = "<group>"; };
 		B975BB7D1E75C91C0076A1EA /* TagStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagStorage.swift; sourceTree = "<group>"; };
+		B99F305B1E869E08005B0808 /* Parser.Gen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.Gen2.swift; sourceTree = "<group>"; };
 		B9A248E51E817216004D60C9 /* Tracery.Text.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Text.swift; sourceTree = "<group>"; };
 		B9A248E81E81859A004D60C9 /* TextFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFormat.swift; sourceTree = "<group>"; };
 		B9A248EB1E818FB3004D60C9 /* fable.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fable.txt; sourceTree = "<group>"; };
+		B9B9CC411E882E260080881D /* Objects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Objects.swift; sourceTree = "<group>"; };
 		B9FCA8071E73D6FA0069F8B6 /* Tracery Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tracery Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9FCA80B1E73D6FA0069F8B6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -203,6 +212,8 @@
 				B912800B1E77AF980063D5A8 /* TraceryioSamples.swift */,
 				B9A248E81E81859A004D60C9 /* TextFormat.swift */,
 				B9A248EB1E818FB3004D60C9 /* fable.txt */,
+				B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */,
+				B9B9CC411E882E260080881D /* Objects.swift */,
 			);
 			name = CommonTesting;
 			path = ../CommonTesting;
@@ -253,20 +264,21 @@
 		B96DC01D1E72F2B7008623B8 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				B912802C1E77AFEE0063D5A8 /* Info.plist */,
 				B96DC01E1E72F2B7008623B8 /* CyclicReferenceIdentifier.swift */,
 				B96DC01F1E72F2B7008623B8 /* EmptyRulesetDetector.swift */,
+				B912802C1E77AFEE0063D5A8 /* Info.plist */,
 				B96DC0201E72F2B7008623B8 /* Lexer.swift */,
+				B99F305B1E869E08005B0808 /* Parser.Gen2.swift */,
 				B96DC0211E72F2B7008623B8 /* Parser.swift */,
 				B96DC0221E72F2B7008623B8 /* RuleCandidateSelector.swift */,
 				B96DC0231E72F2B7008623B8 /* RuleCandidatesProvider.swift */,
 				B96DC0241E72F2B7008623B8 /* RuleSelfReferenceIdentifer.swift */,
 				B96DC0251E72F2B7008623B8 /* RulesetAnalyser.swift */,
 				B96DC0261E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift */,
-				B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */,
-				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B975BB7D1E75C91C0076A1EA /* TagStorage.swift */,
 				B90E7E741E77C6A000C5BD17 /* Tracery.Eval.swift */,
+				B96DC0271E72F2B7008623B8 /* Tracery.Logging.swift */,
+				B96DC0281E72F2B7008623B8 /* Tracery.swift */,
 				B9A248E51E817216004D60C9 /* Tracery.Text.swift */,
 			);
 			name = Common;
@@ -475,10 +487,12 @@
 				B91280471E77B0530063D5A8 /* Helpers.swift in Sources */,
 				B912804A1E77B0530063D5A8 /* Performance.swift in Sources */,
 				B912804E1E77B0530063D5A8 /* TraceryioSamples.swift in Sources */,
+				B9B9CC431E882E260080881D /* Objects.swift in Sources */,
 				B912804D1E77B0530063D5A8 /* Tags.swift in Sources */,
 				B91280451E77B0530063D5A8 /* ExtensionMethod.swift in Sources */,
 				B91280431E77B0530063D5A8 /* ErrorMessages.swift in Sources */,
 				B91280461E77B0530063D5A8 /* ExtensionModifier.swift in Sources */,
+				B96F759A1E84D0CF00C324AB /* WeightedCandidates.swift in Sources */,
 				B912804B1E77B0530063D5A8 /* RecursiveRules.swift in Sources */,
 				B91280421E77B0530063D5A8 /* CustomSelectors.swift in Sources */,
 				B91280491E77B0530063D5A8 /* Keywords.swift in Sources */,
@@ -503,6 +517,7 @@
 				B96DC02B1E72F2B7008623B8 /* Lexer.swift in Sources */,
 				B96DC0311E72F2B7008623B8 /* TagOverrideRuleIdentifier.swift in Sources */,
 				B96DC0291E72F2B7008623B8 /* CyclicReferenceIdentifier.swift in Sources */,
+				B99F305C1E869E08005B0808 /* Parser.Gen2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +539,7 @@
 				B9FCA7FD1E73D2D20069F8B6 /* TagOverrideRuleIdentifier.swift in Sources */,
 				B9FCA7FE1E73D2D20069F8B6 /* Tracery.Logging.swift in Sources */,
 				B9FCA7FF1E73D2D20069F8B6 /* Tracery.swift in Sources */,
+				B99F305D1E869E08005B0808 /* Parser.Gen2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -541,10 +557,12 @@
 				B91280371E77B0520063D5A8 /* Helpers.swift in Sources */,
 				B912803A1E77B0520063D5A8 /* Performance.swift in Sources */,
 				B912803E1E77B0520063D5A8 /* TraceryioSamples.swift in Sources */,
+				B9B9CC421E882E260080881D /* Objects.swift in Sources */,
 				B912803D1E77B0520063D5A8 /* Tags.swift in Sources */,
 				B91280351E77B0520063D5A8 /* ExtensionMethod.swift in Sources */,
 				B91280331E77B0520063D5A8 /* ErrorMessages.swift in Sources */,
 				B91280361E77B0520063D5A8 /* ExtensionModifier.swift in Sources */,
+				B96F75991E84D0CF00C324AB /* WeightedCandidates.swift in Sources */,
 				B912803B1E77B0520063D5A8 /* RecursiveRules.swift in Sources */,
 				B91280321E77B0520063D5A8 /* CustomSelectors.swift in Sources */,
 				B91280391E77B0520063D5A8 /* Keywords.swift in Sources */,

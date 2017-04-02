@@ -21,7 +21,7 @@ struct RuleMapping {
 
 struct RuleCandidate {
     let text: String
-    let nodes: [ParserNode]
+    var value: ValueCandidate
 }
 
 
@@ -38,9 +38,12 @@ extension TraceryOptions {
 
 public class Tracery {
     
+    var objects = [String: Any]()
     var ruleSet: [String: RuleMapping]
+    var runTimeRuleSet = [String: RuleMapping]()
     var mods: [String: (String,[String])->String]
     var tagStorage: TagStorage
+    var contextStack: ContextStack
     
     public var ruleNames: [String] { return ruleSet.keys.map { $0 } }
     
@@ -51,10 +54,12 @@ public class Tracery {
     let options: TraceryOptions
     
     public init(_ options: TraceryOptions = TraceryOptions.defaultSet, rules: () -> [String: Any]) {
+        
         self.options = options
         mods = [:]
         ruleSet = [:]
         tagStorage = options.tagStorageType.storage()
+        contextStack = ContextStack()
         tagStorage.tracery = self
         
         let rules = rules()
@@ -68,75 +73,17 @@ public class Tracery {
         info("tracery ready")
     }
     
-    // add a rule and its definition to
-    // the mapping table
-    // errors if any are returned
-    func add(rule: String, definition value: Any) {
-        
-        // validate the rule name
-        let tokens = Lexer.tokens(rule)
-        guard tokens.count == 1, case let .text(name) = tokens[0] else {
-            error("rule '\(rule)' ignored - names must be plaintext")
-            return
-        }
-        if name.contains("#") || name.contains("[") {
-            error("rule '\(rule)' ignored - names cannot contain # or [")
-            return
-        }
-        
-        if ruleSet[rule] != nil {
-            warn("duplicate rule '\(rule)', using latest definition")
-        }
-        
-        let values: [String]
-        
-        if let provider = value as? RuleCandidatesProvider {
-            values = provider.candidates
-        }
-        else if let string = value as? String {
-            values = [string]
-        }
-        else if let array = value as? [String] {
-            values = array
-        }
-        else if let array = value as? Array<CustomStringConvertible> {
-            values = array.map { $0.description }
-        }
-        else {
-            values = ["\(value)"]
-        }
-        
-        let candidates = values.flatMap { createRuleCandidate(rule: rule, text: $0) }
-        if candidates.count == 0 {
-            warn("rule '\(rule)' does not have any definitions, will be ignored")
-            return
-        }
-        
-        let selector: RuleCandidateSelector
-        if let s = value as? RuleCandidateSelector {
-            selector = s
-        }
-        else if candidates.count == 1 {
-            selector = PickFirstContentSelector.shared
-        }
-        else {
-            selector = DefaultContentSelector(candidates.count)
-        }
-        
-        ruleSet[rule] = RuleMapping(candidates: candidates, selector: selector)
-    }
-    
-    private func createRuleCandidate(rule:String, text: String) -> RuleCandidate? {
+    func createRuleCandidate(rule:String, text: String) -> RuleCandidate? {
         let e = error
         do {
             info("checking rule '\(rule)' - \(text)")
             return RuleCandidate(
                 text: text,
-                nodes: try Parser.gen(Lexer.tokens(text))
+                value: ValueCandidate(nodes: try Parser.gen2(Lexer.tokens(text)))
             )
         }
         catch {
-            e("rule '\(rule)' parse error - \(error) in definition - \(text)")
+            e("rule '\(rule)' parse error - \(error)")
             return nil
         }
     }
@@ -175,10 +122,11 @@ public class Tracery {
         ruleSet[rule]?.selector = selector
     }
     
-    public func expand(_ input: String, resetTags: Bool = true) -> String {
+    public func expand(_ input: String, maintainContext: Bool = false) -> String {
         do {
-            if resetTags {
+            if !maintainContext {
                 ruleEvaluationLevel = 0
+                runTimeRuleSet.removeAll()
                 tagStorage.removeAll()
             }
             return try eval(input)
@@ -206,3 +154,81 @@ public class Tracery {
         // trace("⚙️ depth: \(ruleEvaluationLevel)")
     }
 }
+
+
+
+// MARK: Rule management
+extension Tracery {
+    // add a rule and its definition to
+    // the mapping table
+    // errors if any are returned
+    public func add(rule: String, definition value: Any) {
+        
+        // validate the rule name
+        let tokens = Lexer.tokens(rule)
+        guard tokens.count == 1, case .text = tokens[0] else {
+            error("rule '\(rule)' ignored - names must be plaintext")
+            return
+        }
+        if ruleSet[rule] != nil {
+            warn("rule '\(rule)' will be re-written")
+        }
+        
+        let values: [String]
+        
+        if let provider = value as? RuleCandidatesProvider {
+            values = provider.candidates
+        }
+        else if let string = value as? String {
+            values = [string]
+        }
+        else if let array = value as? [String] {
+            values = array
+        }
+        else if let array = value as? Array<CustomStringConvertible> {
+            values = array.map { $0.description }
+        }
+        else {
+            values = ["\(value)"]
+        }
+        
+        let candidates = values.flatMap { createRuleCandidate(rule: rule, text: $0) }
+        if candidates.count == 0 {
+            warn("rule '\(rule)' ignored - no expansion candidates found")
+            return
+        }
+        
+        let selector: RuleCandidateSelector
+        if let s = value as? RuleCandidateSelector {
+            selector = s
+        }
+        else {
+            selector = candidates.map { $0.value }.selector()
+        }
+        
+        ruleSet[rule] = RuleMapping(candidates: candidates, selector: selector)
+    }
+    
+    // Removes a rule
+    public func remove(rule: String) {
+        ruleSet[rule] = nil
+    }
+}
+
+// MARK: object management
+extension Tracery {
+
+    public func add(object: Any, named name: String) {
+        objects[name] = object
+    }
+    
+    public func remove(object name: String) {
+        objects[name] = nil
+    }
+    
+    public func configuredObjects() -> [String: Any] {
+        return objects
+    }
+    
+}
+

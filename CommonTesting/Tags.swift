@@ -122,7 +122,14 @@ class Tags: XCTestCase {
         
     }
 
+    func testTagsCanBeSetInsideAnonymousRules() {
+        XCTAssertEqual("hello", Tracery().expand("{([tag:hello]{tag})}"))
+    }
     
+    
+    func testTagsCanBeSetInsideNamedRules() {
+        XCTAssertEqual("hello", Tracery().expand("{rule([tag:hello]{tag})}{rule}"))
+    }
 
     
 }
@@ -180,7 +187,7 @@ extension Tags {
             "level-2" : "[#level-3#]L2=#tag#, #L3#",
             "level-3" : "[L3:do_not_print]"
             ]}
-        XCTAssertEqual(t.expand("#origin#"), "L1=root, L2=root, #L3#")
+        XCTAssertEqual(t.expand("#origin#"), "L1=root, L2=root, {L3}")
     }
     
     func testHierarchicalTagsCanBeSet() {
@@ -197,7 +204,7 @@ extension Tags {
         XCTAssertEqual(t.expand("#inside_rule#"), "value")
         XCTAssertEqual(t.expand("#override_in_same_rule1#"), "value-in value-in ")
         XCTAssertEqual(t.expand("#override_in_same_rule2#"), "value-out value-in ")
-        XCTAssertEqual(t.expand("#sub_tag_not_visible#"), "#tag2#")
+        XCTAssertEqual(t.expand("#sub_tag_not_visible#"), "{tag2}")
     }
 
     

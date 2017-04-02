@@ -13,22 +13,27 @@ class ErrorMessages: XCTestCase {
     
     func testErrorMessages() {
         
-        let t = Tracery{[:]}
-        
-        XCTAssertEqual(t.expand("#rule"),       "error: closing # not found for rule 'rule'")
-        XCTAssertEqual(t.expand("#.#"),         "error: expected modifier name after . for rule '', but got: '#' near '#.'")
-        XCTAssertEqual(t.expand("#.(#"),        "error: expected modifier name after . for rule '', but got: '(' near '#.'")
-        XCTAssertEqual(t.expand("#.call(#"),    "error: expected ) to close modifier call")
-        XCTAssertEqual(t.expand("#.call(a,#"),  "error: expected ) to close modifier call")
-        XCTAssertEqual(t.expand("#.call(a,)#"), "error: parameter expected, but not found in modifier 'call'")
-        XCTAssertEqual(t.expand("#[]#"),        "error: empty [] not allowed")
-        XCTAssertEqual(t.expand("#[tag]#"),     "error: tag 'tag' must be followed by a :")
-        XCTAssertEqual(t.expand("#[tag:]#"),    "error: value expected for tag 'tag', but none found")
-        XCTAssertEqual(t.expand("#[tag:#.(]#"), "error: unable to parse value '#.(' for tag 'tag' reason - expected modifier name after . for rule '', but got: '(' near '#.'")
-        XCTAssertEqual(t.expand("[:number]"),   "error: expected a tag name, but got: ':' near '['")
-        XCTAssertEqual(t.expand("["),           "error: expected a tag name")
-
+        checkRule("#.#",         "error: expected modifier name after . in rule ''")
+        checkRule("#rule",       "error: closing # or } not found for rule 'rule'")
+        checkRule("#.(#",        "error: expected modifier name after . in rule ''")
+        checkRule("#.call(#",    "error: closing # or } not found for rule ''")
+        checkRule("#.call(a,#",  "error: closing # or } not found for rule ''")
+        checkRule("#.call(a,)#", "error: expected parameter after ,")
+        checkRule("#[]#",        "")
+        checkRule("#[tag]#",     "error: expected : after tag 'tag'")
+        checkRule("#[tag:]#",    "error: expected a tag value")
+        checkRule("#[tag:#.(]#", "error: expected modifier name after . in rule ''")
+        checkRule("[:number]",   "error: expected tag name")
+        checkRule("#rule(a,)#",  "error: expected rule candidate after ,")
+        checkRule("[tag:a,]",    "error: expected tag value after ,")
+        checkRule("{new(a,b}",   "error: expected ) after rule candidate list")
+        checkRule("{new(a,b)",   "error: expected # or } after new rule definition")
     }
 
-    
+    func checkRule(_ target: String, _ prefix: String) {
+        let output = Tracery().expand(target)
+        print("expanding: \(target)")
+        print("\(output)\n")
+        XCTAssertEqual(output.hasPrefix(prefix), true)
+    }
 }

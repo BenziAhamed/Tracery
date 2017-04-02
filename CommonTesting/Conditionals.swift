@@ -101,7 +101,7 @@ class Conditionals: XCTestCase {
             "tag2": ["name1","name2","name3","#name4#"],
             "name4": "name"
         ]}
-        XCTAssertEqual(t.expandVerbose("[if #[tag1:name]tag1# in #tag2# then ok else nope]"), "ok")
+        XCTAssertEqual(t.expand("[if #[tag1:name]tag1# in #tag2# then ok else nope]"), "ok")
     }
     
     

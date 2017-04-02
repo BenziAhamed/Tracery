@@ -21,7 +21,9 @@ class CandidateSelector : XCTestCase {
         
         t.setCandidateSelector(rule: "msg", selector: selector)
         
-        XCTAssertEqual(t.expand("#msg#"), "hello")
+        for _ in 0..<20 {
+            XCTAssertEqual(t.expand("#msg#"), "hello")
+        }
     }
     
     
@@ -35,7 +37,7 @@ class CandidateSelector : XCTestCase {
         
         t.setCandidateSelector(rule: "msg", selector: selector)
         
-        XCTAssertEqual(t.expand("#msg#"), "#msg#")
+        XCTAssertEqual(t.expand("#msg#"), "{msg}")
     }
     
     func testRuleCandidateSelectorReturnValueIsAlwaysHonoured() {

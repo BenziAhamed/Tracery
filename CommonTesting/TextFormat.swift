@@ -39,7 +39,7 @@ class TextFormat: XCTestCase {
         
         let t = Tracery(lines: lines)
         
-        XCTAssertFalse(t.expandVerbose("#binary#").contains("stack overflow"))
+        XCTAssertFalse(t.expand("#binary#").contains("stack overflow"))
 
     }
     

@@ -53,5 +53,22 @@ class ExtensionModifier: XCTestCase {
         XCTAssertEqual(t.expand("#msg.prefix.reversed.prefix.reversed#"), "!new york!")
     }
     
+    func testInlineRulesAllowModifierCalls() {
+        
+        let t = Tracery {
+            ["word" : "{(abc,bcd,cde).caps.reversed}"]
+        }
+        
+        t.add(modifier: "caps") { $0.uppercased() }
+        t.add(modifier: "reversed") { return String.init($0.characters.reversed()) }
+        
+        let allowed:Set<String> = ["CBA", "DCB", "EDC"]
+        
+        for _ in 0..<10 {
+            XCTAssertTrue(allowed.contains(t.expand("{word}")))
+        }
+
+    }
+    
 }
 
