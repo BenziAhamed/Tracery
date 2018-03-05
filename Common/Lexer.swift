@@ -96,11 +96,11 @@ struct Lexer {
         var tokens = [Token]()
         
         func advance() {
-            input.characters.formIndex(after: &index)
+            input.formIndex(after: &index)
         }
         
         func rewind(count: Int) {
-            input.characters.formIndex(&index, offsetBy: -count)
+            input.formIndex(&index, offsetBy: -count)
         }
         
         var current: Character? {
@@ -108,7 +108,7 @@ struct Lexer {
         }
         
         var lookahead: Character? {
-            let next = input.characters.index(after: index)
+            let next = input.index(after: index)
             return next < input.endIndex ? input[next] : nil
         }
         
@@ -194,7 +194,7 @@ struct Lexer {
                     
                     // key word check needs to be performed
                     // only if we have consumed at least 3 characters
-                    guard text.characters.count >= 3 else { continue }
+                    guard text.count >= 3 else { continue }
                     
                     // check if we greedily consumed a keyword
                     // keywords must be preceded by white space
@@ -214,7 +214,7 @@ struct Lexer {
                         
                         // check if we have consumed at least x character
                         // as the keyword
-                        guard let prevCharIndex = input.characters.index(index, offsetBy: -keyword.characters.count-1, limitedBy: input.startIndex) else { continue }
+                        guard let prevCharIndex = input.index(index, offsetBy: -keyword.count-1, limitedBy: input.startIndex) else { continue }
                         let prevChar = input[prevCharIndex]
                         
                         if text == keyword {
@@ -229,8 +229,8 @@ struct Lexer {
                             
                         }
                         else if text.hasSuffix(keyword), prevChar == " " {
-                            let end = text.index(text.endIndex, offsetBy: -keyword.characters.count)
-                            rewind(count: keyword.characters.count)
+                            let end = text.index(text.endIndex, offsetBy: -keyword.count)
+                            rewind(count: keyword.count)
                             return .text(text.substring(to: end))
                         }
                     }

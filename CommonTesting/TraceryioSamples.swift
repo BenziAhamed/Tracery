@@ -38,7 +38,7 @@ class TraceryioSamples: XCTestCase {
         let pattern = "^The \(colors.regexGenerateMatchesAnyItemPattern()) \(animals.regexGenerateMatchesAnyItemPattern()) of the \(natureNouns.regexGenerateMatchesAnyItemPattern()) is called \(names.regexGenerateMatchesAnyItemPattern())$"
         let regex = try? NSRegularExpression(pattern: pattern, options: .useUnixLineSeparators)
         let output = t.expand("#sentence#")
-        let match = regex?.firstMatch(in: output, options: NSRegularExpression.MatchingOptions.anchored, range: .init(location: 0, length: output.characters.count))
+        let match = regex?.firstMatch(in: output, options: NSRegularExpression.MatchingOptions.anchored, range: .init(location: 0, length: output.count))
         
         XCTAssertNotNil(match?.numberOfRanges)
         XCTAssertEqual(match!.numberOfRanges, 5)
@@ -93,7 +93,7 @@ class TraceryioSamples: XCTestCase {
                     $0.range(of: "\(c)") != nil
                 }
                 .forEach {
-                    let leftBrace = $0.characters[$0.characters.startIndex]
+                    let leftBrace = $0[$0.startIndex]
                     if leftBrace == c {
                         stackOfBraces.append(c)
                     }
@@ -104,7 +104,7 @@ class TraceryioSamples: XCTestCase {
                     }
                 }
         }
-        output.characters.forEach { trackBraces($0) }
+        output.forEach { trackBraces($0) }
         XCTAssertEqual(stackOfBraces.count, 0)
         
     }

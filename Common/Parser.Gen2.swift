@@ -411,7 +411,7 @@ extension Parser {
             let end = min(index, endIndex)
             let consumed = tokens[0..<end].map { $0.rawText }.joined()
             var all = tokens.map { $0.rawText }.joined()
-            let location = consumed.characters.count
+            let location = consumed.count
             all.insert("❌", at: all.index(all.startIndex, offsetBy: location, limitedBy: all.endIndex)!)
             let lines = [
                 message,

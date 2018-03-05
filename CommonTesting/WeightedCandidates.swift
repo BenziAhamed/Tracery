@@ -29,7 +29,7 @@ class WeightedCandidates: XCTestCase {
         
         for _ in 0..<100 {
             let output = t.expand("#origin#")
-            XCTAssertEqual(output, String(repeating: "1", count: output.characters.count))
+            XCTAssertEqual(output, String(repeating: "1", count: output.count))
         }
         
     }
@@ -50,7 +50,7 @@ class WeightedCandidates: XCTestCase {
         
         for _ in 0..<100 {
             let output = t.expand("#binary#")
-            XCTAssertEqual(output, String(repeating: "1", count: output.characters.count))
+            XCTAssertEqual(output, String(repeating: "1", count: output.count))
         }
         
     }
@@ -74,8 +74,8 @@ class WeightedCandidates: XCTestCase {
         print("iterations", count)
         for i in 1...count {
             let output = t.expand("#number#")
-            print(i, "-", output, "(\(output.characters.count))")
-            total += output.characters.count
+            print(i, "-", output, "(\(output.count))")
+            total += output.count
             XCTAssertFalse(output.contains("stack overflow"))
         }
         
@@ -96,8 +96,8 @@ class WeightedCandidates: XCTestCase {
         print("iterations", count)
         for i in 1...count {
             let output = t.expand("#b(0,1)##n(#b##n#:\(target-1),#b#)##n#")
-            print(i, "-", output, "(\(output.characters.count))")
-            total += output.characters.count
+            print(i, "-", output, "(\(output.count))")
+            total += output.count
             XCTAssertTrue(!output.contains("stack overflow"))
             if output.contains("stack overflow") {
                 return
@@ -125,8 +125,8 @@ class WeightedCandidates: XCTestCase {
             // any(0,1) and then b  : weighted to target-1
             // then trigger b
             let output = t.expand("#b(0,1,#(0,1)##b#:\(target-1))##b#")
-            print(i, "-", output, "(\(output.characters.count))")
-            total += output.characters.count
+            print(i, "-", output, "(\(output.count))")
+            total += output.count
             XCTAssertTrue(!output.contains("stack overflow"))
             if output.contains("stack overflow") {
                 return

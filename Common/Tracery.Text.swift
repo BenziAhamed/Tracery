@@ -56,7 +56,7 @@ struct TextParser {
         for line in lines {
             switch state {
             case .consumeRule:
-                if line.characters.count > 2, line.hasPrefix("["), line.hasSuffix("]") {
+                if line.count > 2, line.hasPrefix("["), line.hasSuffix("]") {
                     let start = line.index(after: line.startIndex)
                     let end = line.index(before: line.endIndex)
                     rule = line.substring(with: start..<end)
