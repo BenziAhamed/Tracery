@@ -205,7 +205,7 @@ fileprivate class StronglyConnectedComponent<Vertex> where Vertex: GraphIndexAdd
 // https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
 fileprivate struct TarjanAlgorithm {
     
-    static func findStronglyConnectedComponents<Vertex: GraphIndexAddressable>(graph: Graph<Vertex>) -> [StronglyConnectedComponent<Vertex>] {
+    static func findStronglyConnectedComponents<Vertex>(graph: Graph<Vertex>) -> [StronglyConnectedComponent<Vertex>] {
         
         var index = 0
         var g = graph.map(TarjanVertex.init)
