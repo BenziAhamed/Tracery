@@ -457,7 +457,7 @@ extension Parser {
             nodes.removeLast()
         }
         else if content.hasSuffix(" ") {
-            nodes[nodes.count-1] = .text(content.substring(to: content.index(before: content.endIndex)))
+            nodes[nodes.count-1] = .text(String(content[..<content.index(before: content.endIndex)]))
         }
     }
 

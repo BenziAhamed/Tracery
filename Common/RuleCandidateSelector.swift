@@ -32,7 +32,7 @@ private extension MutableCollection {
             let d: IndexDistance = numericCast(arc4random_uniform(numericCast(unshuffledCount)))
             guard d != 0 else { continue }
             let i = index(firstUnshuffled, offsetBy: d)
-			self.swapAt(firstUnshuffled, i)
+            swapAt(firstUnshuffled, i)
         }
     }
 }

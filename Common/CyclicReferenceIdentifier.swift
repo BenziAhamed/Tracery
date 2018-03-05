@@ -336,7 +336,7 @@ fileprivate struct JohnsonCircuitFindingAlgorithm {
             // adjacency structure of strong component K with least
             // vertex in subgraph of G induced by {s, s+ 1, n};
             let sccs = graph.filter({ $0.graphIndex >= s }).findStronglyConnectedComponents()
-            guard let K = sccs.min(by: { $0.0.leastGraphIndex <  $0.1.leastGraphIndex }) else {
+            guard let K = sccs.min(by: { $0.leastGraphIndex <  $1.leastGraphIndex }) else {
                 break
             }
             s = K.leastGraphIndex

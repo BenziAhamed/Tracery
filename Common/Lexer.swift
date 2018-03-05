@@ -231,7 +231,7 @@ struct Lexer {
                         else if text.hasSuffix(keyword), prevChar == " " {
                             let end = text.index(text.endIndex, offsetBy: -keyword.count)
                             rewind(count: keyword.count)
-                            return .text(text.substring(to: end))
+                            return .text(String(text[..<end]))
                         }
                     }
                     
@@ -255,9 +255,9 @@ struct Lexer {
 
 extension String {
     func trim(fromEnd i: Int) -> String {
-        return substring(to: index(endIndex, offsetBy: -i))
+		return String(self[..<index(endIndex, offsetBy: -i)])
     }
     func trim(fromStart i: Int) -> String {
-        return substring(from: index(startIndex, offsetBy: i))
+        return String(self[..<index(startIndex, offsetBy: i)])
     }
 }

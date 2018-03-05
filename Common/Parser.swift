@@ -93,7 +93,7 @@ enum ParserNode : CustomStringConvertible {
             
         case let .rule(name, mods):
             if mods.count > 0 {
-                let mods = mods.reduce("") { $0.0 + $0.1.description }
+                let mods = mods.reduce("") { $0 + $1.description }
                 return "RULE_\(name)_\(mods))"
             }
             return "RULE_\(name)"
