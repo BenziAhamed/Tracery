@@ -20,14 +20,14 @@ t.add(method: "plural") { input, args in
 }
 
 t.add(call: "decrement") {
-    let count = Int(t.expand("#count#", resetTags: false)) ?? 1
-    t.expand("[count:\(count-1)]", resetTags: false)
+    let count = Int(t.expand("#count#", maintainContext: false)) ?? 1
+    t.expand("[count:\(count-1)]", maintainContext: false)
 }
 
 t.setCandidateSelector(rule: "line", selector: {
     class LineSelector : RuleCandidateSelector {
         func pick(count: Int) -> Int {
-            let count = t.expand("#count#", resetTags: false)
+            let count = t.expand("#count#", maintainContext: false)
             return count == "0" ? 1 : 0
         }
     }

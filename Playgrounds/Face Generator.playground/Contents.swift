@@ -148,7 +148,7 @@ class Scene : SKScene {
         }
         
         tracery.add(modifier: "eval") { input in
-            return tracery.expand(input, resetTags: false)
+            return tracery.expand(input, maintainContext: false)
         }
     }
     
