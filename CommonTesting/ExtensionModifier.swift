@@ -42,7 +42,7 @@ class ExtensionModifier: XCTestCase {
             [ "msg" : "new york" ]
         }
         t.add(modifier: "caps") { return $0.uppercased() }
-        t.add(modifier: "reversed") { return .init($0.characters.reversed()) }
+        t.add(modifier: "reversed") { return .init($0.reversed()) }
         t.add(modifier: "kebabed") { return $0.replacingOccurrences(of: " ", with: "-") }
         t.add(modifier: "prefix") { return "!" + $0 }
         
@@ -60,7 +60,7 @@ class ExtensionModifier: XCTestCase {
         }
         
         t.add(modifier: "caps") { $0.uppercased() }
-        t.add(modifier: "reversed") { return String.init($0.characters.reversed()) }
+        t.add(modifier: "reversed") { return String.init($0.reversed()) }
         
         let allowed:Set<String> = ["CBA", "DCB", "EDC"]
         

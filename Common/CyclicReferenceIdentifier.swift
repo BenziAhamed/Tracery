@@ -205,7 +205,7 @@ fileprivate class StronglyConnectedComponent<Vertex> where Vertex: GraphIndexAdd
 // https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
 fileprivate struct TarjanAlgorithm {
     
-    static func findStronglyConnectedComponents<Vertex: GraphIndexAddressable>(graph: Graph<Vertex>) -> [StronglyConnectedComponent<Vertex>] {
+    static func findStronglyConnectedComponents<Vertex>(graph: Graph<Vertex>) -> [StronglyConnectedComponent<Vertex>] {
         
         var index = 0
         var g = graph.map(TarjanVertex.init)
@@ -336,7 +336,7 @@ fileprivate struct JohnsonCircuitFindingAlgorithm {
             // adjacency structure of strong component K with least
             // vertex in subgraph of G induced by {s, s+ 1, n};
             let sccs = graph.filter({ $0.graphIndex >= s }).findStronglyConnectedComponents()
-            guard let K = sccs.min(by: { $0.0.leastGraphIndex <  $0.1.leastGraphIndex }) else {
+            guard let K = sccs.min(by: { $0.leastGraphIndex <  $1.leastGraphIndex }) else {
                 break
             }
             s = K.leastGraphIndex

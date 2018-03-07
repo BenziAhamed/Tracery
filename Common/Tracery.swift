@@ -33,7 +33,7 @@ public class TraceryOptions {
 }
 
 extension TraceryOptions {
-    static let defaultSet = TraceryOptions()
+    public static let defaultSet = TraceryOptions()
 }
 
 public class Tracery {
