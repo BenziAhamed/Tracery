@@ -110,7 +110,7 @@ class CyclicReferenceIdentifier : RulesetAnalyser {
         
         warn("cyclic references were detected in the following rules:")
         cycles.forEach { cycle in
-            let layout = cycle.flatMap { $0.rule }.joined(separator: " -> ")
+            let layout = cycle.compactMap { $0.rule }.joined(separator: " -> ")
             warn("      \(layout)")
         }
         
@@ -198,7 +198,7 @@ fileprivate class TarjanVertex<Vertex> : GraphIndexAddressable {
 fileprivate class StronglyConnectedComponent<Vertex> where Vertex: GraphIndexAddressable {
     var vertices = [Vertex]()
     var leastGraphIndex: Int {
-        return vertices.flatMap{ $0.graphIndex }.min()!
+        return vertices.compactMap{ $0.graphIndex }.min()!
     }
 }
 
@@ -223,7 +223,7 @@ fileprivate struct TarjanAlgorithm {
             v.onStack = true
             
             // Consider successors of v
-            for w in g.successors(of: v).flatMap({ g.getVertex(index: $0) }) {
+            for w in g.successors(of: v).compactMap({ g.getVertex(index: $0) }) {
                 
                 if w.index == -1 {
                     // Successor w has not yet been visited; recurse on it
@@ -309,7 +309,7 @@ fileprivate struct JohnsonCircuitFindingAlgorithm {
             for w in graph.successors(of: graph.getVertex(index: v)!) {
                 if w == s {
                     let first = graph.getVertex(index: stack[0])!
-                    cycles.append(stack.flatMap { graph.getVertex(index: $0) } + [first])
+                    cycles.append(stack.compactMap { graph.getVertex(index: $0) } + [first])
                     f = true
                 }
                 else if blocked[w] {
