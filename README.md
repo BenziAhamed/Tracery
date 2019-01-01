@@ -1,6 +1,6 @@
 
  
- ![Tracery - powerful content generation](logo.png)
+ ![Tracery - powerful content generation](https://raw.githubusercontent.com/BenziAhamed/Tracery/master/logo.png)
  
 # Contents
 - [Introduction](#introduction)
@@ -42,10 +42,24 @@
  
 ## Installation
  
+### Manual
 - Clone or download this repository
 - To work with the playground, open Playgrounds/Tracery.playground
 - The project builds `iOS` and `macOS` framework targets, which can be linked to your projects
- 
+
+### Cocoapods
+You want to add pod 'Tracery', '~> 0.0.1' similar to the following to your Podfile:
+
+```
+target 'MyApp' do
+  pod 'Tracery', '~> 0.0.1'
+end
+```
+Then run a pod install inside your terminal, or from CocoaPods.app.
+
+Alternatively to give it a test run, run the command:
+
+`pod try Tracery`
 
 [top](#contents)
 ****
