@@ -20,7 +20,7 @@ extension TagMapping : CustomStringConvertible {
 }
 
 protocol TagStorage {
-    weak var tracery:Tracery? { get set }
+    var tracery:Tracery? { get set }
     mutating func store(name: String, tag: TagMapping)
     func get(name: String) -> TagMapping?
     mutating func removeAll()
