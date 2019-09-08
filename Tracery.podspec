@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "Tracery"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "Powerful extensible content generation library inspired by Tracery.io"
 
   s.description  = <<-DESC

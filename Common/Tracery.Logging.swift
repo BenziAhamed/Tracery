@@ -46,7 +46,7 @@ func error(_ message: @autoclosure () -> String) {
 }
 
 func trace(_ message: @autoclosure () -> String) {
-    Tracery.log(level: .verbose, message: message)
+    Tracery.log(level: .verbose, message: message())
 }
 
 

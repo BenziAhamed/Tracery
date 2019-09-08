@@ -45,7 +45,7 @@ class TextFormat: XCTestCase {
     
     func testPlaintextFile() {
         
-        let fableFile = Bundle(for: type(of: self)).path(forResource: "fable", ofType: "txt")!
+        let fableFile = Bundle.main.executablePath! + "/CommonTesting/fable.txt"
         let t = Tracery.init(path: fableFile)
         
         for _ in 0..<10 {

@@ -26,7 +26,7 @@ class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
     }
     
     func pick(count: Int) -> Int {
-        var choice = Int(arc4random_uniform(sum))
+        var choice = Int.random(in: 0..<numericCast(sum))
         var index = 0
         for weight in weights {
             choice = choice - weight

@@ -30,7 +30,7 @@ class CandidateProvider: XCTestCase {
             let candidates = ["jack","jill"]
             func pick(count: Int) -> Int {
                 invokeCount += 1
-                return Int(arc4random_uniform(2))
+                return Int.random(in: 0..<2)
             }
         }
         

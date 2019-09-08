@@ -36,7 +36,7 @@ class WeightedCandidateSet : RuleCandidatesProvider, RuleCandidateSelector {
     }
     
     func pick(count: Int) -> Int {
-        let choice = Int(arc4random_uniform(totalWeights) + 1) // since running weight start at 1
+        let choice = Int.random(in: 0...runningWeights)
         for weight in runningWeights {
             if choice <= weight.total {
                 return weight.target

@@ -29,7 +29,7 @@ private extension MutableCollection {
         guard c > 1 else { return }
         
         for (firstUnshuffled , unshuffledCount) in zip(indices, stride(from: c, to: 1, by: -1)) {
-            let d: Int = numericCast(arc4random_uniform(numericCast(unshuffledCount)))
+            let d = Int.random(in: 0..<unshuffledCount)
             guard d != 0 else { continue }
             let i = index(firstUnshuffled, offsetBy: d)
             swapAt(firstUnshuffled, i)
@@ -82,7 +82,7 @@ class WeightedSelector :  RuleCandidateSelector {
     }
     
     func pick(count: Int) -> Int {
-        let choice = Int(arc4random_uniform(sum))
+        let choice = Int.random(in: 0..<numericCast(sum))
         let i = index(choice: choice)
         // print("id: ", id, "weights: ", weights, "sum: ", sum, "choice: ", choice, "index: ", i)
         return i

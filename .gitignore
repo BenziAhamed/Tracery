@@ -39,6 +39,7 @@ Tracery.xcworkspace/xcuserdata/*
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
 # Packages/
 .build/
+.swiftpm/
 
 # CocoaPods
 #
