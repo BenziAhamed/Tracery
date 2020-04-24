@@ -65,9 +65,5 @@ class Rules : XCTestCase {
         }
     }
     
-    func testInlineRulesCanBeCleared() {
-        XCTAssertEqual(Tracery().expand("{b(0)}{b}{b()}{b}"), "0")
-    }
-    
 }
 

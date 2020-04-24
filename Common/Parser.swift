@@ -80,9 +80,7 @@ enum ParserNode : CustomStringConvertible {
     case createTag(name: String, selector: RuleCandidateSelector)
     
     // args handling
-    
     indirect case evaluateArg(nodes: [ParserNode])
-    case clearArgs
     
     // low level flow control
     
@@ -94,57 +92,54 @@ enum ParserNode : CustomStringConvertible {
         case let .rule(name, mods):
             if mods.count > 0 {
                 let mods = mods.reduce("") { $0 + $1.description }
-                return "RULE_\(name)_\(mods))"
+                return "⌽#\(name)\(mods)#"
             }
-            return "RULE_\(name)"
+            return "⌽#\(name)#"
 
         case let .createRule(name, values):
-            if values.count == 1 { return "NEW_RULE(\(name)=\(values[0]))" }
-            return "+RULE_\(name)=\(values)"
+            if values.count == 1 { return "⌽+#\(name)=\(values[0])#" }
+            return "⌽+#\(name)=\(values)#"
             
         case let .tag(name, values):
-            if values.count == 1 { return "TAG(\(name)=\(values[0]))" }
-            return "TAG_\(name)=\(values)"
+            if values.count == 1 { return "⌽t:\(name)=\(values[0])" }
+            return "⌽t:\(name)=(\(values))"
             
         case let .text(text):
-            return "TXT_\(text)"
+            return "⌽`\(text)`"
             
         case let .any(values, _, mods):
             if mods.count > 0 {
-                return "ANY\(values)+\(mods)"
+                return "⌽any\(values)+\(mods)"
             }
-            return "ANY\(values)"
+            return "⌽any\(values)"
             
         case let .weight(value):
-            return "WEIGHT_\(value)"
+            return "⌽weight(\(value))"
             
         case let .runMod(name):
-            return "RUN_MOD_\(name)"
+            return "⌽run(\(name))"
             
         case let .createTag(name, _):
-            return "+TAG_\(name)"
+            return "⌽+t:\(name)"
             
         case let .evaluateArg(nodes):
-            return "EVAL_ARG<\(nodes)>"
-            
-        case .clearArgs:
-            return "CLR_ARGS"
+            return "⌽eval<\(nodes)>"
             
         case let .ifBlock(condition, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "IF(\(condition) THEN \(thenBlock) ELSE \(elseBlock))"
+                return "⌽if(\(condition) then \(thenBlock) else \(elseBlock))"
             }
-            return "IF(\(condition) THEN \(thenBlock))"
+            return "⌽if(\(condition) then \(thenBlock))"
             
             
         case let .branch(check, thenBlock, elseBlock):
             if let elseBlock = elseBlock {
-                return "JUMP(args \(check) THEN \(thenBlock) ELSE \(elseBlock))"
+                return "⌽jump(args \(check) then \(thenBlock) else \(elseBlock))"
             }
-            return "JUMP(args \(check) THEN \(thenBlock))"
+            return "⌽jump(args \(check) then \(thenBlock))"
             
         case let .whileBlock(condition, doBlock):
-            return "WHILE(\(condition) THEN \(doBlock))"
+            return "⌽while(\(condition) then \(doBlock))"
 
         }
     }

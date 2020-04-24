@@ -43,6 +43,8 @@ extension Tracery {
             }
 
             contextStack.push(nodes, popAction, affectsEvaluationLevel)
+            
+            trace("🔽 pushed \(contextStack.contexts[contextStack.top-1])")
         }
         
         // pop an evaluated context
@@ -68,10 +70,9 @@ extension Tracery {
                     nodes.append(.evaluateArg(nodes: param.nodes))
                 }
                 nodes.append(.runMod(name: mod.name))
-                nodes.append(.clearArgs)
             }
             // at this stage nodes will be
-            // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod, clearArgs)* ]
+            // [rule_expansion_nodes, (evalArg_1, ... evalArg_N, runMod)* ]
             
             // rule_expansion_nodes evaluate as normal, and updates context.result
             // evalArgs will update the args list, and runMod will use the args list to run a mod,
@@ -88,20 +89,19 @@ extension Tracery {
             
             let top = contextStack.top - 1
             
-            trace("----------")
-            contextStack.contexts.enumerated().forEach { i, context in
-                if i <= top {
-                    trace("\(i) \(context)")
+            func traceContextStack() {
+                guard Tracery.logLevel == .verbose else { return }
+                trace("----------")
+                let top = contextStack.top - 1
+                contextStack.contexts.enumerated().forEach { i, context in
+                    if i <= top {
+                        trace("\(i) \(context)")
+                    }
                 }
             }
             
-//            do {
-//                let i = depth
-//                let context = stack[i]
-//                trace("\(i) \(context)")
-//            }
-            
-            
+            traceContextStack()
+                        
             // have we have finished processing
             // the stack?
             if contextStack.executionComplete {
@@ -125,17 +125,16 @@ extension Tracery {
                 
             case let .text(text):
                 trace("📘 text '\(text)'")
-                // commit result to context
+                // accumulate text in result
+                // of current top context
                 contextStack.contexts[top].result.append(text)
                 
             case let .evaluateArg(nodes):
                 // special node that evaluates
                 // child nodes and adds result
                 // in parent context's args list
+                trace("📙 evalArg '\(nodes)'")
                 try pushContext(nodes, .addArg)
-                
-            case .clearArgs:
-                contextStack.contexts[top].args.removeAll()
                 
             case let .any(values, selector, mods):
                 let choice = values[selector.pick(count: values.count)]
@@ -175,7 +174,7 @@ extension Tracery {
                     trace("📗 ⚠️ overwriting tag[\(name) \(existing.description)]")
                 }
                 tagStorage.store(name: name, tag: mapping)
-                trace("📗 set tag[\(name)] <-- \(mapping.description)")
+                trace("📗 set tag[\(name)] <- \(mapping.description)")
                 
             case let .ifBlock(condition, thenBlock, elseBlock):
                 trace("🕎 ⤵️ \(node)")
@@ -413,7 +412,10 @@ struct ExecutionContext {
 
 extension ExecutionContext : CustomStringConvertible {
     var description: String {
-        return "\(nodes) \(popAction) args\(args) result:\(result)"
+//        if let last = nodes.last {
+//            return "\(nodes) current:\(last) args\(args) -> \(popAction) result:'\(result)'"
+//        }
+        return "\(nodes) args\(args) -> \(popAction) result:'\(result)'"
     }
 }
 

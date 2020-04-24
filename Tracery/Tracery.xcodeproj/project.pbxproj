@@ -59,6 +59,10 @@
 		B96F75991E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
 		B96F759A1E84D0CF00C324AB /* WeightedCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */; };
 		B975BB7E1E75C91C0076A1EA /* TagStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975BB7D1E75C91C0076A1EA /* TagStorage.swift */; };
+		B97AC6012452151000F2C51E /* InlineRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97AC6002452151000F2C51E /* InlineRules.swift */; };
+		B97AC6022452151600F2C51E /* InlineRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97AC6002452151000F2C51E /* InlineRules.swift */; };
+		B97AC60424521FD700F2C51E /* UniformDistribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97AC60324521FD700F2C51E /* UniformDistribution.swift */; };
+		B97AC60524521FD700F2C51E /* UniformDistribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97AC60324521FD700F2C51E /* UniformDistribution.swift */; };
 		B99F305C1E869E08005B0808 /* Parser.Gen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99F305B1E869E08005B0808 /* Parser.Gen2.swift */; };
 		B99F305D1E869E08005B0808 /* Parser.Gen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99F305B1E869E08005B0808 /* Parser.Gen2.swift */; };
 		B9A248E61E817216004D60C9 /* Tracery.Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A248E51E817216004D60C9 /* Tracery.Text.swift */; };
@@ -138,6 +142,8 @@
 		B96DC0281E72F2B7008623B8 /* Tracery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.swift; sourceTree = "<group>"; };
 		B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeightedCandidates.swift; sourceTree = "<group>"; };
 		B975BB7D1E75C91C0076A1EA /* TagStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TagStorage.swift; sourceTree = "<group>"; };
+		B97AC6002452151000F2C51E /* InlineRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineRules.swift; sourceTree = "<group>"; };
+		B97AC60324521FD700F2C51E /* UniformDistribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniformDistribution.swift; sourceTree = "<group>"; };
 		B99F305B1E869E08005B0808 /* Parser.Gen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.Gen2.swift; sourceTree = "<group>"; };
 		B9A248E51E817216004D60C9 /* Tracery.Text.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracery.Text.swift; sourceTree = "<group>"; };
 		B9A248E81E81859A004D60C9 /* TextFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFormat.swift; sourceTree = "<group>"; };
@@ -212,6 +218,8 @@
 				B9A248EB1E818FB3004D60C9 /* fable.txt */,
 				B96F75981E84D0CF00C324AB /* WeightedCandidates.swift */,
 				B9B9CC411E882E260080881D /* Objects.swift */,
+				B97AC6002452151000F2C51E /* InlineRules.swift */,
+				B97AC60324521FD700F2C51E /* UniformDistribution.swift */,
 			);
 			name = CommonTesting;
 			path = ../CommonTesting;
@@ -393,7 +401,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0820;
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Benzi Ahamed";
 				TargetAttributes = {
 					B9127FDF1E77AEA40063D5A8 = {
@@ -424,6 +432,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = B96DBFB21E72B630008623B8;
@@ -479,6 +488,8 @@
 			files = (
 				B91280401E77B0530063D5A8 /* CandidateSelector.swift in Sources */,
 				B9A248EA1E81859A004D60C9 /* TextFormat.swift in Sources */,
+				B97AC60524521FD700F2C51E /* UniformDistribution.swift in Sources */,
+				B97AC6022452151600F2C51E /* InlineRules.swift in Sources */,
 				B91280441E77B0530063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912803F1E77B0530063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280411E77B0530063D5A8 /* CustomProviders.swift in Sources */,
@@ -549,6 +560,8 @@
 			files = (
 				B91280301E77B0520063D5A8 /* CandidateSelector.swift in Sources */,
 				B9A248E91E81859A004D60C9 /* TextFormat.swift in Sources */,
+				B97AC60424521FD700F2C51E /* UniformDistribution.swift in Sources */,
+				B97AC6012452151000F2C51E /* InlineRules.swift in Sources */,
 				B91280341E77B0520063D5A8 /* ExtensionCalls.swift in Sources */,
 				B912802F1E77B0520063D5A8 /* CandidateProvider.swift in Sources */,
 				B91280311E77B0520063D5A8 /* CustomProviders.swift in Sources */,
@@ -597,7 +610,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.folded-paper.Tracery-Tests-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -613,7 +626,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.folded-paper.Tracery-Tests-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -621,6 +634,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -682,6 +696,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -750,7 +765,7 @@
 				PRODUCT_MODULE_NAME = Tracery;
 				PRODUCT_NAME = Tracery;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -772,7 +787,7 @@
 				PRODUCT_MODULE_NAME = Tracery;
 				PRODUCT_NAME = Tracery;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -796,7 +811,7 @@
 				PRODUCT_NAME = Tracery;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -820,7 +835,7 @@
 				PRODUCT_NAME = Tracery;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -833,7 +848,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.folded-paper.Tracery-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -846,7 +861,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.folded-paper.Tracery-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

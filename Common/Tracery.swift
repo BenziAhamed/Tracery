@@ -28,6 +28,7 @@ struct RuleCandidate {
 public class TraceryOptions {
     public var tagStorageType = TaggingPolicy.unilevel
     public var isRuleAnalysisEnabled = true
+    public var logLevel = Tracery.LoggingLevel.errors
     
     public init() { }
 }
@@ -44,6 +45,7 @@ public class Tracery {
     var mods: [String: (String,[String])->String]
     var tagStorage: TagStorage
     var contextStack: ContextStack
+    
     
     public var ruleNames: [String] { return ruleSet.keys.map { $0 } }
     

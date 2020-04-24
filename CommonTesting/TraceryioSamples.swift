@@ -58,8 +58,8 @@ class TraceryioSamples: XCTestCase {
         let braces = ["<>","«»","𛰫𛰬","⌜⌝","ᙅᙂ","ᙦᙣ","⁅⁆","⌈⌉","⌊⌋","⟦⟧","⦃⦄","⦗⦘","⫷⫸"]
         var braceTypes = braces
             .map { braces -> String in
-                let open = braces[braces.startIndex]
-                let close = braces[braces.index(after: braces.startIndex)]
+                let open = braces.first!
+                let close = braces.last!
                 return "[open:\(open)][close:\(close)]"
             }
         

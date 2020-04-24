@@ -18,7 +18,8 @@ class Tags: XCTestCase {
     
     func testTagsWork() {
         let t = Tracery()
-        XCTAssertEqual(t.expand("[tag:value]#tag#"), "value")
+        XCTAssertEqual(t.expandVerbose("[tag:value]#tag#"), "value")
+        XCTAssertEqual(t.expandVerbose("{[tag:value]tag}"), "value")
     }
     
     func testUnilevelTagsCanBeSet() {

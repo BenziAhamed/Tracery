@@ -33,25 +33,6 @@ class Performance: XCTestCase {
         }
     }
 
-    
-    func test() {
-        
-        
-        // let input = "{(hello:100,konichiwa:1000)}"
-        let input = "{b} can you please . let me know? (i am ok)"
-        let tokens = Lexer.tokens(input)
-        print(tokens)
-        do {
-            let nodes = try Parser.gen2(tokens)
-            print(nodes)
-            print(Tracery().expandVerbose(input))
-            
-        } catch {
-            print(error)
-        }
-        
-    }
-
 }
 
 

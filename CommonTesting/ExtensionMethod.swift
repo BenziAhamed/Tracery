@@ -118,5 +118,23 @@ class ExtensionMethod: XCTestCase {
         XCTAssertEqual(callCount, target)
     }
     
+    
+    func testMethodWorksWithRuleExpansion() {
+        
+        let t = Tracery {[
+            "count" : [5] ,
+            "msg"   : "#count.repeat(#count#)#"
+        ]}
+        
+        t.add(method: "repeat") { (input, args) -> String in
+            guard let arg = args.first, let count = Int.init(arg) else {
+                return input
+            }
+            return String.init(repeating: input, count: count)
+        }
+        
+        XCTAssertEqual(t.expand("#msg#"), "55555")
+    }
+    
 }
 
